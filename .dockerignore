@@ -1,0 +1,14 @@
+# 安全：绝不可打进镜像
+.env
+
+# 版本控制 / 虚拟环境
+.git
+.venv
+__pycache__
+*.pyc
+
+# 运行时产物（容器内会重新生成）
+data/index/
+data/logs/
+data/generated/
+*.pkl

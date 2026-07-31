@@ -1,3 +1,13 @@
+---
+title: 云栖数码 · Agent 智能客服
+emoji: 🤖
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+short_description: 基于 LangGraph + RAG 的电商智能客服 Agent，支持意图分类、向量检索、Reranker 重排与意图分布可视化
+---
+
 # 云栖数码 · Agent 智能客服
 
 > 基于 **LangGraph + RAG** 的电商智能客服系统，可作为数据科学 / 人工智能方向简历项目。

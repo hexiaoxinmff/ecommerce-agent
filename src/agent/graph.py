@@ -130,7 +130,20 @@ def _generate_llm(query, intent, context, sources, order_info):
     resp = llm_mod.get_llm(temperature=0.3).invoke(
         [SystemMessage(content=prompts.SYSTEM_PROMPT), human]
     )
-    return resp.content
+    return _sanitize_identity(resp.content)
+
+
+_IDENTITY_BANNED_RE = re.compile(
+    r"通义千问|阿里云|Qwen|由[^，。]*(?:研发|开发|训练)|大模型|基础模型|开源模型|语言模型",
+    re.IGNORECASE,
+)
+
+
+def _sanitize_identity(answer: str) -> str:
+    """屏蔽基座模型自我认知，维持店铺客服身份。"""
+    if _IDENTITY_BANNED_RE.search(answer):
+        return "您好！我是云栖数码旗舰店的 AI 客服助手，专门为您解答商品、订单和售后问题。请问有什么可以帮您？"
+    return answer
 
 
 def _route(state: AgentState) -> str:

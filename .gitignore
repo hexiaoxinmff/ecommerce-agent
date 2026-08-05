@@ -1,14 +1,9 @@
-# 环境变量（含密钥，切勿提交）
-.env
-
-# 构建产物 / 运行产物
-data/index/
-data/logs/
-data/generated/
 __pycache__/
 *.pyc
 .venv/
-
-# 编辑器 / 系统
-.DS_Store
-*.swp
+*.log
+install*.log
+.env
+.env.bak
+data/faiss_index/
+.pytest_cache/

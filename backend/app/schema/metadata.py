@@ -80,6 +80,14 @@ class TableMeta:
     columns: tuple[ColumnMeta, ...]
 
 
+# 进程级 Schema 目录缓存。
+# 背景（Task 29 Phase 1 实测）：SchemaCatalog.from_database() 每次调用会建立
+# 6 条 SQLite 连接，而单个请求会调用它 2 次（SchemaLinker.link 与
+# SQLGenerator.generate_with_context 各一次）→ 每请求 12 条连接。
+# 数据库为只读且 Schema 已冻结，故可安全缓存。
+_CATALOG_CACHE: "SchemaCatalog | None" = None
+
+
 class SchemaCatalog:
     """项目数据库的 Schema 元数据目录（来自真实数据库 + 业务描述）。"""
 
@@ -143,3 +151,22 @@ class SchemaCatalog:
                 columns=columns,
             )
         return cls(tables)
+
+    @classmethod
+    def get_cached(cls) -> "SchemaCatalog":
+        """返回进程级缓存的 Schema 目录（首次调用时构建）。
+
+        语义与 from_database() 完全一致，仅避免重复 introspection。
+        数据库为只读且 Schema 已冻结，因此缓存不引入正确性风险。
+        若运行期数据库结构发生变化，需先调用 clear_cache()。
+        """
+        global _CATALOG_CACHE
+        if _CATALOG_CACHE is None:
+            _CATALOG_CACHE = cls.from_database()
+        return _CATALOG_CACHE
+
+    @classmethod
+    def clear_cache(cls) -> None:
+        """清空进程级 Schema 缓存（测试或数据库变更后调用）。"""
+        global _CATALOG_CACHE
+        _CATALOG_CACHE = None

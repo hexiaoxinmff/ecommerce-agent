@@ -49,6 +49,20 @@ class MimoProvider:
         self._base_url = config.MIMO_BASE_URL
         self._model = config.MIMO_MODEL
         self._timeout = config.MIMO_TIMEOUT
+        # 惰性创建、实例内复用：Task 29 Phase 1 实测每次调用重建客户端
+        # 需 14.9 ms（最坏 403 ms），且无法复用连接池与 TLS 会话。
+        self._client: openai.OpenAI | None = None
+
+    def _get_client(self) -> openai.OpenAI:
+        """返回实例级复用的 OpenAI 客户端（首次调用时创建）。"""
+        if self._client is None:
+            self._client = openai.OpenAI(
+                api_key=self._api_key,
+                base_url=self._base_url,
+                timeout=self._timeout,
+                max_retries=0,  # 本阶段不做自动重试
+            )
+        return self._client
 
     @property
     def model(self) -> str:
@@ -107,12 +121,7 @@ class MimoProvider:
           因此通过官方参数关闭深度思考（thinking.type=disabled），
           响应更快、temperature 语义成立。
         """
-        client = openai.OpenAI(
-            api_key=self._api_key,
-            base_url=self._base_url,
-            timeout=self._timeout,
-            max_retries=0,  # 本阶段不做自动重试
-        )
+        client = self._get_client()
         response = client.chat.completions.create(
             model=self._model,
             messages=messages,

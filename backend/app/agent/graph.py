@@ -89,6 +89,31 @@ def build_agent(components: AgentComponents | None = None) -> Any:
     return builder.compile()
 
 
+# 进程级默认图缓存。
+# 背景（Task 29 Phase 1 实测）：build_agent() 每次编译约 29 ms，
+# 而图结构是静态的（节点与边不随请求变化），无需每请求重编译。
+#
+# 缓存以「构建函数的身份」为键：一旦 build_agent 被替换（如测试通过
+# monkeypatch 注入 fake 组件图），缓存自动失效并重建。
+# 这样既拿到生产路径的复用收益，又完全保留测试的可注入性与隔离性。
+_DEFAULT_GRAPH_CACHE: tuple[Any, Any] | None = None  # (build_agent_fn, graph)
+
+
+def get_default_graph() -> Any:
+    """返回进程级复用的默认 Agent 图（首次调用时编译）。"""
+    global _DEFAULT_GRAPH_CACHE
+    builder = build_agent  # 读取模块全局，尊重 monkeypatch
+    if _DEFAULT_GRAPH_CACHE is None or _DEFAULT_GRAPH_CACHE[0] is not builder:
+        _DEFAULT_GRAPH_CACHE = (builder, builder())
+    return _DEFAULT_GRAPH_CACHE[1]
+
+
+def clear_default_graph_cache() -> None:
+    """清空默认图缓存（测试或组件/配置变更后调用）。"""
+    global _DEFAULT_GRAPH_CACHE
+    _DEFAULT_GRAPH_CACHE = None
+
+
 def run_agent(
     question: str,
     components: AgentComponents | None = None,
@@ -96,8 +121,11 @@ def run_agent(
     """编排一次完整 Text2SQL 分析（含 ≤1 次 Repair），返回结构化结果与 Trace。
 
     total_time_ms 为整个 Graph Run 的总耗时（不是单个 Node）。
+
+    components 为 None 时复用进程级默认图（避免每请求重编译）；
+    显式传入 components 时按需构建，保证测试注入语义不变。
     """
-    graph = build_agent(components)
+    graph = build_agent(components) if components is not None else get_default_graph()
     start = time.perf_counter()
     final_state = graph.invoke({"question": question})
     total_ms = round((time.perf_counter() - start) * 1000.0, 2)

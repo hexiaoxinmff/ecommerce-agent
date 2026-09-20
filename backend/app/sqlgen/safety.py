@@ -29,8 +29,11 @@ _WRITE_NODE_TYPES = (
 _ALLOWED_STATEMENT_TYPES = (exp.Select, exp.Union)
 
 
-def check_sql_safety(sql: str) -> None:
-    """检查 SQL 是否安全（只读单条 SELECT/WITH）。
+def _parse_single_readonly(sql: str):
+    """解析为单条只读 SELECT/WITH 语句，并完成全部只读性检查。
+
+    内部共用实现：check_sql_safety 与 check_sql_safety_with_tables
+    共享同一次 sqlglot 解析，避免对同一句 SQL 重复解析。
 
     Raises:
         SQLUnsafeError: 任一检查未通过。
@@ -58,6 +61,38 @@ def check_sql_safety(sql: str) -> None:
     if forbidden:
         keywords = sorted({node.key for node in forbidden})
         raise SQLUnsafeError(f"SQL 包含被禁止的写操作/DDL/PRAGMA: {', '.join(keywords)}")
+
+    return statement
+
+
+def check_sql_safety(sql: str) -> None:
+    """检查 SQL 是否安全（只读单条 SELECT/WITH）。
+
+    Raises:
+        SQLUnsafeError: 任一检查未通过。
+    """
+    _parse_single_readonly(sql)
+
+
+def check_sql_safety_with_tables(sql: str) -> set[str]:
+    """单次解析同时完成只读校验与表名提取。
+
+    与 `check_sql_safety(sql)` + `extract_referenced_tables(sql)`
+    语义等价（含完全相同的校验顺序与错误信息），但只解析一次。
+
+    Returns:
+        SQL 引用的真实表名集合（已剔除 CTE 名称）。
+
+    Raises:
+        SQLUnsafeError: 只读校验未通过。
+    """
+    statement = _parse_single_readonly(sql)
+    cte_names = {cte.alias_or_name for cte in statement.find_all(exp.CTE)}
+    return {
+        table.name
+        for table in statement.find_all(exp.Table)
+        if table.name not in cte_names
+    }
 
 
 def extract_referenced_tables(sql: str) -> set[str]:

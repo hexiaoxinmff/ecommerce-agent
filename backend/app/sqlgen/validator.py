@@ -18,7 +18,7 @@ from app.sqlgen.errors import (
     SQLTableMismatchError,
     SQLUnsafeError,
 )
-from app.sqlgen.safety import check_sql_safety, extract_referenced_tables
+from app.sqlgen.safety import check_sql_safety_with_tables
 
 
 def extract_json(raw: str) -> str:
@@ -100,8 +100,9 @@ def validate_output(
             raise SQLGenSchemaMismatchError(f"columns 包含不存在的字段: {full_name}")
 
     # SQL 安全/结构校验 + 表引用一致性
-    check_sql_safety(sql)
-    referenced = extract_referenced_tables(sql)
+    # （Task 29：单次 sqlglot 解析同时完成两项检查，避免重复解析；
+    #   校验顺序与错误信息与原先完全一致）
+    referenced = check_sql_safety_with_tables(sql)
     unexpected = referenced - allowed
     if unexpected:
         raise SQLTableMismatchError(

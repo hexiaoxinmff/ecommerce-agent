@@ -274,11 +274,11 @@ The historical statements in `REPOSITORY_RECOVERY_PHASE_2C.md` and `REPOSITORY_R
 
 ```
 master:
-  7286d114b6628550451aa076c7b8e76fb6ad727e
-  (promotion point 6814153 + Phase 2E report commit)
+  df83d0ade1049bffbfeff7d1411ce582a6e99cc0
+  (promotion point 6814153 + Phase 2E documentation commits)
 
 candidateA_promotion_20260920:
-  7286d114b6628550451aa076c7b8e76fb6ad727e
+  df83d0ade1049bffbfeff7d1411ce582a6e99cc0
 
 recovery_master_20260920:
   518cd8964fc438aa82151f60b415cb4d9ce17a37
@@ -287,7 +287,9 @@ HEAD:
   master
 ```
 
-The **promotion point** — the commit that carries Candidate A into master — is `6814153`, and it is an ancestor of the current `master` tip (verified with `git merge-base --is-ancestor 6814153 master` → YES). The current tip `7286d11` adds only the Phase 2E report.
+The **promotion point** — the commit that carries Candidate A into master — is `6814153`, and it is an ancestor of the current `master` tip (verified with `git merge-base --is-ancestor 6814153 master` → YES). The commits after it (`7286d11`, `df83d0a`) add only Phase 2E documentation.
+
+Final regression re-run at the final tip `df83d0a`: **399 passed, 0 failed** (25.55 s).
 
 ### Working tree
 

@@ -1,0 +1,194 @@
+{
+  "phase": "2C",
+  "artifact": "CANDIDATE_A_PROMOTION_MANIFEST",
+  "generated": "2026-09-20",
+  "branch": "candidateA_promotion_20260920",
+  "promotion_commit": "019b18a450c25887c1786ce2a76d55af57640ea8",
+  "promotion_commit_message": "perf: promote Candidate A runtime reuse",
+  "base_branch": "master",
+  "base_commit": "518cd8964fc438aa82151f60b415cb4d9ce17a37",
+  "merged_back_into_master": false,
+
+  "derivation_sources": [
+    "RECOVERY_MANIFEST_FINAL.json (Phase 2B-1; candidate_a_exact_final_source=CONFIRMED)",
+    "RECOVERY_MANIFEST_PHASE2B2.json (Phase 2B-2)",
+    "reports/task29_performance_profile.md + reports/task29_phase2_c4.md",
+    "reports/task35_performance_optimization_integration.md + .json",
+    "recovered transcript / file-history (12/12 Edit hunks applied cleanly)"
+  ],
+
+  "included_files": [
+    {
+      "path": "backend/app/agent/graph.py",
+      "role": "A1 production source",
+      "sha256_final": "9d09cbae3de49521cef242e106e967b8065aa368c9a6dcc0183b16503d14a25b",
+      "size_bytes_final": 4889,
+      "sha256_recovery_source": "744d5d96249346c75eb5467bdbc1655a31f2fb4784d37e4bf98fe087f24b66ee",
+      "sha256_source_changed": "INTENTIONAL",
+      "change_reason": "Source hash 744d5d96 contained a Task 30 contamination hunk (linker_factory/create_schema_linker). Reverted to master-baseline form. A1 optimizations verified intact.",
+      "reason_for_inclusion": "A1 process-level compiled-graph cache: _DEFAULT_GRAPH_CACHE / get_default_graph() / clear_default_graph_cache(); run_agent() reuses default graph when components is None"
+    },
+    {
+      "path": "backend/app/schema/metadata.py",
+      "role": "A2 production source",
+      "sha256_final": "6aa9b571229d17ad6d9f066c911886f35b046b48a39911280d3a1989293e2de8",
+      "size_bytes_final": 6219,
+      "sha256_recovery_source": "6aa9b571229d17ad6d9f066c911886f35b046b48a39911280d3a1989293e2de8",
+      "sha256_source_changed": "NO",
+      "reason_for_inclusion": "A2 SchemaCatalog process-level cache: _CATALOG_CACHE / get_cached() / clear_cache(); per-request SQLite connections 12 -> 0"
+    },
+    {
+      "path": "backend/app/llm/mimo.py",
+      "role": "A3 production source",
+      "sha256_final": "2eddd623bf8db37a91cf9462783eba6f462944c08363c977540999750e2be403",
+      "size_bytes_final": 5779,
+      "sha256_recovery_source": "2eddd623bf8db37a91cf9462783eba6f462944c08363c977540999750e2be403",
+      "sha256_source_changed": "NO",
+      "reason_for_inclusion": "A3 MimoProvider._get_client() instance-level client reuse (self._client, max_retries=0)"
+    },
+    {
+      "path": "backend/app/sqlgen/safety.py",
+      "role": "A4 production source",
+      "sha256_final": "c9cd072471381036b9e32c675225dafa30a7992e096ee2fbbb0f42fa03bb85b1",
+      "size_bytes_final": 3575,
+      "sha256_recovery_source": "c9cd072471381036b9e32c675225dafa30a7992e096ee2fbbb0f42fa03bb85b1",
+      "sha256_source_changed": "NO",
+      "reason_for_inclusion": "A4 _parse_single_readonly() / check_sql_safety_with_tables() - single sqlglot parse does both read-only check and table extraction"
+    },
+    {
+      "path": "backend/app/sqlgen/validator.py",
+      "role": "A4 consumer",
+      "sha256_final": "1c0e9a2c395adabcf1528ced1f90f844e1e2b9d6f5f76a2138570ff05f384e59",
+      "size_bytes_final": 4545,
+      "sha256_recovery_source": "1c0e9a2c395adabcf1528ced1f90f844e1e2b9d6f5f76a2138570ff05f384e59",
+      "sha256_source_changed": "NO",
+      "reason_for_inclusion": "A4 consumer: validator now calls check_sql_safety_with_tables() instead of two-step parse"
+    },
+    {
+      "path": "backend/tests/test_task29_runtime_reuse.py",
+      "role": "behavioral test (32 test cases)",
+      "sha256_final": "5d6282299832c69e7b75a5a5a768ba1307661a529940cfc24cd0cb0bf4d52383",
+      "size_bytes_final": 9783,
+      "sha256_recovery_source": "5d6282299832c69e7b75a5a5a768ba1307661a529940cfc24cd0cb0bf4d52383",
+      "sha256_source_changed": "NO",
+      "reason_for_inclusion": "Covers semantic equivalence + cache invalidation for all four optimizations. Verified to have NO Task 30/32+ experimental dependency.",
+      "recovery_classification": "LIKELY_COPY"
+    }
+  ],
+
+  "excluded_files": [
+    {
+      "path": "backend/app/schema/rule_linker.py",
+      "reason": "Task 30/31 experimental component. B1 Holdout V2 FAIL -> Production Integration BLOCKED (Sufficiency 88.9% < 98%)"
+    },
+    {
+      "path": "backend/app/schema/linker_factory.py",
+      "reason": "Task 30/31 experimental component. Introduces LINKER_MODE switch = production variable wiring; production must be fixed SchemaLinker"
+    },
+    {
+      "path": "backend/app/schema/coverage_guard.py",
+      "reason": "Task 32 experimental component. Guard routing locks Sufficiency at 87.5% < 98%, structurally BLOCKED"
+    },
+    {
+      "path": "backend/app/schema/hybrid_linker.py",
+      "reason": "Task 32 experimental component; depends on coverage_guard"
+    },
+    {
+      "path": "backend/app/agent/structural_coverage.py",
+      "reason": "Task 33 research component. Method-boundary BLOCKED (false positives irreducible)"
+    },
+    {
+      "path": "backend/app/agent/schema_retrieval.py",
+      "reason": "Task 34 research component. Verdict INCONCLUSIVE, generalization unproven"
+    },
+    {
+      "path": "backend/tests/test_b1_rule_linker.py",
+      "reason": "EXCLUDE: depends on rule_linker.py (Task 30)"
+    },
+    {
+      "path": "backend/tests/test_task32_coverage_guard.py",
+      "reason": "EXCLUDE: depends on coverage_guard.py (Task 32)"
+    },
+    {
+      "path": "backend/tests/test_structural_coverage.py",
+      "reason": "EXCLUDE: depends on structural_coverage.py (Task 33)"
+    },
+    {
+      "path": "backend/tests/test_task33b_r1_audit.py",
+      "reason": "EXCLUDE: depends on structural_coverage.py (Task 33)"
+    },
+    {
+      "path": "backend/tests/test_task34_schema_retrieval.py",
+      "reason": "EXCLUDE: depends on schema_retrieval.py (Task 34)"
+    },
+    {
+      "path": "backend/tests/conftest.py",
+      "reason": "EXCLUDE: recovered version's _reset_process_caches autouse fixture imports clear_fk_graph_cache (structural_coverage, Task 33) and clear_db_vocabulary_cache (coverage_guard, Task 32). On pure Candidate A production the fixture would ImportError on every test.",
+      "disclosed_risk": "Without _reset_process_caches, process-level caches could in principle survive across test files. Empirically NOT observed: promotion branch runs 399 passed / 0 failed. _get_client() is instance-level and _parse_single_readonly() is stateless, so no pollution path exists for A3/A4. A follow-up (out of Phase 2C scope) should add a Candidate-A-only conftest variant with only clear_default_graph_cache() + SchemaCatalog.clear_cache()."
+    }
+  ],
+
+  "contamination_audit": {
+    "found": "YES",
+    "count": 1,
+    "file": "backend/app/agent/graph.py",
+    "detail": "First application carried a Task 30 hunk: `from app.schema.linker_factory import create_schema_linker` + `schema_linker = create_schema_linker(provider=provider)`. Not part of Candidate A.",
+    "root_cause": "Phase 2B-1 replay protocol applies transcript Edits onto the master baseline. Those Edits were originally authored on a Task-30-era file. An old_string matched a semantically adjacent (but different) location on the baseline, carrying the Task 30 factory switch into Candidate A. old_string match != semantic match.",
+    "action": "Per section 13 gate: STOPPED before commit. Isolated the single hunk, reverted to master-baseline form (SchemaLinker), rescanned all 6 files (only graph.py had been affected; other 5 CLEAN), re-ran tests, then committed.",
+    "post_fix_scan": "CLEAN - zero occurrences of linker_factory / create_schema_linker / LINKER_MODE / rule_linker / coverage_guard / hybrid / structural_coverage / schema_retrieval across all six files"
+  },
+
+  "diff_gate": {
+    "command": "git diff master..candidateA_promotion_20260920 --name-only",
+    "result": [
+      "backend/app/agent/graph.py",
+      "backend/app/llm/mimo.py",
+      "backend/app/schema/metadata.py",
+      "backend/app/sqlgen/safety.py",
+      "backend/app/sqlgen/validator.py",
+      "backend/tests/test_task29_runtime_reuse.py"
+    ],
+    "stat": "6 files changed, 383 insertions(+), 13 deletions(-)",
+    "forbidden_files_present": "NONE"
+  },
+
+  "regression_tests": {
+    "command": "python -m pytest backend/tests",
+    "master_recovered": { "passed": 367, "failed": 0, "warnings": 1, "duration_s": 26.11 },
+    "candidate_a_promotion": { "passed": 399, "failed": 0, "warnings": 1, "duration_s": 25.08 },
+    "delta": "+32 (test_task29_runtime_reuse.py: 16 test functions, parameterized to 32 cases)"
+  },
+
+  "runtime_probes": {
+    "A1": "get_default_graph / clear_default_graph_cache / _DEFAULT_GRAPH_CACHE all present",
+    "A2": "SchemaCatalog.get_cached() returns same instance twice; table_names = 5 tables",
+    "A3": "MimoProvider._get_client present; contains max_retries=0",
+    "A4": "_parse_single_readonly / check_sql_safety_with_tables present; JOIN returns {'users','orders'}"
+  },
+
+  "frozen_assets": {
+    "prompt": { "file": "backend/app/sqlgen/prompt.py", "before": "31244e614fb36a693220a44d5a71610b0350aca26c61c8b98075afcd70d87fed", "after": "31244e614fb36a693220a44d5a71610b0350aca26c61c8b98075afcd70d87fed", "match": "YES" },
+    "dataset": { "file": "data/eval/ecommerce_eval_v1.json", "before": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a", "after": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a", "match": "YES" },
+    "fewshot": { "file": "data/fewshot/ecommerce_examples.json", "before": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee", "after": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee", "match": "YES" },
+    "db": { "file": "db/ecommerce.db", "before": "65e5d8b2727cfa064174f9a08aa7d4b08209e0edd1eba81f3155698f1a4491d9", "after": "65e5d8b2727cfa064174f9a08aa7d4b08209e0edd1eba81f3155698f1a4491d9", "match": "YES" }
+  },
+
+  "production_red_lines": {
+    "LINKER_MODE_present_in_production": "NO (absent)",
+    "linker_factory_py_present": "NO",
+    "graph_uses": "SchemaLinker(provider=provider) - identical to master baseline",
+    "get_llm_provider": "unchanged",
+    "rule_linker_wired": "NO",
+    "coverage_guard_wired": "NO",
+    "hybrid_linker_wired": "NO",
+    "schema_retrieval_wired": "NO"
+  },
+
+  "final_state": {
+    "master": "518cd8964fc438aa82151f60b415cb4d9ce17a37 (recovered baseline)",
+    "candidateA_promotion_20260920": "019b18a450c25887c1786ce2a76d55af57640ea8 (master + Candidate A only)",
+    "candidate_a_status": "NOT_YET_MERGED",
+    "production": "recovered baseline",
+    "promotion": "READY_FOR_REVIEW"
+  }
+}

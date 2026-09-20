@@ -1,0 +1,25 @@
+{
+  "case_id": "B-1003",
+  "eval_id": "E-0026",
+  "question": "2024年及以后注册的用户数量按注册年份分布是怎样的？",
+  "difficulty": "medium",
+  "scenario": "user_analysis",
+  "operators": [
+    "where",
+    "group_by",
+    "date_group",
+    "aggregate",
+    "date_filter"
+  ],
+  "gold_sql": "SELECT strftime('%Y', register_date) AS reg_year, COUNT(*) AS user_count FROM users WHERE register_date >= '2024-01-01' GROUP BY reg_year ORDER BY reg_year",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "LLMApiKeyNotConfiguredError",
+  "latency_ms": 9.52,
+  "repair_count": 0,
+  "trace": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

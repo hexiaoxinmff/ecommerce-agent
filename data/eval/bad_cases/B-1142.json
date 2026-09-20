@@ -1,0 +1,22 @@
+{
+  "case_id": "B-1142",
+  "eval_id": "E-0051",
+  "question": "各收货地区的订单数量分布是怎样的？",
+  "difficulty": "medium",
+  "scenario": "regional_analysis",
+  "operators": [
+    "aggregate",
+    "group_by"
+  ],
+  "gold_sql": "SELECT region, COUNT(*) AS order_count FROM orders GROUP BY region ORDER BY order_count DESC",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

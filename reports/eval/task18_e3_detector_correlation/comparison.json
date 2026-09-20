@@ -1,0 +1,243 @@
+{
+  "experiment": "task18_e3_detector_correlation",
+  "note": "OFF/ON 为独立生成样本（Mimo 随机性），比较的是『alarm 样本与失败率的关联』，非严格 paired causal effect。",
+  "off": {
+    "tag": "OFF",
+    "total": 100,
+    "alarm": {
+      "name": "alarm",
+      "count": 1,
+      "rate_pct": 1.0,
+      "exec_fail": 0,
+      "exec_fail_rate": 0.0,
+      "ex_fail": 1,
+      "ex_fail_rate": 100.0,
+      "result_mismatch": 1,
+      "result_mismatch_rate": 100.0,
+      "timeout": 0,
+      "timeout_rate": 0.0,
+      "provider_failure": 0
+    },
+    "no_alarm": {
+      "name": "no_alarm",
+      "count": 99,
+      "rate_pct": 99.0,
+      "exec_fail": 1,
+      "exec_fail_rate": 1.01,
+      "ex_fail": 9,
+      "ex_fail_rate": 9.09,
+      "result_mismatch": 8,
+      "result_mismatch_rate": 8.08,
+      "timeout": 0,
+      "timeout_rate": 0.0,
+      "provider_failure": 0
+    },
+    "alarm_ids": [
+      "E-0086"
+    ],
+    "alarm_severity": {
+      "E-0086": "high"
+    },
+    "known_bad": {
+      "E-0057": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0077": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0082": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0083": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0086": {
+        "alarm": true,
+        "severity": "high",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0090": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0095": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0096": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0099": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": false,
+        "error_type": "SQL 执行失败: no such column: r.region"
+      },
+      "E-0100": {
+        "alarm": false,
+        "severity": "low",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      }
+    },
+    "ex_ok_alarmed": []
+  },
+  "on": {
+    "tag": "ON",
+    "total": 100,
+    "alarm": {
+      "name": "alarm",
+      "count": 1,
+      "rate_pct": 1.0,
+      "exec_fail": 0,
+      "exec_fail_rate": 0.0,
+      "ex_fail": 1,
+      "ex_fail_rate": 100.0,
+      "result_mismatch": 1,
+      "result_mismatch_rate": 100.0,
+      "timeout": 0,
+      "timeout_rate": 0.0,
+      "provider_failure": 0
+    },
+    "no_alarm": {
+      "name": "no_alarm",
+      "count": 99,
+      "rate_pct": 99.0,
+      "exec_fail": 1,
+      "exec_fail_rate": 1.01,
+      "ex_fail": 8,
+      "ex_fail_rate": 8.08,
+      "result_mismatch": 7,
+      "result_mismatch_rate": 7.07,
+      "timeout": 1,
+      "timeout_rate": 1.01,
+      "provider_failure": 1
+    },
+    "alarm_ids": [
+      "E-0086"
+    ],
+    "alarm_severity": {
+      "E-0086": "high"
+    },
+    "known_bad": {
+      "E-0057": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0077": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0082": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0083": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0086": {
+        "alarm": true,
+        "severity": "high",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0090": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0095": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0096": {
+        "alarm": false,
+        "severity": "none",
+        "ex": false,
+        "exec_ok": true,
+        "error_type": "result_mismatch"
+      },
+      "E-0099": {
+        "alarm": false,
+        "severity": "none",
+        "ex": true,
+        "exec_ok": true,
+        "error_type": null
+      },
+      "E-0100": {
+        "alarm": false,
+        "severity": "none",
+        "ex": true,
+        "exec_ok": true,
+        "error_type": null
+      }
+    },
+    "ex_ok_alarmed": []
+  },
+  "comparison": {
+    "alarm_count_off": 1,
+    "alarm_count_on": 1,
+    "ex_ok_alarmed_off": [],
+    "ex_ok_alarmed_on": [],
+    "rel_risk_ex_fail_off": 11.0,
+    "rel_risk_ex_fail_on": 12.375,
+    "rel_risk_exec_fail_off": 0.0,
+    "rel_risk_exec_fail_on": 0.0,
+    "rel_risk_limits": {
+      "n_alarm_off": 1,
+      "n_alarm_on": 1,
+      "usable_for_inference": false,
+      "confidence_interval": null,
+      "note": "RR values are retained as arithmetic diagnostics only and must not be used for statistical inference due to n=1"
+    }
+  }
+}

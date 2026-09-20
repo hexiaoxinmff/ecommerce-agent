@@ -1,0 +1,30 @@
+{
+  "case_id": "B-1166",
+  "eval_id": "E-0096",
+  "question": "2025年环比增速最快的3个月份是哪几个？（请给出月份、当月销售额与环比增速百分比）",
+  "difficulty": "extra_hard",
+  "scenario": "time_analysis",
+  "operators": [
+    "date_group",
+    "group_by",
+    "aggregate",
+    "where",
+    "date_filter",
+    "subquery",
+    "ratio",
+    "order_by",
+    "limit",
+    "top_n"
+  ],
+  "gold_sql": "WITH monthly AS (SELECT strftime('%Y-%m', order_date) AS month, SUM(total_amount) AS revenue FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' GROUP BY month), with_prev AS (SELECT month, revenue, LAG(revenue) OVER (ORDER BY month) AS prev_rev FROM monthly) SELECT month, ROUND(revenue, 2) AS revenue, ROUND((revenue - prev_rev) * 100.0 / prev_rev, 2) AS mom_pct FROM with_prev WHERE prev_rev IS NOT NULL ORDER BY mom_pct DESC, month LIMIT 3",
+  "pred_sql": "WITH monthly_sales AS (SELECT strftime('%Y-%m', o.order_date) AS month, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' AND strftime('%Y', o.order_date) = '2025' GROUP BY month), monthly_with_lag AS (SELECT month, total_sales, LAG(total_sales, 1) OVER (ORDER BY month) AS prev_month_sales FROM monthly_sales) SELECT month, total_sales, ROUND((total_sales - prev_month_sales) * 100.0 / prev_month_sales, 2) AS growth_rate_pct FROM monthly_with_lag WHERE prev_month_sales IS NOT NULL AND prev_month_sales > 0 ORDER BY growth_rate_pct DESC LIMIT 3",
+  "initial_sql": "WITH monthly_sales AS (SELECT strftime('%Y-%m', o.order_date) AS month, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' AND strftime('%Y', o.order_date) = '2025' GROUP BY month), monthly_with_lag AS (SELECT month, total_sales, LAG(total_sales, 1) OVER (ORDER BY month) AS prev_month_sales FROM monthly_sales) SELECT month, total_sales, ROUND((total_sales - prev_month_sales) * 100.0 / prev_month_sales, 2) AS growth_rate_pct FROM monthly_with_lag WHERE prev_month_sales IS NOT NULL AND prev_month_sales > 0 ORDER BY growth_rate_pct DESC LIMIT 3",
+  "final_sql": "WITH monthly_sales AS (SELECT strftime('%Y-%m', o.order_date) AS month, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' AND strftime('%Y', o.order_date) = '2025' GROUP BY month), monthly_with_lag AS (SELECT month, total_sales, LAG(total_sales, 1) OVER (ORDER BY month) AS prev_month_sales FROM monthly_sales) SELECT month, total_sales, ROUND((total_sales - prev_month_sales) * 100.0 / prev_month_sales, 2) AS growth_rate_pct FROM monthly_with_lag WHERE prev_month_sales IS NOT NULL AND prev_month_sales > 0 ORDER BY growth_rate_pct DESC LIMIT 3",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 13182.55,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

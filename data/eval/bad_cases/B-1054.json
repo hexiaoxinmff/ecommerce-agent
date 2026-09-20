@@ -1,0 +1,27 @@
+{
+  "case_id": "B-1054",
+  "eval_id": "E-0072",
+  "question": "2025年中订单量高于全年月均订单量的月份有哪些？（请给出月份与订单量）",
+  "difficulty": "hard",
+  "scenario": "time_analysis",
+  "operators": [
+    "where",
+    "date_filter",
+    "date_group",
+    "group_by",
+    "having",
+    "aggregate",
+    "subquery"
+  ],
+  "gold_sql": "SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' GROUP BY month HAVING COUNT(*) > (SELECT COUNT(*) / 12.0 FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31') ORDER BY order_count DESC, month",
+  "pred_sql": "WITH monthly_orders AS (SELECT strftime('%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' GROUP BY month), avg_orders AS (SELECT AVG(order_count) AS avg_monthly_order_count FROM monthly_orders) SELECT m.month, m.order_count FROM monthly_orders m, avg_orders a WHERE m.order_count > a.avg_monthly_order_count ORDER BY m.month",
+  "initial_sql": "WITH monthly_orders AS (SELECT strftime('%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' GROUP BY month), avg_orders AS (SELECT AVG(order_count) AS avg_monthly_order_count FROM monthly_orders) SELECT m.month, m.order_count FROM monthly_orders m, avg_orders a WHERE m.order_count > a.avg_monthly_order_count ORDER BY m.month",
+  "final_sql": "WITH monthly_orders AS (SELECT strftime('%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' GROUP BY month), avg_orders AS (SELECT AVG(order_count) AS avg_monthly_order_count FROM monthly_orders) SELECT m.month, m.order_count FROM monthly_orders m, avg_orders a WHERE m.order_count > a.avg_monthly_order_count ORDER BY m.month",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 12930.99,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# 环境与密钥
+.env
+.env.local
+*.key
+
+# 数据库与数据文件（数据库由脚本重建，二进制不入库）
+db/*.db
+data/*.db
+data/*.sqlite
+data/raw/
+
+# Node / 前端
+node_modules/
+web/dist/
+
+# IDE
+.idea/
+.vscode/
+
+# 日志与运行产物
+logs/
+*.log
+evaluation/reports/*.html

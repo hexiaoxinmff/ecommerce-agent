@@ -1,0 +1,23 @@
+{
+  "case_id": "B-1010",
+  "eval_id": "E-0022",
+  "question": "2025年全年一共下了多少订单？",
+  "difficulty": "easy",
+  "scenario": "time_analysis",
+  "operators": [
+    "aggregate",
+    "where",
+    "date_filter"
+  ],
+  "gold_sql": "SELECT COUNT(*) FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31'",
+  "pred_sql": "SELECT COUNT(*) AS total_orders FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled'",
+  "initial_sql": "SELECT COUNT(*) AS total_orders FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled'",
+  "final_sql": "SELECT COUNT(*) AS total_orders FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled'",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 7381.42,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

@@ -1,0 +1,21 @@
+{
+  "case_id": "B-1039",
+  "eval_id": "E-0007",
+  "question": "平台上一共有多少商品？",
+  "difficulty": "easy",
+  "scenario": "product_analysis",
+  "operators": [
+    "aggregate"
+  ],
+  "gold_sql": "SELECT COUNT(*) AS product_count FROM products",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "LLMNetworkError",
+  "latency_ms": 34042.74,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:error;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

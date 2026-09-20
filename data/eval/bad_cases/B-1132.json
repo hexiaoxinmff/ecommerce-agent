@@ -1,0 +1,27 @@
+{
+  "case_id": "B-1132",
+  "eval_id": "E-0090",
+  "question": "2025年各订单状态下，实付金额高于5000元的高金额订单数与5000元及以下的普通订单数分别是多少？（含取消订单的结构统计）",
+  "difficulty": "extra_hard",
+  "scenario": "order_analysis",
+  "operators": [
+    "conditional_aggregation",
+    "case_when",
+    "where",
+    "date_filter",
+    "group_by",
+    "aggregate",
+    "order_by"
+  ],
+  "gold_sql": "SELECT status, COUNT(CASE WHEN total_amount > 5000 AND status != 'cancelled' THEN 1 END) AS high_cnt, COUNT(CASE WHEN total_amount <= 5000 AND status != 'cancelled' THEN 1 END) AS normal_cnt, COUNT(*) AS total_cnt FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' GROUP BY status ORDER BY status",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

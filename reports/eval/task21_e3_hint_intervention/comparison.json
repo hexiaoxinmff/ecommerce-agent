@@ -1,0 +1,118 @@
+{
+  "experiment": "task21_e3_hint_intervention",
+  "note": "OFF/ON 为独立随机样本（Mimo）；ON 仅在 detector alarm 时注入 FANOUT_RECHECK_HINT 并额外 regeneration 一次（≤1），其余与 OFF 完全一致。",
+  "experiment_boundary_limits": {
+    "not_strictly_single_variable": true,
+    "reasons": [
+      "timeout: OFF=60s vs ON=90s",
+      "pipeline: OFF=LangGraph+safety+repair vs ON=linear script no repair",
+      "latency accounting differs"
+    ],
+    "audit_note": "WorkBuddy 审计（P1-3）确认上述差异未实际污染本次 EX 结论；但结果只能解释为机制层面观测（mechanism-level observation），不是全局 EX 增益的干净因果估计。"
+  },
+  "overall_ex_interpretation": {
+    "off_ex": 90.0,
+    "on_ex": 93.0,
+    "observed_delta_pt": 3.0,
+    "attributable_to_hint_pt": 1.0,
+    "attributable_cases": ["E-0086"],
+    "not_attributable_cases": ["E-0099", "E-0100"],
+    "statement": "Hint 提升 EX 3pt 的表述禁止使用；仅 E-0086 的 +1pt 有 Hint 直接归因证据。"
+  },
+  "off": {
+    "ex": 90.0,
+    "conditional_ex": 90.0,
+    "exec_rate": 99.0,
+    "pass_at_1": 90.0,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "avg_latency_ms": 11144.08,
+    "p50_latency_ms": 10717.79,
+    "p95_latency_ms": 17544.76
+  },
+  "on": {
+    "ex": 93.0,
+    "conditional_ex": 93.0,
+    "exec_rate": 100.0,
+    "pass_at_1": 93.0,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "avg_latency_ms": 10529.26,
+    "p50_latency_ms": 9616.94,
+    "p95_latency_ms": 15561.7
+  },
+  "delta_ex": 3.0,
+  "alarm": {
+    "off_count": 0,
+    "on_count": 1,
+    "on_alarm_ids": [
+      "E-0086"
+    ]
+  },
+  "hint": {
+    "alarm_count": 1,
+    "hint_injected_count": 1,
+    "consistent": true,
+    "regeneration_count_total": 1,
+    "avg_regeneration_count": 0.01
+  },
+  "fanout_intervention": {
+    "alarm_fixed": [
+      "E-0086"
+    ],
+    "alarm_regressed": [],
+    "alarm_both_wrong": [],
+    "fix_count": 1,
+    "regress_count": 0
+  },
+  "e0086": {
+    "detector_alarm": true,
+    "hint_injected": true,
+    "initial_ex": false,
+    "final_ex": true,
+    "off_ex": false,
+    "regen_count": 1
+  },
+  "cross_group_changes": [
+    {
+      "case_id": "E-0086",
+      "off_bad": true,
+      "on_bad": false,
+      "on_alarm": true
+    },
+    {
+      "case_id": "E-0099",
+      "off_bad": true,
+      "on_bad": false,
+      "on_alarm": false
+    },
+    {
+      "case_id": "E-0100",
+      "off_bad": true,
+      "on_bad": false,
+      "on_alarm": false
+    }
+  ],
+  "latency": {
+    "off_avg": 11144.08,
+    "on_avg": 10529.26,
+    "off_p50": 10717.79,
+    "on_p50": 9616.94,
+    "off_p95": 17544.76,
+    "on_p95": 15561.7
+  },
+  "failure_breakdown": {
+    "off": {
+      "provider": 0,
+      "timeout": 0,
+      "exec": 99.0,
+      "bad_count": 10
+    },
+    "on": {
+      "provider": 0,
+      "timeout": 0,
+      "exec": 100.0,
+      "bad_count": 7
+    }
+  }
+}

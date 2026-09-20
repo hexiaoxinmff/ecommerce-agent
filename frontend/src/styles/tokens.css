@@ -1,0 +1,101 @@
+/* =========================================================
+   UI/UX v1.0 Design Tokens
+   方案 B：深海蓝 + 蓝紫科技感 · 汇报演示优化版
+   唯一视觉基准来源：docs/UI-UX.md
+   ========================================================= */
+
+:root {
+  /* ---------- color ---------- */
+  --color-bg-page: #0b1220;
+  --color-bg-navy: #0e1a30;
+  --color-bg-card: #12233f;
+  --color-bg-sub: #162a4a;
+  --color-bg-hover: #1a3054;
+
+  --color-primary: #3d8bff;
+  --color-primary-hover: #5ba0ff;
+  --color-primary-active: #2f74e6;
+  --color-primary-light: #1e3a66;
+  --color-primary-text: #a8c9ff;
+
+  --color-ai-purple: #8b7cf6;
+  --color-ai-light: #1c1740;
+  --color-ai-glow: rgba(139, 124, 246, 0.45);
+
+  --color-success: #2ed47a;
+  --color-warning: #f5a623;
+  --color-error: #f0515b;
+  --color-info: #38bdf8;
+
+  --color-text-primary: #f4f7ff;
+  --color-text-body: #c9d4e8;
+  --color-text-secondary: #8ca0c0;
+  --color-text-disabled: #4a5c78;
+
+  --color-border: rgba(148, 178, 226, 0.14);
+  --color-border-strong: rgba(148, 178, 226, 0.3);
+
+  /* 图表数据色板（固定 8 色） */
+  --chart-1: #3d8bff;
+  --chart-2: #8b7cf6;
+  --chart-3: #38bdf8;
+  --chart-4: #2ed47a;
+  --chart-5: #f5a623;
+  --chart-6: #f05b5b;
+  --chart-7: #2dd4bf;
+  --chart-8: #94a3b8;
+
+  /* ---------- font ---------- */
+  --font-family-cn: "PingFang SC", "HarmonyOS Sans SC", "Source Han Sans SC",
+    "Microsoft YaHei", sans-serif;
+  --font-family-en: "Inter", "SF Pro Display", "Segoe UI", sans-serif;
+  --font-family-code: "JetBrains Mono", "Cascadia Code", "Consolas", monospace;
+
+  --font-size-page-title: 30px;
+  --font-size-h1: 24px;
+  --font-size-h2: 18px;
+  --font-size-body: 16px;
+  --font-size-aux: 13px;
+  --font-size-kpi: 44px;
+  --font-size-kpi-sm: 36px;
+  --font-size-code: 15px;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 600;
+  --font-weight-bold: 700;
+
+  --line-height-body: 1.6;
+  --line-height-title: 1.3;
+
+  /* ---------- space ---------- */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+
+  /* ---------- radius ---------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
+
+  /* ---------- shadow / glow ---------- */
+  --shadow-card: 0 2px 8px rgba(3, 8, 20, 0.35);
+  --shadow-pop: 0 6px 20px rgba(3, 8, 20, 0.5);
+  --glow-primary: 0 0 12px rgba(61, 139, 255, 0.35);
+  --glow-ai: 0 0 12px rgba(139, 124, 246, 0.4);
+
+  /* ---------- layout ---------- */
+  --layout-sider: 220px;
+  --layout-sider-collapsed: 68px;
+  --layout-header: 64px;
+  --layout-content-max: 1440px;
+  --layout-page-padding: 24px;
+  --layout-card-gap: 16px;
+  --layout-section-gap: 24px;
+}

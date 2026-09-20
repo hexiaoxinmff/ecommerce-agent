@@ -1,0 +1,29 @@
+{
+  "case_id": "B-1098",
+  "eval_id": "E-0086",
+  "question": "累计消费金额超过全平台用户平均累计消费2倍、且累计下单超过8笔的用户有哪些？（请给出用户名、累计金额、订单数与购买商品种数）",
+  "difficulty": "extra_hard",
+  "scenario": "user_analysis",
+  "operators": [
+    "multiple_join",
+    "join",
+    "where",
+    "group_by",
+    "aggregate",
+    "subquery",
+    "nested_subquery",
+    "comparison_to_average",
+    "order_by"
+  ],
+  "gold_sql": "WITH user_stats AS (SELECT o.user_id AS uid, SUM(o.total_amount) AS spent, COUNT(DISTINCT o.id) AS orders, COUNT(DISTINCT oi.product_id) AS sku_cnt FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY o.user_id) SELECT u.username, ROUND(us.spent, 2) AS total_spent, us.orders, us.sku_cnt FROM user_stats us JOIN users u ON u.id = us.uid WHERE us.spent > 2 * (SELECT AVG(spent) FROM (SELECT SUM(total_amount) AS spent FROM orders WHERE status != 'cancelled' GROUP BY user_id) t) AND us.orders > 8 ORDER BY us.spent DESC, u.id",
+  "pred_sql": "WITH user_stats AS (SELECT u.id, u.username, SUM(o.total_amount) AS total_spent, COUNT(o.id) AS order_count, COUNT(DISTINCT oi.product_id) AS product_count FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY u.id), platform_avg AS (SELECT AVG(total_spent) AS avg_spent FROM user_stats) SELECT us.username, ROUND(us.total_spent, 2) AS total_spent, us.order_count, us.product_count FROM user_stats us, platform_avg pa WHERE us.total_spent > pa.avg_spent * 2 AND us.order_count > 8 ORDER BY us.total_spent DESC",
+  "initial_sql": "WITH user_stats AS (SELECT u.id, u.username, SUM(o.total_amount) AS total_spent, COUNT(o.id) AS order_count, COUNT(DISTINCT oi.product_id) AS product_count FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY u.id), platform_avg AS (SELECT AVG(total_spent) AS avg_spent FROM user_stats) SELECT us.username, ROUND(us.total_spent, 2) AS total_spent, us.order_count, us.product_count FROM user_stats us, platform_avg pa WHERE us.total_spent > pa.avg_spent * 2 AND us.order_count > 8 ORDER BY us.total_spent DESC",
+  "final_sql": "WITH user_stats AS (SELECT u.id, u.username, SUM(o.total_amount) AS total_spent, COUNT(o.id) AS order_count, COUNT(DISTINCT oi.product_id) AS product_count FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY u.id), platform_avg AS (SELECT AVG(total_spent) AS avg_spent FROM user_stats) SELECT us.username, ROUND(us.total_spent, 2) AS total_spent, us.order_count, us.product_count FROM user_stats us, platform_avg pa WHERE us.total_spent > pa.avg_spent * 2 AND us.order_count > 8 ORDER BY us.total_spent DESC",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 17478.35,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

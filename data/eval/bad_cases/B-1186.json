@@ -1,0 +1,28 @@
+{
+  "case_id": "B-1186",
+  "eval_id": "E-0099",
+  "question": "哪些收货地区中，家用电器类目销售金额占该地区总销售金额的比例高于全平台家电占比？（请给出地区、家电销售额与占比百分比）",
+  "difficulty": "extra_hard",
+  "scenario": "ratio",
+  "operators": [
+    "multiple_join",
+    "join",
+    "where",
+    "group_by",
+    "aggregate",
+    "subquery",
+    "ratio",
+    "order_by"
+  ],
+  "gold_sql": "WITH total AS (SELECT o.region, SUM(oi.subtotal) AS total_rev FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' GROUP BY o.region), elec AS (SELECT o.region, SUM(oi.subtotal) AS elec_rev FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' AND c.name = '家用电器' GROUP BY o.region) SELECT e.region, ROUND(e.elec_rev, 2) AS elec_rev, ROUND(e.elec_rev * 100.0 / t.total_rev, 2) AS pct FROM elec e JOIN total t ON t.region = e.region WHERE e.elec_rev * 100.0 / t.total_rev > 24.97 ORDER BY pct DESC, e.region",
+  "pred_sql": "WITH region_sales AS ( SELECT o.region, SUM(oi.subtotal) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY o.region ), region_appliance_sales AS ( SELECT o.region, SUM(oi.subtotal) AS appliance_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' AND c.name = '家用电器' GROUP BY o.region ), platform_appliance_ratio AS ( SELECT SUM(CASE WHEN c.name = '家用电器' THEN oi.subtotal ELSE 0 END) * 100.0 / SUM(oi.subtotal) AS platform_ratio FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' ) SELECT r.region, ROUND(ras.appliance_sales, 2) AS appliance_sales, ROUND(ras.appliance_sales * 100.0 / rs.total_sales, 2) AS region_ratio_pct FROM region_sales rs JOIN region_appliance_sales ras ON rs.region = ras.region CROSS JOIN platform_appliance_ratio par WHERE ras.appliance_sales * 100.0 / rs.total_sales > par.platform_ratio ORDER BY region_ratio_pct DESC",
+  "initial_sql": "WITH region_sales AS ( SELECT o.region, SUM(oi.subtotal) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY o.region ), region_appliance_sales AS ( SELECT o.region, SUM(oi.subtotal) AS appliance_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' AND c.name = '家用电器' GROUP BY o.region ), platform_appliance_ratio AS ( SELECT SUM(CASE WHEN c.name = '家用电器' THEN oi.subtotal ELSE 0 END) * 100.0 / SUM(oi.subtotal) AS platform_ratio FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' ) SELECT r.region, ROUND(ras.appliance_sales, 2) AS appliance_sales, ROUND(ras.appliance_sales * 100.0 / rs.total_sales, 2) AS region_ratio_pct FROM region_sales rs JOIN region_appliance_sales ras ON rs.region = ras.region CROSS JOIN platform_appliance_ratio par WHERE ras.appliance_sales * 100.0 / rs.total_sales > par.platform_ratio ORDER BY region_ratio_pct DESC",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "sql_repair",
+  "error_type": "SQL 执行失败: no such column: r.region",
+  "latency_ms": 22890.12,
+  "repair_count": 1,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:error;sql_repair:error;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

@@ -1,0 +1,28 @@
+{
+  "case_id": "B-1043",
+  "eval_id": "E-0083",
+  "question": "2025年第四季度中，家用电器类目销售金额占该季度全部商品销售金额的比例是多少？（百分比，保留两位小数）",
+  "difficulty": "hard",
+  "scenario": "ratio",
+  "operators": [
+    "multiple_join",
+    "join",
+    "where",
+    "date_filter",
+    "group_by",
+    "aggregate",
+    "ratio",
+    "subquery"
+  ],
+  "gold_sql": "SELECT c.name, ROUND(SUM(oi.subtotal) * 100.0 / (SELECT SUM(oi3.subtotal) FROM order_items oi3 JOIN orders o3 ON o3.id = oi3.order_id WHERE o3.order_date >= '2025-10-01' AND o3.order_date <= '2025-12-31' AND o3.status != 'cancelled'), 2) AS pct FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.order_date >= '2025-10-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' AND c.name = '家用电器' GROUP BY c.id, c.name",
+  "pred_sql": "SELECT ROUND(SUM(CASE WHEN c.name = '家用电器' THEN oi.subtotal ELSE 0 END) * 100.0 / SUM(oi.subtotal), 2) AS pct FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2025-10-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled'",
+  "initial_sql": "SELECT ROUND(SUM(CASE WHEN c.name = '家用电器' THEN oi.subtotal ELSE 0 END) * 100.0 / SUM(oi.subtotal), 2) AS pct FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2025-10-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled'",
+  "final_sql": "SELECT ROUND(SUM(CASE WHEN c.name = '家用电器' THEN oi.subtotal ELSE 0 END) * 100.0 / SUM(oi.subtotal), 2) AS pct FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2025-10-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled'",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 12649.27,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

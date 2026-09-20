@@ -1,0 +1,516 @@
+# 项目说明（参数文档）
+
+> **文档定位**：本文档记录《基于 Text2SQL 的电商智能数据分析 Agent》**当前代码中真实生效**的运行参数。
+> 所有条目均来自源码/配置文件的直接事实，**不包含任何未实现的规划项**（未实现能力统一列在第 10 节）。
+>
+> **文档边界**：本文档只描述**运行参数**（服务、数据库、LLM、Agent、前端、环境变量）。
+> **实验参数与实验结果不在本文档范围内**，其归属与引用规则见第 10.1 节。
+>
+> **密钥策略**：本文档不包含任何真实密钥。`.env` 中的 `MIMO_API_KEY` 仅以占位符形式出现。
+>
+> 生成时间：2026-09-17 ｜ 对应代码基线：`d258491`（Task 28 收尾前快照）
+
+---
+
+## 1. 文档定位与适用范围
+
+### 1.1 本文档回答什么问题
+
+| 问题 | 对应章节 |
+|---|---|
+| 这套系统跑在什么 Python / Node 版本、什么依赖版本上？ | §2 |
+| 服务监听哪个端口？前端怎么连后端？CORS 放行哪些来源？ | §3 |
+| 数据库文件在哪？为什么说是"只读"？结果集有上限吗？ | §4 |
+| 用的是哪个大模型？超时多久？温度是多少？ | §5 |
+| Agent 最多重试几次？最多执行几次？Few-shot 取几条？ | §6 / §7 |
+| 前端有哪些运行参数与页面能力？ | §8 |
+| 需要配置哪些环境变量？哪些是可选的？ | §9 |
+| 哪些能力**其实没有做**？实验数据和运行参数怎么区分？ | §10 |
+
+### 1.2 参数的三层来源
+
+本项目参数分布在三处，本文档按"**代码常量 > 环境变量默认值 > 环境变量覆盖**"的优先级统一说明：
+
+1. **代码常量**（不可通过环境变量修改）：如 `MAX_RESULT_ROWS = 500`、`repair_count <= 1`；
+2. **环境变量默认值**（代码中写死的 fallback）：如 `LLM_PROVIDER` 默认 `mimo`、`MIMO_TIMEOUT` 默认 `30.0`；
+3. **环境变量覆盖**（部署时可改）：如 `ECOMMERCE_DB_PATH`、`CORS_ORIGINS`、`FEWSHOT_DATASET_PATH`。
+
+> 环境变量加载入口：`backend/app/core/config.py`，通过 `python-dotenv` 读取项目根目录 `.env`，
+> **`override=False`** —— 即真实环境变量优先于 `.env` 文件。
+
+---
+
+## 2. 运行环境与依赖版本
+
+### 2.1 运行时
+
+| 项 | 值 | 来源 |
+|---|---|---|
+| 后端语言 | Python 3.12 / 3.13 | 实际运行环境 |
+| 前端语言 | TypeScript ~6.0.2 | `frontend/package.json` |
+| 包管理 | pip（后端） / npm（前端） | — |
+| 数据库 | SQLite（单文件，无服务端进程） | `db/ecommerce.db` |
+
+### 2.2 后端依赖（`requirements.txt`，精确锁定版本）
+
+| 包 | 版本 | 作用 |
+|---|---|---|
+| `fastapi` | 0.141.1 | HTTP 服务与路由 |
+| `uvicorn` | 0.52.4 | ASGI 服务器 |
+| `pydantic` | 2.13.5 | 请求/响应模型与校验 |
+| `python-dotenv` | 1.2.3 | `.env` 加载 |
+| `langgraph` | 1.2.11 | Agent 编排（有界状态图） |
+| `sqlglot` | 30.18.0 | SQL 静态解析（安全校验 / 扇出检测） |
+| `pytest` | 9.1.1 | 测试框架 |
+| `httpx` | 0.28.1 | 测试用 HTTP 客户端 |
+| `openai` | 3.13.0 | Mimo Provider 的 OpenAI 兼容 SDK |
+
+> **依赖说明**：后端**未使用 ORM**（无 SQLAlchemy），数据库访问为 `sqlite3` 标准库直连（见 §4）。
+
+### 2.3 前端依赖（`frontend/package.json`）
+
+| 包 | 版本 | 类型 |
+|---|---|---|
+| `react` | ^19.2.8 | dependency |
+| `react-dom` | ^19.2.8 | dependency |
+| `echarts` | ^6.1.0 | dependency |
+| `vite` | ^8.3.0 | devDependency |
+| `@vitejs/plugin-react` | ^6.1.1 | devDependency |
+| `typescript` | ~6.0.2 | devDependency |
+| `oxlint` | ^1.81.0 | devDependency |
+| `@types/node` | ^24.13.3 | devDependency |
+| `@types/react` | ^19.2.18 | devDependency |
+| `@types/react-dom` | ^19.2.7 | devDependency |
+
+前端脚本（`package.json` → `scripts`）：
+
+| 命令 | 实际执行 |
+|---|---|
+| `npm run dev` | `vite` |
+| `npm run build` | `tsc -b && vite build` |
+| `npm run lint` | `oxlint` |
+| `npm run preview` | `vite preview` |
+
+> **前端依赖说明**：**未使用 Tailwind CSS，未使用 Ant Design**（或任何组件库）。
+> 样式为手写 CSS，位于 `frontend/src/styles/`（`tokens.css` / `base.css` / `layout.css` / `home.css` / `analysis.css`）。
+
+---
+
+## 3. 服务与网络参数
+
+### 3.1 后端服务
+
+| 参数 | 值 | 来源 / 说明 |
+|---|---|---|
+| 服务名 | `ecommerce-analysis-agent` | `config.py` `SERVICE_NAME` |
+| API 版本 | `0.1.0` | `main.py` FastAPI `version` |
+| 默认监听端口 | **8000** | uvicorn 默认值，**代码中未硬编码端口**，由启动命令决定 |
+| 启动命令 | `uvicorn app.main:app --reload` | `main.py` 模块 docstring（在 `backend` 目录下执行） |
+| 交互式文档 | `/docs`、`/redoc` | FastAPI 自带 |
+| CORS 允许方法 | `GET`、`POST` | `main.py` `allow_methods` |
+| CORS 允许凭证 | `false` | `main.py` `allow_credentials=False` |
+| CORS 允许请求头 | `*` | `main.py` `allow_headers=["*"]` |
+
+### 3.2 CORS 允许来源
+
+| 项 | 值 |
+|---|---|
+| 默认值 | `http://localhost:5173` |
+| 环境变量 | `CORS_ORIGINS` |
+| 格式 | 逗号分隔，支持多来源；空白项自动剔除 |
+| 解析逻辑 | `[o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if o.strip()]` |
+
+### 3.3 后端路由清单（真实注册）
+
+路由注册见 `backend/app/main.py`，全部挂在 `/api` 前缀下：
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/health` | 健康检查（含 SQLite 只读探活） |
+| GET | `/api/system/database` | 数据库信息（只读） |
+| POST | `/api/llm/test` | LLM Provider 连接测试（真实调用 Mimo） |
+| POST | `/api/schema/link` | Schema Linking（识别问题相关表与字段） |
+| POST | `/api/fewshot/retrieve` | Few-shot 示例检索（规则型，Top-K） |
+| POST | `/api/sql/generate` | SQL 生成（只生成，不执行） |
+| POST | `/api/sql/execute` | SQL 执行（只读 SELECT/WITH） |
+| POST | `/api/sql/repair` | SQL 修复（单独测试，最多 1 次） |
+| POST | `/api/sql/execute-with-repair` | SQL 执行（有限 Repair 闭环） |
+| POST | `/api/agent/analyze` | **Text2SQL Agent 编排（LangGraph，主入口）** |
+
+### 3.4 前端连接后端
+
+| 参数 | 值 | 来源 |
+|---|---|---|
+| 后端 Base URL | `import.meta.env.VITE_API_BASE_URL` | 环境变量，可覆盖 |
+| 默认值 | `http://127.0.0.1:8000` | `frontend/src/api/agent.ts` |
+| 尾部斜杠处理 | 自动去除（`.replace(/\/+$/, "")`） | 同上 |
+| 前端开发端口 | **5173** | Vite 默认值（`vite.config.ts` 未自定义端口） |
+| Vite 插件 | `@vitejs/plugin-react` | `frontend/vite.config.ts` |
+
+> **注意端口对应关系**：后端默认 `8000`（uvicorn 默认），前端默认 `5173`（Vite 默认），
+> CORS 默认放行 `http://localhost:5173`。三者构成默认本地开发闭环。
+> 注意 CORS 放行的是 `localhost`，而前端 API 默认指向 `127.0.0.1` —— 二者在浏览器同源策略下
+> 属于不同 origin，如需跨机访问应通过 `CORS_ORIGINS` 显式补充。
+
+---
+
+## 4. 数据库参数
+
+### 4.1 路径解析
+
+| 参数 | 值 |
+|---|---|
+| 默认数据库文件 | `<项目根>/db/ecommerce.db` |
+| 项目根推导 | `Path(__file__).resolve().parents[3]`（**不依赖进程工作目录**） |
+| 环境变量覆盖 | `ECOMMERCE_DB_PATH`（支持绝对/相对路径，相对路径按进程 CWD 解析） |
+| 解析优先级 | `ECOMMERCE_DB_PATH` > 默认路径 |
+
+### 4.2 只读保障（双重）
+
+只读实现见 `backend/app/db/sqlite.py`：
+
+| 层级 | 机制 | 效果 |
+|---|---|---|
+| 文件级 | URI `file:<path>?mode=ro` | 数据库以只读方式打开 |
+| 会话级 | `PRAGMA query_only = ON` | 会话内禁止任何写操作 |
+| 附加 | `PRAGMA foreign_keys = ON` | 外键约束开启 |
+| 路径编码 | 对空格 `%20`、百分号 `%25` 做 URI 编码 | 兼容 Windows 盘符与含空格路径 |
+
+- 本层**不提供任何写方法**；即使强行执行 `INSERT/UPDATE/DELETE/DROP/ALTER/CREATE/REPLACE`，
+  也会被 SQLite 以 `OperationalError` 直接拒绝。
+- **不使用连接池**：每次请求独立连接，调用方负责 `close()`（`contextlib.closing` 或 `try/finally`）。
+
+### 4.3 业务表（5 张核心表）
+
+`TABLE_NAMES = ("users", "categories", "products", "orders", "order_items")`
+
+`GET /api/system/database` 返回：数据库文件名、非 `sqlite_%` 系统表的表数量，以及上述 5 张表的真实行数。
+
+### 4.4 结果集保护上限
+
+| 参数 | 值 | 位置 |
+|---|---|---|
+| `MAX_RESULT_ROWS` | **500** | `backend/app/sqlexec/executor.py` L31（集中配置，不散落写死） |
+
+实现细节（`executor.py`）：
+
+- 使用 `cursor.fetchmany(MAX_RESULT_ROWS + 1)` —— **只多取 1 行用于判断截断**，不把全量结果载入内存；
+- `truncated = len(raw_rows) > MAX_RESULT_ROWS`；
+- `rows = raw_rows[:MAX_RESULT_ROWS]`，`row_count = len(rows)`（**返回给调用方的实际行数**，≤ 500）；
+- **不为精确总数二次执行 SQL**。
+
+> **重要澄清**：`MAX_RESULT_ROWS = 500` 是**执行层的结果行数上限**，
+> **不是 SQL 层面的 `LIMIT 500` 注入**。`backend/app/sqlgen/safety.py` 中**不存在**任何
+> `LIMIT` 相关的强制改写或上限规则 —— 该模块只做结构/只读校验（见 §4.5）。
+> 换言之：Agent 生成的 SQL **不会被自动追加 LIMIT**；超量结果由执行层截断并置 `truncated=true`。
+
+### 4.5 SQL 安全校验规则（`backend/app/sqlgen/safety.py`）
+
+| 检查项 | 规则 |
+|---|---|
+| 非空 | SQL 为空 → 拒绝 |
+| 可解析 | 必须能被 **SQLite 方言**解析，否则拒绝 |
+| 单语句 | 必须恰好 **1 条**语句，多语句拒绝 |
+| 顶层类型 | 顶层必须是 `exp.Select` 或 `exp.Union`（`WITH ... SELECT` 亦归此类） |
+| 禁止节点 | `Insert` / `Update` / `Delete` / `Drop` / `Create` / `Alter` / `Replace` / `Pragma` 任一出现即拒绝 |
+
+补充能力：`extract_referenced_tables(sql)` 提取 SQL 引用的**真实表名**，并**自动剔除 CTE 名称**。
+
+**执行层的二次校验**：`executor.execute()` 在进入数据库前**再次**调用 `check_sql_safety()`，
+即使上游已校验过也不信任 —— 这是最后一道安全边界（`executor.py` L41-45）。
+
+---
+
+## 5. LLM Provider 参数
+
+### 5.1 基础配置
+
+| 参数 | 环境变量 | 默认值 | 说明 |
+|---|---|---|---|
+| Provider | `LLM_PROVIDER` | `mimo` | 小写化处理；**本阶段仅 `mimo` 有实现** |
+| API Key | `MIMO_API_KEY` | `""`（空） | **只从环境变量读取，绝不写死在代码中** |
+| Base URL | `MIMO_BASE_URL` | `""` → `None` | OpenAI 兼容接口地址 |
+| 模型名 | `MIMO_MODEL` | `""` | 空字符串表示未配置 |
+| 超时 | `MIMO_TIMEOUT` | `30.0` 秒 | 必须为**正值**；非法/非正值自动回退默认 |
+
+### 5.2 超时解析规则（`_env_positive_float`）
+
+`MIMO_TIMEOUT` 的读取是**防御式**的，保证"超时必有值、且必为正数"：
+
+1. 未设置或空字符串 → 返回默认 `30.0`；
+2. 无法转 `float` → 返回默认 `30.0`；
+3. 值 ≤ 0 → 返回默认 `30.0`；
+4. 否则使用配置值。
+
+> 因此 `MIMO_TIMEOUT` **不可能为 `None`**，也不需要在下游做 `None` 判断。
+
+### 5.3 密钥缺失时的行为
+
+`MIMO_API_KEY` 未配置时：
+
+- **服务照常启动**（不会因缺 Key 崩溃）；
+- 调用 LLM 相关接口时返回**明确的"未配置"错误**，而不是静默失败或超时。
+
+### 5.4 温度（temperature）
+
+**全部 LLM 调用点均为 `temperature=0.0`**，追求低随机性、可复现：
+
+| 调用点 | 位置 | 值 |
+|---|---|---|
+| SQL 生成 | `backend/app/sqlgen/generator.py` L89 | `0.0` |
+| Schema Linking | `backend/app/schema/linker.py` L151 | `0.0` |
+| SQL 修复 | `backend/app/sqlrepair/repairer.py` L89 | `0.0` |
+| LLM 连接测试 | `backend/app/api/routes/llm.py` L89 | `0.0` |
+| E3 扇出 Hint（实验模块） | `backend/app/experiments/fanout_hint.py` L91 | `0.0` |
+| Provider 默认形参 | `backend/app/llm/mimo.py` L61 / `provider.py` L31 | `0.0` |
+
+> `mimo.py` 中另有说明：该 Provider 在部分模式下 `temperature` / `top_p` 会被服务端强制为推荐默认值；
+> 项目侧的传参语义保持不变。
+
+---
+
+## 6. Agent 编排参数（LangGraph）
+
+### 6.1 图结构（`backend/app/agent/graph.py`）
+
+```
+START → schema_link → fewshot_retrieve → sql_generate → sql_safety
+      → sql_execute
+         ├─ 成功 / Safety 拒绝 / repair 已用尽 ──────────────→ result → END
+         └─ 数据库执行错误(repair_count == 0) → sql_repair
+              ├─ 被拒绝 ────────────────────────────────────→ result → END
+              └─ 通过 → sql_execute_repaired ────────────────→ result → END
+```
+
+### 6.2 有界循环硬约束
+
+| 约束 | 值 | 说明 |
+|---|---|---|
+| `repair_count` | **≤ 1** | 最多修复 1 次 |
+| `execute_count` | **≤ 2** | 最多执行 2 次（首次 + 修复后 1 次） |
+| 无限循环 | **不可能** | 由上述两个计数器 + 条件边共同保证 |
+
+> 这是"**有界状态图**"而非"自由 ReAct Agent"：节点固定、边固定、循环次数有上限。
+> **未实现**自由 ReAct / 无限自循环（见 §10.2）。
+
+### 6.3 耗时口径
+
+| 参数 | 含义 |
+|---|---|
+| `total_time_ms` | **整个 Graph Run 的总耗时**（不是单个 Node 的耗时），由 `time.perf_counter()` 包裹 `graph.invoke()` 计算 |
+| `execution_time_ms` | **仅统计** `cursor.execute` + `fetch`，**不含任何 Mimo 时间**（`executor.py` L48-56） |
+| Trace 中每个事件 | 单节点 `duration_ms`（`app/trace/`） |
+
+### 6.4 Agent 主链路中的 Few-shot 取值
+
+| 参数 | 值 | 位置 |
+|---|---|---|
+| `FEWSHOT_TOP_K`（Agent 节点） | **3** | `backend/app/agent/nodes.py` L42 |
+| `FEWSHOT_TOP_K`（SQL Generator） | **3** | `backend/app/sqlgen/generator.py` L33 |
+| `_REPAIR_FEWSHOT_TOP_K`（修复） | **2** | `backend/app/sqlrepair/repairer.py` L36 |
+
+> 生产默认组件由 `default_components()` 装配：真实 `SchemaLinker` / `FewShotRetriever` /
+> `SQLGenerator` / `SQLRepairer` + `executor.execute`，Provider 为当前默认 Mimo。
+
+---
+
+## 7. Few-shot 检索参数
+
+### 7.1 数据集
+
+| 参数 | 值 |
+|---|---|
+| 默认路径 | `<项目根>/data/fewshot/ecommerce_examples.json` |
+| 环境变量覆盖 | `FEWSHOT_DATASET_PATH` |
+| 解析优先级 | `FEWSHOT_DATASET_PATH` > 默认路径 |
+
+### 7.2 检索参数
+
+| 参数 | 默认值 | 约束 | 位置 |
+|---|---|---|---|
+| `top_k` | **3** | API 层 `1 ≤ top_k ≤ 50`（越界 → 422） | `app/fewshot/models.py` L32 / `app/schemas/fewshot.py` L15 |
+
+检索实现（`app/fewshot/retriever.py`）：
+
+- **规则型本地检索**（非向量检索、非 LLM 检索）；
+- 输出按 `(score, example_id)` **稳定降序** —— 同分时结果确定，可复现；
+- `top_k` 越界**不会崩溃**：`top_k < 1` 抛 `ValueError`；`effective_k = min(top_k, 数据集大小)` 自动裁剪；
+- 后端**未接入任何向量数据库 / Embedding 模型**。
+
+---
+
+## 8. 前端运行参数与页面能力
+
+### 8.1 页面状态
+
+前端为**单页应用**，页面切换由 `useState` 管理（`frontend/src/App.tsx`），**无路由库**：
+
+| 页面 key | 组件 | 状态 |
+|---|---|---|
+| `home` | `HomePage` | 已实现 |
+| `analysis` | `AnalysisPage` | 已实现（**核心交互页**） |
+| `datasets` | `PlaceholderPage` | **占位页**（仅标题+描述） |
+| `history` | `PlaceholderPage` | **占位页**（仅标题+描述） |
+| `settings` | `PlaceholderPage` | **占位页**（仅标题+描述） |
+
+### 8.2 前后端交互契约
+
+| 项 | 值 |
+|---|---|
+| 唯一业务接口 | `POST /api/agent/analyze` |
+| 请求体 | `{ "question": string }` —— **仅此一个字段** |
+| 响应体 | `{ success, result, error }`；`result` 为 `AgentResultDto` |
+| 取消机制 | `AbortSignal`（`analyzeQuestion(question, signal?)`） |
+| 错误处理 | 非 2xx 抛 `AgentApiError`（携带 status + 后端 `error`/`detail`） |
+| 类型定义 | `frontend/src/api/agent.ts`，与后端 `app/agent/models.py`、`app/trace/models.py` **一一对应** |
+
+`AgentResultDto` 字段：`question`、`success`、`generated_sql`、`repaired_sql`、`execution_result`、
+`execution_error`、`repair_reason`、`repair_error`、`execute_count`、`repair_count`、`final_error`、
+`trace`、`total_time_ms`、`http_status`、`error_type`。
+
+### 8.3 前端能力边界
+
+- **请求模式**：单次 `fetch` + 等待完整 JSON 响应。**未使用 SSE / WebSocket / 流式输出**。
+- **状态持久化**：**未使用 `localStorage` / `sessionStorage` / Cookie**；刷新即回到首页。
+- **用户体系**：**无登录、无鉴权、无用户管理**。
+- **会话**：**无多轮对话**；每次分析是独立的单轮请求（请求体只有 `question`，无 `conversation_id`/`session_id`）。
+- **图表**：使用 ECharts 渲染；图表数据来源见 §10.2 的说明。
+
+---
+
+## 9. 环境变量清单
+
+### 9.1 完整清单
+
+| 环境变量 | 必填 | 默认值 | 作用 | 代码位置 |
+|---|---|---|---|---|
+| `ECOMMERCE_DB_PATH` | 否 | `<项目根>/db/ecommerce.db` | SQLite 文件路径 | `core/config.py` |
+| `CORS_ORIGINS` | 否 | `http://localhost:5173` | CORS 放行来源（逗号分隔） | `core/config.py` |
+| `LLM_PROVIDER` | 否 | `mimo` | LLM Provider 名称 | `core/config.py` |
+| `MIMO_API_KEY` | **是**（调用 LLM 时） | `""` | Mimo API Key | `core/config.py` |
+| `MIMO_BASE_URL` | 否 | `""` → `None` | Mimo OpenAI 兼容 Base URL | `core/config.py` |
+| `MIMO_MODEL` | 否 | `""` | 模型名 | `core/config.py` |
+| `MIMO_TIMEOUT` | 否 | `30.0` | LLM 请求超时（秒，须为正） | `core/config.py` |
+| `FEWSHOT_DATASET_PATH` | 否 | `<项目根>/data/fewshot/ecommerce_examples.json` | Few-shot 数据集路径 | `core/config.py` |
+| `VITE_API_BASE_URL` | 否 | `http://127.0.0.1:8000` | 前端访问的后端地址 | `frontend/src/api/agent.ts` |
+
+### 9.2 `.env` 模板（`env.example` 形式，**不含真实密钥**）
+
+```dotenv
+# 当前 Provider（本阶段仅支持 mimo，可省略，默认 mimo）
+LLM_PROVIDER=mimo
+
+# Mimo V2.5 Pro API（OpenAI-compatible）
+MIMO_API_KEY=
+MIMO_BASE_URL=https://api.xiaomimimo.com/v1
+MIMO_MODEL=mimo-v2.5-pro
+MIMO_TIMEOUT=30
+```
+
+### 9.3 配置安全约定
+
+1. `.env` **已被 `.gitignore` 排除，绝不提交**；
+2. 真实 `MIMO_API_KEY` **只允许存在于本机 `.env` 或环境变量中**，严禁写入代码、文档或 Git；
+3. 加载顺序：**真实环境变量优先于 `.env`**（`load_dotenv(..., override=False)`）；
+4. `python-dotenv` 缺失时**静默跳过**，仅依赖真实环境变量（不会因缺包崩溃）。
+
+---
+
+## 10. 运行参数 vs 实验参数，以及未实现能力清单
+
+### 10.1 参数归属分离（重要）
+
+| 类别 | 内容 | 归属位置 | 引用规则 |
+|---|---|---|---|
+| **运行参数** | 服务/DB/LLM/Agent/前端/环境变量 | **本文档** | 以代码为唯一事实来源 |
+| **实验参数** | 数据集版本、Prompt 版本、Few-shot 版本、评测超时、重试次数 | `evaluation/`、`reports/eval/` | 见下表 |
+| **实验结果** | EX / Exec / Pass@1 / provider / timeout / 延迟 | `reports/eval/`、`reports/FINAL_EXPERIMENT_MATRIX.md` | **最终结论只引用 Clean Baseline v1.1** |
+
+评测侧参数（**属于实验范畴，不是生产运行参数**，列此仅供区分）：
+
+| 参数 | 默认值 | 位置 |
+|---|---|---|
+| `per_item_timeout_s` | `60.0` | `evaluation/models.py` L60 / `evaluation/report.py` L21 |
+| `max_retries` | `1` | `evaluation/runner.py` L85 |
+| 执行方式 | **串行**（非并发） | `evaluation/runner.py` L12 |
+| 超时标记 | `error_type = "timeout"` | `evaluation/runner.py` L33 |
+
+> **禁止混用**：`reports/FINAL_EXPERIMENT_MATRIX.md` 明确规定 ——
+> 最终报告/PPT **只能引用 `Clean Baseline v1.1 = 90.0%`** 作为整体 EX 基线；
+> E3 结果以"**机制验证 / proof of concept**"呈现；
+> 历史 E1/E2/E4~E7/Stability 因涉及 Few-shot 泄漏、Gold 缺陷、旧口径，**仅作项目历程背景**。
+
+### 10.2 明确未实现的能力
+
+以下能力**在当前代码中不存在**，任何文档/汇报材料不得声称已实现：
+
+| 能力 | 状态 | 证据 |
+|---|---|---|
+| **SQLAlchemy / ORM** | **未实现** | 数据库访问为 `sqlite3` 标准库直连（`app/db/sqlite.py`）；`requirements.txt` 无该依赖，`backend/app` 无 import |
+| **Tailwind CSS** | **未实现** | `frontend/package.json` 无该依赖；样式为手写 CSS（`frontend/src/styles/` 5 个文件） |
+| **Ant Design / 组件库** | **未实现** | `frontend/package.json` 无 `antd` / `ant-design` / 任何 UI 组件库依赖；组件全部自研于 `frontend/src/components/` |
+| **SSE / 流式输出** | **未实现** | 前端无 `EventSource` 使用、后端无 `text/event-stream` 响应；接口为一次性 JSON 响应 |
+| **多轮对话（Agent 运行时）** | **未实现** | `POST /api/agent/analyze` 请求体仅 `{question}`；无 `conversation_id` / `session_id` 字段。**注意评测侧另有多轮格式规范，见 §10.4** |
+| **用户管理 / 登录鉴权** | **未实现** | 无用户体系；`CORS allow_credentials=False`；前端无登录态存储 |
+| **结论生成（LLM 自动写分析结论）** | **未实现** | `main.py` 明确标注"未接入：结论与图表生成" |
+| **自由 ReAct Agent** | **未实现** | `main.py` 明确标注"未接入：自由 ReAct Agent"；编排为**有界** LangGraph |
+| **SQL 无限自循环修复** | **未实现** | `repair_count ≤ 1` 硬约束（`graph.py`） |
+| **向量检索 / Embedding** | **未实现** | Few-shot 为**规则型本地检索**（`app/fewshot/retriever.py`） |
+| **E3 扇出检测接入生产 Agent** | **未接入** | E3 检测器与 Hint 位于 `app/sqlcheck/`、`app/experiments/`，**不 import 任何 Agent/LLM/DB 模块**，未挂入 `graph.py` 主链路 |
+| **前端路由 / 状态持久化** | **未实现** | 页面切换用 `useState`；无 `localStorage` / 无路由库 |
+
+### 10.3 多轮能力的真实状态（重要澄清）
+
+"多轮"在本项目中有**两层含义**，二者状态不同，**不得混为一谈**：
+
+| 层面 | 状态 | 证据 |
+|---|---|---|
+| **① Agent 运行时的多轮对话** | **未实现** | `POST /api/agent/analyze` 请求体仅 `{question}`；无 `conversation_id` / `session_id`；前端无会话存储（无 `localStorage` / `sessionStorage` / Cookie）。每次分析都是独立单轮请求。 |
+| **② 评测数据集的多轮条目规范** | **规范与校验已实现，但数据集为空占位** | 见下 |
+
+关于 ② 的具体事实：
+
+- **格式规范已定义**：`docs/evaluation-dataset-spec.md` 与 `docs/evaluation-matrix.md` 中定义了
+  多轮条目的 `conversation_id` / `turn_id` / `previous_turn_id` / `expected_context` 结构；
+- **校验逻辑已实现**：`scripts/validate_eval_dataset.py` 第 5 项功能真实实现了多轮条目校验
+  （`conversation_id` 唯一、`turn_id` 顺序、`previous_turn_id` 衔接、枚举合法），
+  对应测试见 `backend/tests/test_validate_eval_dataset.py`；
+- **数据为空占位**：`data/eval/ecommerce_multiturn_v1.json` 的 `conversations` 为 **`[]`**，
+  其 `metadata.description` 明确写着"**当前为结构占位（Task 11），conversations 由第二阶段
+  （约 50~100 轮）生成后填充。多轮不混入主单轮 Benchmark。**"，
+  `review_status` 为 `draft`；
+- **正式评测集为单轮**：`data/eval/ecommerce_eval_v1.json`（ECO-SQL-Bench **v1.1**）为
+  `items` 共 **100** 条的单轮评测集，`review_status` 为 `reviewed`。
+
+> **结论**：多轮是"**规范先行、数据未生成、运行时未支持**"的状态。
+> 任何材料不得声称本项目具备多轮对话能力，也不得将多轮规范当作多轮实验数据引用。
+
+### 10.4 E3 相关说明（参数视角）
+
+| 项 | 值 |
+|---|---|
+| 模块定位 | 只读、非干预的 SQL 结构分析器（识别 "1:N JOIN + Order-level Aggregation" 风险） |
+| 输入约束 | **只读 Pred SQL + AST**；不读 Gold SQL / Gold Result / Gold Label |
+| 副作用 | **不修改 SQL、不触发 Repair、不影响 Agent 主链路**；只输出诊断信息，**不做 hard gate** |
+| 识别模式 | Pattern A（`order_join_item_order_agg`）/ Pattern B（`count_star_ambiguous`） |
+| 严重度 | `high` / `medium` / `low` |
+| 生产接入状态 | **未接入**（PoC / 机制验证阶段） |
+
+> E3 的**实验数据与冻结结论**见 `reports/eval/E3_FINAL_FREEZE.md`，
+> 属于"实验结果"范畴，**不在本文档的运行参数范围内**。
+
+---
+
+## 附录：本文档事实来源索引
+
+| 章节 | 主要来源文件 |
+|---|---|
+| §2 依赖 | `requirements.txt`、`frontend/package.json` |
+| §3 服务 | `backend/app/main.py`、`backend/app/core/config.py`、`frontend/src/api/agent.ts`、`frontend/vite.config.ts` |
+| §4 数据库 | `backend/app/core/config.py`、`backend/app/db/sqlite.py`、`backend/app/sqlexec/executor.py`、`backend/app/sqlgen/safety.py` |
+| §5 LLM | `backend/app/core/config.py`、`backend/app/llm/mimo.py`、`backend/app/llm/provider.py`、`.env.example` |
+| §6 Agent | `backend/app/agent/graph.py`、`backend/app/agent/nodes.py`、`backend/app/sqlgen/generator.py`、`backend/app/sqlrepair/repairer.py` |
+| §7 Few-shot | `backend/app/fewshot/models.py`、`backend/app/fewshot/retriever.py`、`backend/app/schemas/fewshot.py` |
+| §8 前端 | `frontend/src/App.tsx`、`frontend/src/components/Sidebar.tsx`、`frontend/src/api/agent.ts` |
+| §9 环境变量 | `backend/app/core/config.py`、`.env.example` |
+| §10 实验分离 | `reports/FINAL_EXPERIMENT_MATRIX.md`、`reports/eval/E3_FINAL_FREEZE.md`、`evaluation/*.py` |

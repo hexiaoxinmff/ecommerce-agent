@@ -1,0 +1,45 @@
+{
+  "experiment": "task20_e3_hint_intervention",
+  "task": "Task 20：E3 Detector 提示型干预实验设计与最小可行性验证（E-0086 单例 dry-run）",
+  "status": "DONE_SINGLE_CASE（未跑 100 条）",
+  "clean_baseline": {
+    "dataset_version": "1.1",
+    "dataset_sha256": "DBA277CC0BE7CC282DF67C86DD7EABFEA1337458612A86885F6DAEF0C6829F1A",
+    "database_version": "dev-2026-09-14",
+    "database_sha256": "65E5D8B2727CFA064174F9A08AA7D4B08209E0EDD1EBA81F3155698F1A4491D9",
+    "seed": 20260914,
+    "prompt_version": "SQLGENERATOR_PROMPT_V1.3（未修改）",
+    "fewshot_version": "FEWSHOT_V3（23 条，未修改）",
+    "model": "mimo-v2.5-pro",
+    "provider": "mimo"
+  },
+  "intervention": {
+    "name": "FANOUT_RECHECK_HINT",
+    "trigger": "analyze_fanout(pred_sql).fan_out_suspected == true",
+    "injection": "追加一条 user message（role=user）至原始 messages 后，同一 provider temperature=0 重新生成",
+    "when_false": "不添加任何内容（hint=None，final_sql=initial_sql）",
+    "not": ["不修改 SQL", "不触发 Repair", "无 AST rewrite", "无第二 Agent", "不改正式 Prompt/Generator"]
+  },
+  "module": "backend/app/experiments/fanout_hint.py（独立实验配置，不进入正式 Agent 主链路）",
+  "single_case_E0086": {
+    "detector_alarm": true,
+    "hint_injected": true,
+    "initial_sql": "单 CTE 直连 users×orders×order_items + SUM(o.total_amount)（43 行，黄冬梅 total_spent=369854.65）",
+    "initial_EX": false,
+    "initial_error": "结果集合不一致（fan-out 4.1×）",
+    "regenerated_sql": "双 CTE：user_order_stats（订单粒度 SUM total_amount）+ user_product_stats（明细粒度 COUNT DISTINCT product_id）再 JOIN（46 行，黄冬梅 total_spent=89397.46）",
+    "final_EX": true,
+    "final_error": "",
+    "note": "模型自行采用了订单粒度预聚合 + 独立聚合再 JOIN 的正确结构；单次 dry-run 证据，非完整 benchmark 结论"
+  },
+  "tests": {
+    "T1_detector_false_hint_none": "PASS",
+    "T2_detector_true_hint_not_none": "PASS",
+    "T3_e0086_alarm_injected": "PASS",
+    "T4_e0100_like_no_hint": "PASS（末污染全局）",
+    "T5_hint_does_not_modify_input_sql": "PASS",
+    "T6_no_repair_side_effect": "PASS",
+    "full_pytest": "待最终回归"
+  },
+  "protected_files": ["Benchmark/Gold/Few-shot/Prompt/DB/Detector/Repair 均未修改"]
+}

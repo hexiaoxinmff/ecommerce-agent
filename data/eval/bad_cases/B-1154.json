@@ -1,0 +1,33 @@
+{
+  "case_id": "B-1154",
+  "eval_id": "E-0095",
+  "question": "最近30天（2026年8月14日至9月12日）中，有哪些地区-分类组合的销售金额高于该地区各组合的平均销售金额？（请给出地区、分类与销售额，取前10）",
+  "difficulty": "extra_hard",
+  "scenario": "time_analysis",
+  "operators": [
+    "multiple_join",
+    "join",
+    "where",
+    "date_filter",
+    "group_by",
+    "aggregate",
+    "subquery",
+    "nested_subquery",
+    "comparison_to_average",
+    "multi_dimension_grouping",
+    "having",
+    "order_by",
+    "limit"
+  ],
+  "gold_sql": "WITH pair_sales AS (SELECT o.region, c.name AS cat_name, SUM(oi.subtotal) AS revenue FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2026-08-14' AND o.order_date <= '2026-09-12' AND o.status != 'cancelled' GROUP BY o.region, c.id, c.name HAVING SUM(oi.subtotal) > 30000) SELECT ps.region, ps.cat_name, ROUND(ps.revenue, 2) AS revenue FROM pair_sales ps WHERE ps.revenue > (SELECT AVG(t.avg_rev) FROM (SELECT region, AVG(revenue) AS avg_rev FROM pair_sales GROUP BY region) t WHERE t.region = ps.region) ORDER BY ps.revenue DESC, ps.region, ps.cat_name LIMIT 10",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

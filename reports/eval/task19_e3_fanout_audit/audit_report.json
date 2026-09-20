@@ -1,0 +1,21 @@
+{
+  "experiment": "task19_e3_fanout_audit",
+  "scope": "Task17 static_scan_report.json 中『SQL 文本含 orders+order_items 但 Detector 未报警』的候选（20 条）+ 已知正例 E-0086",
+  "stats": {
+    "known_positive": 1,
+    "audit_tn": 20,
+    "audit_fp": 0,
+    "audit_fn": 0,
+    "audit_uncertain": 0
+  },
+  "audit_subset_precision": 1.0,
+  "audit_subset_recall": 1.0,
+  "known_positive_hit_rate": 1.0,
+  "audit_subset_fn_rate": 0.0,
+  "note_precision_recall": "旧字段 audit_subset_precision/audit_subset_recall 仅为历史实验字段，只覆盖『审计子集 = E-0086 已知正例 + 20 条候选负样本』，不代表整个 benchmark precision/recall；新字段 known_positive_hit_rate=已知正例命中率（1/1），audit_subset_fn_rate=审计子集假阴性率（0/20）。正例 n=1，统计功效有限。",
+  "conclusion": {
+    "potential_fn": [],
+    "uncertain": [],
+    "summary": "20 条候选全部人工判定为无 fan-out（TN），未发现真实 FN；D（CASE 条件列）已确认无反复误报"
+  }
+}

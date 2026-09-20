@@ -1,0 +1,23 @@
+{
+  "case_id": "B-1013",
+  "eval_id": "E-0047",
+  "question": "2024年至2026年每年的订单数量分别是多少？",
+  "difficulty": "medium",
+  "scenario": "time_analysis",
+  "operators": [
+    "aggregate",
+    "date_group",
+    "group_by"
+  ],
+  "gold_sql": "SELECT strftime('%Y', order_date) AS order_year, COUNT(*) AS order_count FROM orders GROUP BY order_year ORDER BY order_year",
+  "pred_sql": "SELECT strftime('%Y', order_date) AS year, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) IN ('2024', '2025', '2026') AND status != 'cancelled' GROUP BY year ORDER BY year",
+  "initial_sql": "SELECT strftime('%Y', order_date) AS year, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) IN ('2024', '2025', '2026') AND status != 'cancelled' GROUP BY year ORDER BY year",
+  "final_sql": "SELECT strftime('%Y', order_date) AS year, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) IN ('2024', '2025', '2026') AND status != 'cancelled' GROUP BY year ORDER BY year",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 10305.77,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

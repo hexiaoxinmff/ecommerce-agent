@@ -1,0 +1,28 @@
+{
+  "case_id": "B-1126",
+  "eval_id": "E-0079",
+  "question": "2025年中实付销售额高于该年月均销售额的月份有哪些？（请给出月份与销售额）",
+  "difficulty": "hard",
+  "scenario": "ranking",
+  "operators": [
+    "where",
+    "date_filter",
+    "date_group",
+    "group_by",
+    "aggregate",
+    "subquery",
+    "comparison_to_average",
+    "order_by"
+  ],
+  "gold_sql": "WITH monthly_rev AS (SELECT strftime('%Y-%m', order_date) AS month, SUM(total_amount) AS revenue FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' GROUP BY month) SELECT month, ROUND(revenue, 2) AS revenue FROM monthly_rev WHERE revenue > (SELECT AVG(revenue) FROM monthly_rev) ORDER BY revenue DESC, month",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

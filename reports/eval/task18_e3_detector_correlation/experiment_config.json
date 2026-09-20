@@ -1,0 +1,35 @@
+{
+  "experiment": "task18_e3_detector_correlation",
+  "task": "Task 18：E3 Fan-out Detector 关联性验证（观测实验，非修复实验）",
+  "status": "IN_PROGRESS",
+  "clean_baseline": {
+    "dataset_version": "1.1",
+    "dataset_sha256": "DBA277CC0BE7CC282DF67C86DD7EABFEA1337458612A86885F6DAEF0C6829F1A",
+    "database_version": "dev-2026-09-14",
+    "database_sha256": "65E5D8B2727CFA064174F9A08AA7D4B08209E0EDD1EBA81F3155698F1A4491D9",
+    "seed": 20260914,
+    "schema_version": "1.0",
+    "prompt_version": "SQLGENERATOR_PROMPT_V1.3",
+    "prompt_sha256": "10583478b3a7d972865050501cd6e4b9062531503f1c3852cdd79cbf66f796d5",
+    "fewshot_version": "FEWSHOT_V3",
+    "fewshot_count": 23,
+    "fewshot_sha256": "EE12FCC994C6AFEC42A94F4E327109961AC2022466673BC4A37485638F7D4CEE",
+    "model": "mimo-v2.5-pro",
+    "provider": "mimo",
+    "baseline_ex": 90.0
+  },
+  "detector": {
+    "module": "backend/app/sqlcheck/fanout_detector.py",
+    "reused_from_task17": true,
+    "rules_modified_in_task18": false
+  },
+  "design": {
+    "run_off": "复用 Clean Baseline 100 条（标准 Agent 流程，未调用 Detector）；对已保存 pred_sql 只读补算 telemetry（不反向影响数据）",
+    "run_on": "重新跑 100 条，Agent/生成流程与 Clean Baseline 完全一致；生成后仅额外调用 analyze_fanout(pred_sql) 保存 telemetry，不反馈、不触发 repair、不改 SQL",
+    "comparison_note": "OFF/ON 为独立生成样本（Mimo 自带随机性），比较的是『Detector 报警样本与失败率的关联』，不是严格 paired causal effect"
+  },
+  "protected": [
+    "Benchmark/Gold/Few-shot/Prompt/DB/Agent 主流程/Runner 均不改动",
+    "Detector 不读 Gold、不改 SQL、不触发 repair、不反馈 LLM"
+  ]
+}

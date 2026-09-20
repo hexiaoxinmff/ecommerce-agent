@@ -1,0 +1,416 @@
+{
+  "meta": {
+    "run_id": "20260916_09876",
+    "timestamp": "2026-09-16T02:44:36Z",
+    "dataset_version": "1.1",
+    "database_version": "dev-2026-09-14",
+    "schema_version": "1.0",
+    "seed": 20260914,
+    "model": "mimo-v2.5-pro",
+    "provider": "mimo",
+    "base_url": "https://api.xiaomimimo.com/v1",
+    "prompt_version": "SQLGENERATOR_PROMPT_V1.3",
+    "fewshot_version": "FEWSHOT_V3",
+    "experiment": "clean_baseline_v1_1",
+    "randomness": "provider API controlled randomness unavailable",
+    "mode": "full",
+    "per_item_timeout_s": 60.0,
+    "total_items": 100,
+    "prompt_sha256": "10583478b3a7d972865050501cd6e4b9062531503f1c3852cdd79cbf66f796d5",
+    "fewshot_sha256": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee",
+    "fewshot_path": "F:\\基于 Text2SQL 的电商智能数据分析 Agent\\data\\fewshot\\ecommerce_examples.json",
+    "dataset_sha256": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a",
+    "db_table_counts": "{\"users\": 2000, \"categories\": 30, \"products\": 500, \"orders\": 10000, \"order_items\": 30457}"
+  },
+  "bad_cases": [
+    {
+      "eval_id": "E-0057",
+      "difficulty": "hard",
+      "stage": "result",
+      "error_type": "result_mismatch",
+      "latency_ms": 10139.2,
+      "gold_rows": 3,
+      "gold_hash": "80dd214e24cc6fd82ba071b22706342fbf26be412797c1350b3c899568248cd4",
+      "pred_rows": 3,
+      "pred_err": null,
+      "verdict": null,
+      "norm_detail": "ComparisonOutcome(match=False, reason='结果集合不一致', detail='', gold_row_count=3, pred_row_count=3)",
+      "gold_first": [
+        {
+          "tier": "1-3单",
+          "user_count": 490
+        },
+        {
+          "tier": "11单及以上",
+          "user_count": 19
+        },
+        {
+          "tier": "4-10单",
+          "user_count": 1474
+        }
+      ],
+      "pred_first": [
+        {
+          "user_tier": "1-3单",
+          "user_count": 490
+        },
+        {
+          "user_tier": "11单及以上",
+          "user_count": 36
+        },
+        {
+          "user_tier": "4-10单",
+          "user_count": 1474
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0077",
+      "difficulty": "hard",
+      "stage": "result",
+      "error_type": "result_mismatch",
+      "latency_ms": 9657.0,
+      "gold_rows": 7,
+      "gold_hash": "e451b1f8be834ea52c8849844be18e080f69693f4b0981afd4f515f33ce6167f",
+      "pred_rows": 7,
+      "pred_err": null,
+      "verdict": null,
+      "norm_detail": "ComparisonOutcome(match=False, reason='结果集合不一致', detail='', gold_row_count=7, pred_row_count=7)",
+      "gold_first": [
+        {
+          "region": "广东",
+          "revenue": 1690745.96
+        },
+        {
+          "region": "江苏",
+          "revenue": 1611494.39
+        },
+        {
+          "region": "浙江",
+          "revenue": 1142764.67
+        }
+      ],
+      "pred_first": [
+        {
+          "region": "广东",
+          "total_sales": 1592437.35
+        },
+        {
+          "region": "江苏",
+          "total_sales": 1544644.37
+        },
+        {
+          "region": "浙江",
+          "total_sales": 1097363.78
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0082",
+      "difficulty": "hard",
+      "stage": "result",
+      "error_type": "result_mismatch",
+      "latency_ms": 12994.9,
+      "gold_rows": 1,
+      "gold_hash": "587371358c2b4efac2a126ed252afaade04786b985342d66462293695bdf3c6f",
+      "pred_rows": 1,
+      "pred_err": null,
+      "verdict": null,
+      "norm_detail": "ComparisonOutcome(match=False, reason='列数不一致：gold=2 pred=1', detail='', gold_row_count=1, pred_row_count=1)",
+      "gold_first": [
+        {
+          "name": "休闲零食",
+          "pct": 0.81
+        }
+      ],
+      "pred_first": [
+        {
+          "percentage": 0.81
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0083",
+      "difficulty": "hard",
+      "stage": "result",
+      "error_type": "result_mismatch",
+      "latency_ms": 15440.8,
+      "gold_rows": 1,
+      "gold_hash": "7490d3a46660f927cc19cafc9db34caeb6faf3d910d4ef9b149220af2276f235",
+      "pred_rows": 1,
+      "pred_err": null,
+      "verdict": null,
+      "norm_detail": "ComparisonOutcome(match=False, reason='列数不一致：gold=2 pred=1', detail='', gold_row_count=1, pred_row_count=1)",
+      "gold_first": [
+        {
+          "name": "家用电器",
+          "pct": 28.98
+        }
+      ],
+      "pred_first": [
+        {
+          "percentage": 28.98
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0086",
+      "difficulty": "extra_hard",
+      "stage": "result",
+      "error_type": "result_mismatch",
+      "latency_ms": 13260.6,
+      "gold_rows": 46,
+      "gold_hash": "727834dc8f85bcb4b455318310b8603a890a1147845712a2757d74586226703b",
+      "pred_rows": 43,
+      "pred_err": null,
+      "verdict": null,
+      "norm_detail": "ComparisonOutcome(match=False, reason='结果集合不一致', detail='', gold_row_count=46, pred_row_count=43)",
+      "gold_first": [
+        {
+          "username": "黄冬梅",
+          "total_spent": 89397.46,
+          "orders": 10,
+          "sku_cnt": 31
+        },
+        {
+          "username": "曾国栋",
+          "total_spent": 79076.29,
+          "orders": 10,
+          "sku_cnt": 42
+        },
+        {
+          "username": "曾家豪",
+          "total_spent": 70758.33,
+          "orders": 10,
+          "sku_cnt": 33
+        }
+      ],
+      "pred_first": [
+        {
+          "username": "黄冬梅",
+          "total_spent": 369854.65,
+          "order_count": 10,
+          "product_count": 31
+        },
+        {
+          "username": "曾国栋",
+          "total_spent": 294744.79,
+          "order_count": 10,
+          "product_count": 42
+        },
+        {
+          "username": "杨文",
+          "total_spent": 244084.57,
+          "order_count": 9,
+          "product_count": 33
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0090",
+      "difficulty": "extra_hard",
+      "stage": "result",
+      "error_type": "result_mismatch",
+      "latency_ms": 9448.4,
+      "gold_rows": 5,
+      "gold_hash": "df6b09372db4eb9f3588231044cc43ee2ab0b116665d8ecd6920673bba1ca09e",
+      "pred_rows": 5,
+      "pred_err": null,
+      "verdict": null,
+      "norm_detail": "ComparisonOutcome(match=False, reason='列数不一致：gold=4 pred=3', detail='', gold_row_count=5, pred_row_count=5)",
+      "gold_first": [
+        {
+          "status": "cancelled",
+          "high_cnt": 0,
+          "normal_cnt": 0,
+          "total_cnt": 202
+        },
+        {
+          "status": "completed",
+          "high_cnt": 474,
+          "normal_cnt": 1960,
+          "total_cnt": 2434
+        },
+        {
+          "status": "paid",
+          "high_cnt": 77,
+          "normal_cnt": 290,
+          "total_cnt": 367
+        }
+      ],
+      "pred_first": [
+        {
+          "status": "cancelled",
+          "high_amount_orders": 0,
+          "normal_amount_orders": 478
+        },
+        {
+          "status": "completed",
+          "high_amount_orders": 1167,
+          "normal_amount_orders": 4905
+        },
+        {
+          "status": "paid",
+          "high_amount_orders": 207,
+          "normal_amount_orders": 784
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0095",
+      "difficulty": "extra_hard",
+      "stage": "result",
+      "error_type": "result_mismatch",
+      "latency_ms": 15013.1,
+      "gold_rows": 9,
+      "gold_hash": "70cf5b38211e86bda10398576f70790c335fb19fe3f43dedc5df524a26ca1364",
+      "pred_rows": 10,
+      "pred_err": null,
+      "verdict": null,
+      "norm_detail": "ComparisonOutcome(match=False, reason='结果集合不一致', detail='', gold_row_count=9, pred_row_count=10)",
+      "gold_first": [
+        {
+          "region": "江苏",
+          "cat_name": "电脑办公",
+          "revenue": 85615.52
+        },
+        {
+          "region": "山东",
+          "cat_name": "电脑办公",
+          "revenue": 78690.23
+        },
+        {
+          "region": "广东",
+          "cat_name": "电脑办公",
+          "revenue": 65271.92
+        }
+      ],
+      "pred_first": [
+        {
+          "region": "江苏",
+          "category_name": "电脑办公",
+          "total_sales": 85615.52
+        },
+        {
+          "region": "山东",
+          "category_name": "电脑办公",
+          "total_sales": 78690.23
+        },
+        {
+          "region": "山东",
+          "category_name": "家用电器",
+          "total_sales": 72746.95
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0096",
+      "difficulty": "extra_hard",
+      "stage": "result",
+      "error_type": "result_mismatch",
+      "latency_ms": 13182.5,
+      "gold_rows": 3,
+      "gold_hash": "95de24040f0ef77cbf7ad582d6217d6d3658c393743270250f4456e0fe6937c1",
+      "pred_rows": 3,
+      "pred_err": null,
+      "verdict": null,
+      "norm_detail": "ComparisonOutcome(match=False, reason='结果集合不一致', detail='', gold_row_count=3, pred_row_count=3)",
+      "gold_first": [
+        {
+          "month": "2025-12",
+          "revenue": 1608091.51,
+          "mom_pct": 33.56
+        },
+        {
+          "month": "2025-05",
+          "revenue": 965099.06,
+          "mom_pct": 14.16
+        },
+        {
+          "month": "2025-10",
+          "revenue": 1327764.13,
+          "mom_pct": 12.62
+        }
+      ],
+      "pred_first": [
+        {
+          "month": "2025-12",
+          "total_sales": 1675347.91,
+          "growth_rate_pct": 33.3
+        },
+        {
+          "month": "2025-10",
+          "total_sales": 1399380.3,
+          "growth_rate_pct": 14.96
+        },
+        {
+          "month": "2025-05",
+          "total_sales": 1014819.08,
+          "growth_rate_pct": 14.49
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0099",
+      "difficulty": "extra_hard",
+      "stage": "sql_repair",
+      "error_type": "SQL 执行失败: no such column: r.region",
+      "latency_ms": 25796.6,
+      "gold_rows": 7,
+      "gold_hash": "9bcf0f7024e3349affb500713651c4a4ddf9a12ced78e0099d23c2ece8a28287",
+      "pred_rows": null,
+      "pred_err": "SQLExecutionDatabaseError: SQL 执行失败: no such column: r.region",
+      "verdict": false,
+      "norm_detail": "None",
+      "gold_first": [
+        {
+          "region": "辽宁",
+          "elec_rev": 520136.76,
+          "pct": 31.15
+        },
+        {
+          "region": "四川",
+          "elec_rev": 738590.94,
+          "pct": 29.96
+        },
+        {
+          "region": "陕西",
+          "elec_rev": 365751.64,
+          "pct": 29.44
+        }
+      ],
+      "pred_first": null
+    },
+    {
+      "eval_id": "E-0100",
+      "difficulty": "extra_hard",
+      "stage": "result",
+      "error_type": "result_mismatch",
+      "latency_ms": 15572.4,
+      "gold_rows": 1,
+      "gold_hash": "e36f6b0beb8e7427bd7d9b7853276828942e5a6992ab4cbecd63777e1d66ba46",
+      "pred_rows": 1,
+      "pred_err": null,
+      "verdict": null,
+      "norm_detail": "ComparisonOutcome(match=False, reason='结果集合不一致', detail='', gold_row_count=1, pred_row_count=1)",
+      "gold_first": [
+        {
+          "may_revenue": 965099.06,
+          "may_orders": 311,
+          "feb_revenue": 775493.74,
+          "feb_orders": 212,
+          "may_to_feb_ratio": 1.24
+        }
+      ],
+      "pred_first": [
+        {
+          "sales_may": 1014819.08,
+          "sales_feb": 807005.41,
+          "orders_may": 311,
+          "orders_feb": 212,
+          "sales_ratio": 1.26
+        }
+      ]
+    }
+  ]
+}

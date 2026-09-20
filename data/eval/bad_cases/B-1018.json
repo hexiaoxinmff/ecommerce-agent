@@ -1,0 +1,27 @@
+{
+  "case_id": "B-1018",
+  "eval_id": "E-0053",
+  "question": "2026年7月至8月，订单数量最高的5个收货地区是哪些？（请给出地区名称与订单数量）",
+  "difficulty": "medium",
+  "scenario": "regional_analysis",
+  "operators": [
+    "where",
+    "aggregate",
+    "date_filter",
+    "group_by",
+    "order_by",
+    "limit",
+    "top_n"
+  ],
+  "gold_sql": "SELECT region, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-07-01' AND order_date <= '2026-08-31' GROUP BY region ORDER BY order_count DESC, region LIMIT 5",
+  "pred_sql": "SELECT region, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-07-01' AND order_date < '2026-09-01' AND status != 'cancelled' GROUP BY region ORDER BY order_count DESC LIMIT 5",
+  "initial_sql": "SELECT region, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-07-01' AND order_date < '2026-09-01' AND status != 'cancelled' GROUP BY region ORDER BY order_count DESC LIMIT 5",
+  "final_sql": "SELECT region, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-07-01' AND order_date < '2026-09-01' AND status != 'cancelled' GROUP BY region ORDER BY order_count DESC LIMIT 5",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 10912.62,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

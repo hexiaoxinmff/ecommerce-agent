@@ -1,0 +1,26 @@
+{
+  "case_id": "B-1064",
+  "eval_id": "E-0100",
+  "question": "2025年5月（传统促销月）与2月（淡季）相比：两个月的非取消订单销售额分别是多少，订单量分别是多少，5月销售额相当于2月的多少倍？",
+  "difficulty": "extra_hard",
+  "scenario": "comparison",
+  "operators": [
+    "where",
+    "date_filter",
+    "aggregate",
+    "subquery",
+    "nested_subquery",
+    "ratio"
+  ],
+  "gold_sql": "WITH may AS (SELECT COUNT(*) AS cnt, SUM(total_amount) AS rev FROM orders WHERE order_date >= '2025-05-01' AND order_date <= '2025-05-31' AND status != 'cancelled'), feb AS (SELECT COUNT(*) AS cnt, SUM(total_amount) AS rev FROM orders WHERE order_date >= '2025-02-01' AND order_date <= '2025-02-28' AND status != 'cancelled') SELECT ROUND(m.rev, 2) AS may_revenue, m.cnt AS may_orders, ROUND(f.rev, 2) AS feb_revenue, f.cnt AS feb_orders, ROUND(m.rev / f.rev, 2) AS may_to_feb_ratio FROM may m, feb f",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

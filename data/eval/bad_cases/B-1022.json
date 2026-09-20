@@ -1,0 +1,28 @@
+{
+  "case_id": "B-1022",
+  "eval_id": "E-0066",
+  "question": "2025年各季度、各订单状态的实付销售额分别是多少？（不含取消订单；请按季度与状态列出）",
+  "difficulty": "hard",
+  "scenario": "sales_analysis",
+  "operators": [
+    "where",
+    "date_filter",
+    "case_when",
+    "date_group",
+    "group_by",
+    "aggregate",
+    "multi_dimension_grouping",
+    "order_by"
+  ],
+  "gold_sql": "SELECT CASE WHEN substr(order_date, 6, 2) IN ('01','02','03') THEN 'Q1' WHEN substr(order_date, 6, 2) IN ('04','05','06') THEN 'Q2' WHEN substr(order_date, 6, 2) IN ('07','08','09') THEN 'Q3' ELSE 'Q4' END AS quarter, status, ROUND(SUM(total_amount), 2) AS revenue FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' GROUP BY quarter, status ORDER BY quarter, status",
+  "pred_sql": "SELECT strftime('%Y-Q%Q', order_date) AS quarter, status, ROUND(SUM(total_amount), 2) AS total_sales FROM orders WHERE status != 'cancelled' AND strftime('%Y', order_date) = '2025' GROUP BY quarter, status ORDER BY quarter, status",
+  "initial_sql": "SELECT strftime('%Y-Q%Q', order_date) AS quarter, status, ROUND(SUM(total_amount), 2) AS total_sales FROM orders WHERE status != 'cancelled' AND strftime('%Y', order_date) = '2025' GROUP BY quarter, status ORDER BY quarter, status",
+  "final_sql": "SELECT strftime('%Y-Q%Q', order_date) AS quarter, status, ROUND(SUM(total_amount), 2) AS total_sales FROM orders WHERE status != 'cancelled' AND strftime('%Y', order_date) = '2025' GROUP BY quarter, status ORDER BY quarter, status",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 12516.8,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

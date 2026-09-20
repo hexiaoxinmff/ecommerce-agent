@@ -1,0 +1,29 @@
+{
+  "case_id": "B-1133",
+  "eval_id": "E-0091",
+  "question": "2025年各收货地区、各季度的平均实付金额（客单价）是多少，每个组合的订单量如何？（仅列订单数不少于10的地点-季度组合）",
+  "difficulty": "extra_hard",
+  "scenario": "sales_analysis",
+  "operators": [
+    "multi_dimension_grouping",
+    "date_group",
+    "case_when",
+    "group_by",
+    "aggregate",
+    "having",
+    "where",
+    "date_filter",
+    "order_by"
+  ],
+  "gold_sql": "SELECT o.region, CASE WHEN substr(o.order_date, 6, 2) IN ('01','02','03') THEN 'Q1' WHEN substr(o.order_date, 6, 2) IN ('04','05','06') THEN 'Q2' WHEN substr(o.order_date, 6, 2) IN ('07','08','09') THEN 'Q3' ELSE 'Q4' END AS quarter, ROUND(AVG(o.total_amount), 2) AS avg_amount, COUNT(*) AS order_count FROM orders o WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY o.region, quarter HAVING COUNT(*) >= 10 ORDER BY o.region, quarter",
+  "pred_sql": "SELECT region, CASE WHEN substr(order_date, 6, 2) IN ('01', '02', '03') THEN 'Q1' WHEN substr(order_date, 6, 2) IN ('04', '05', '06') THEN 'Q2' WHEN substr(order_date, 6, 2) IN ('07', '08', '09') THEN 'Q3' WHEN substr(order_date, 6, 2) IN ('10', '11', '12') THEN 'Q4' END AS quarter, ROUND(AVG(total_amount), 2) AS avg_paid_amount, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2025' GROUP BY region, quarter HAVING COUNT(*) >= 10 ORDER BY region, quarter",
+  "initial_sql": "SELECT region, CASE WHEN substr(order_date, 6, 2) IN ('01', '02', '03') THEN 'Q1' WHEN substr(order_date, 6, 2) IN ('04', '05', '06') THEN 'Q2' WHEN substr(order_date, 6, 2) IN ('07', '08', '09') THEN 'Q3' WHEN substr(order_date, 6, 2) IN ('10', '11', '12') THEN 'Q4' END AS quarter, ROUND(AVG(total_amount), 2) AS avg_paid_amount, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2025' GROUP BY region, quarter HAVING COUNT(*) >= 10 ORDER BY region, quarter",
+  "final_sql": "SELECT region, CASE WHEN substr(order_date, 6, 2) IN ('01', '02', '03') THEN 'Q1' WHEN substr(order_date, 6, 2) IN ('04', '05', '06') THEN 'Q2' WHEN substr(order_date, 6, 2) IN ('07', '08', '09') THEN 'Q3' WHEN substr(order_date, 6, 2) IN ('10', '11', '12') THEN 'Q4' END AS quarter, ROUND(AVG(total_amount), 2) AS avg_paid_amount, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2025' GROUP BY region, quarter HAVING COUNT(*) >= 10 ORDER BY region, quarter",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 50425.98,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

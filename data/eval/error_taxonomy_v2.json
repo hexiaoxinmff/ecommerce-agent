@@ -1,0 +1,547 @@
+{
+  "version": "v2",
+  "baseline_run_id": "20260915_41066",
+  "description": "Task 14.3 统一归因 v2：修正 v1 的 wrong_ratio_denominator 误判、E-0097 表述、E-0098 非确定性标记；enum 无复合字符串",
+  "failure_type_enum": [
+    "wrong_output_shape",
+    "wrong_cancelled",
+    "enum_hallucination",
+    "wrong_amount_field",
+    "wrong_avg_granularity",
+    "wrong_date_group",
+    "wrong_daily_avg",
+    "wrong_context_filter",
+    "ranking_tie_risk"
+  ],
+  "taxonomy_definitions": {
+    "wrong_output_shape": "SELECT 输出列/列数不完整（§D1 判错）：问题要求的字段未逐一对应输出",
+    "wrong_cancelled": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消",
+    "enum_hallucination": "枚举值幻想（地区/状态等非库内原值）",
+    "wrong_amount_field": "金额字段选错（subtotal vs total_amount / price vs unit_price）",
+    "wrong_avg_granularity": "用户/商品维度均值需两阶段聚合，模型用订单/明细均值代替",
+    "wrong_date_group": "日期分组格式非法（如 strftime %Q）或时间维度理解错误",
+    "wrong_daily_avg": "日均分母用固定天数，而非实际有订单的不同日期数",
+    "wrong_context_filter": "遗漏题面显式过滤条件/阈值（如 HAVING>30000）导致基准失真",
+    "ranking_tie_risk": "排名题并列无稳定 tiebreaker，结果非确定性"
+  },
+  "cases": [
+    {
+      "eval_id": "E-0002",
+      "question": "广东省有多少用户？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE region = '广东'",
+      "pred_sql": "SELECT COUNT(*) AS user_count FROM users WHERE region = '广东省'",
+      "failure_type": "enum_hallucination",
+      "root_cause": "枚举值幻想（地区/状态等非库内原值）"
+    },
+    {
+      "eval_id": "E-0014",
+      "question": "2024年6月下了多少订单？",
+      "difficulty": "easy",
+      "scenario": "order_analysis",
+      "operators": [
+        "aggregate",
+        "where",
+        "date_filter"
+      ],
+      "gold_sql": "SELECT COUNT(*) FROM orders WHERE order_date >= '2024-06-01' AND order_date <= '2024-06-30'",
+      "pred_sql": "SELECT COUNT(*) AS order_count FROM orders WHERE order_date >= '2024-06-01' AND order_date < '2024-07-01' AND status != 'cancelled'",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0022",
+      "question": "2025年全年一共下了多少订单？",
+      "difficulty": "easy",
+      "scenario": "time_analysis",
+      "operators": [
+        "aggregate",
+        "where",
+        "date_filter"
+      ],
+      "gold_sql": "SELECT COUNT(*) FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31'",
+      "pred_sql": "SELECT COUNT(*) AS total_orders FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled'",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0034",
+      "question": "在售商品中价格最高的5款商品是哪些？（请给出商品名称、价格与所属分类）",
+      "difficulty": "medium",
+      "scenario": "ranking",
+      "operators": [
+        "where",
+        "join",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "gold_sql": "SELECT p.name, p.price, c.name AS category_name FROM products p JOIN categories c ON c.id = p.category_id WHERE p.status = 'on_sale' ORDER BY p.price DESC, p.id LIMIT 5",
+      "pred_sql": "SELECT p.name, p.price, c.name AS category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.status = 'active' ORDER BY p.price DESC LIMIT 5",
+      "failure_type": "enum_hallucination",
+      "root_cause": "枚举值幻想（地区/状态等非库内原值）"
+    },
+    {
+      "eval_id": "E-0038",
+      "question": "整个平台售价最高的商品属于哪个分类？最高价是多少？",
+      "difficulty": "medium",
+      "scenario": "category_analysis",
+      "operators": [
+        "aggregate",
+        "join",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "gold_sql": "SELECT c.name, MAX(p.price) AS max_price FROM products p JOIN categories c ON c.id = p.category_id GROUP BY c.id, c.name ORDER BY max_price DESC, c.id LIMIT 1",
+      "pred_sql": "SELECT c.name AS category_name, p.price AS max_price FROM products p JOIN categories c ON p.category_id = c.id WHERE p.status = 'active' ORDER BY p.price DESC LIMIT 1",
+      "failure_type": "enum_hallucination",
+      "root_cause": "枚举值幻想（地区/状态等非库内原值）"
+    },
+    {
+      "eval_id": "E-0047",
+      "question": "2024年至2026年每年的订单数量分别是多少？",
+      "difficulty": "medium",
+      "scenario": "time_analysis",
+      "operators": [
+        "aggregate",
+        "date_group",
+        "group_by"
+      ],
+      "gold_sql": "SELECT strftime('%Y', order_date) AS order_year, COUNT(*) AS order_count FROM orders GROUP BY order_year ORDER BY order_year",
+      "pred_sql": "SELECT strftime('%Y', order_date) AS year, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) IN ('2024', '2025', '2026') AND status != 'cancelled' GROUP BY year ORDER BY year",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0048",
+      "question": "2026年订单数量最多的5个月份是哪几个？（请给出月份与订单数）",
+      "difficulty": "medium",
+      "scenario": "time_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "date_filter",
+        "date_group",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "gold_sql": "SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-01-01' GROUP BY month ORDER BY order_count DESC, month LIMIT 5",
+      "pred_sql": "SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2026' AND status != 'cancelled' GROUP BY month ORDER BY order_count DESC LIMIT 5",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0049",
+      "question": "按季度统计2024年的订单数量，每个季度各有多少笔订单？",
+      "difficulty": "medium",
+      "scenario": "time_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "date_filter",
+        "case_when",
+        "group_by",
+        "date_group"
+      ],
+      "gold_sql": "SELECT CASE WHEN substr(order_date, 6, 2) IN ('01','02','03') THEN 'Q1' WHEN substr(order_date, 6, 2) IN ('04','05','06') THEN 'Q2' WHEN substr(order_date, 6, 2) IN ('07','08','09') THEN 'Q3' ELSE 'Q4' END AS quarter, COUNT(*) AS order_count FROM orders WHERE order_date >= '2024-01-01' AND order_date <= '2024-12-31' GROUP BY 1 ORDER BY 1",
+      "pred_sql": "SELECT CASE WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 10 AND 12 THEN 'Q4' END AS quarter, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2024' AND status != 'cancelled' GROUP BY quarter ORDER BY quarter",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0050",
+      "question": "2026年工作日与周末的订单数量分别是多少？",
+      "difficulty": "medium",
+      "scenario": "time_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "case_when",
+        "group_by",
+        "date_filter",
+        "order_by"
+      ],
+      "gold_sql": "SELECT CASE WHEN strftime('%w', order_date) IN ('0','6') THEN '周末' ELSE '工作日' END AS day_type, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-01-01' GROUP BY 1 ORDER BY order_count DESC, 1",
+      "pred_sql": "SELECT CASE WHEN CAST(strftime('%w', order_date) AS INTEGER) IN (0, 6) THEN '周末' ELSE '工作日' END AS day_type, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2026' AND status != 'cancelled' GROUP BY day_type",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0051",
+      "question": "各收货地区的订单数量分布是怎样的？",
+      "difficulty": "medium",
+      "scenario": "regional_analysis",
+      "operators": [
+        "aggregate",
+        "group_by"
+      ],
+      "gold_sql": "SELECT region, COUNT(*) AS order_count FROM orders GROUP BY region ORDER BY order_count DESC",
+      "pred_sql": "SELECT region, COUNT(*) AS order_count FROM orders WHERE status != 'cancelled' GROUP BY region ORDER BY order_count DESC",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0053",
+      "question": "2026年7月至8月，订单数量最高的5个收货地区是哪些？（请给出地区名称与订单数量）",
+      "difficulty": "medium",
+      "scenario": "regional_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "date_filter",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "gold_sql": "SELECT region, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-07-01' AND order_date <= '2026-08-31' GROUP BY region ORDER BY order_count DESC, region LIMIT 5",
+      "pred_sql": "SELECT region, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-07-01' AND order_date < '2026-09-01' AND status != 'cancelled' GROUP BY region ORDER BY order_count DESC LIMIT 5",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0054",
+      "question": "平均售价最高的5个商品分类是哪些？（请给出分类名称与平均售价）",
+      "difficulty": "medium",
+      "scenario": "ranking",
+      "operators": [
+        "aggregate",
+        "join",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "gold_sql": "SELECT c.name, ROUND(AVG(p.price), 2) AS avg_price FROM products p JOIN categories c ON c.id = p.category_id GROUP BY c.id, c.name ORDER BY avg_price DESC, c.name LIMIT 5",
+      "pred_sql": "SELECT c.name AS category_name, ROUND(AVG(oi.unit_price), 2) AS avg_price FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' GROUP BY c.id ORDER BY avg_price DESC LIMIT 5",
+      "failure_type": "wrong_amount_field",
+      "root_cause": "金额字段选错（subtotal vs total_amount / price vs unit_price）"
+    },
+    {
+      "eval_id": "E-0056",
+      "question": "累计消费金额超过全平台用户平均累计消费3倍的用户有哪些？（请给出用户名与累计非取消实付金额）",
+      "difficulty": "hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "join",
+        "where",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "gold_sql": "WITH user_spent AS (SELECT o.user_id AS uid, SUM(o.total_amount) AS spent FROM orders o WHERE o.status != 'cancelled' GROUP BY o.user_id) SELECT u.username, ROUND(us.spent, 2) AS total_spent FROM user_spent us JOIN users u ON u.id = us.uid GROUP BY u.id, u.username, us.spent HAVING us.spent > 3 * (SELECT AVG(spent) FROM user_spent) ORDER BY total_spent DESC, u.id",
+      "pred_sql": "SELECT u.username, ROUND(SUM(o.total_amount), 2) AS cumulative_spent FROM users u JOIN orders o ON u.id = o.user_id WHERE o.status != 'cancelled' GROUP BY u.id HAVING SUM(o.total_amount) > 3 * (SELECT AVG(total_amount) FROM orders WHERE status != 'cancelled') ORDER BY cumulative_spent DESC",
+      "failure_type": "wrong_avg_granularity",
+      "root_cause": "用户/商品维度均值需两阶段聚合，模型用订单/明细均值代替"
+    },
+    {
+      "eval_id": "E-0057",
+      "question": "按用户累计下单次数将用户分为三档（1-3单、4-10单、11单及以上），各档分别有多少用户？",
+      "difficulty": "hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "subquery",
+        "case_when",
+        "group_by",
+        "aggregate"
+      ],
+      "gold_sql": "SELECT CASE WHEN cnt <= 3 THEN '1-3单' WHEN cnt <= 10 THEN '4-10单' ELSE '11单及以上' END AS tier, COUNT(*) AS user_count FROM (SELECT o.user_id AS uid, COUNT(*) AS cnt FROM orders o GROUP BY o.user_id) AS u GROUP BY tier ORDER BY tier",
+      "pred_sql": "SELECT CASE WHEN order_count BETWEEN 1 AND 3 THEN '1-3单' WHEN order_count BETWEEN 4 AND 10 THEN '4-10单' ELSE '11单及以上' END AS order_range, COUNT(*) AS user_count FROM (SELECT u.id, COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON u.id = o.user_id AND o.status != 'cancelled' GROUP BY u.id) GROUP BY order_range",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0066",
+      "question": "2025年各季度、各订单状态的实付销售额分别是多少？（不含取消订单；请按季度与状态列出）",
+      "difficulty": "hard",
+      "scenario": "sales_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "case_when",
+        "date_group",
+        "group_by",
+        "aggregate",
+        "multi_dimension_grouping",
+        "order_by"
+      ],
+      "gold_sql": "SELECT CASE WHEN substr(order_date, 6, 2) IN ('01','02','03') THEN 'Q1' WHEN substr(order_date, 6, 2) IN ('04','05','06') THEN 'Q2' WHEN substr(order_date, 6, 2) IN ('07','08','09') THEN 'Q3' ELSE 'Q4' END AS quarter, status, ROUND(SUM(total_amount), 2) AS revenue FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' GROUP BY quarter, status ORDER BY quarter, status",
+      "pred_sql": "SELECT strftime('%Y-Q%Q', order_date) AS quarter, status, ROUND(SUM(total_amount), 2) AS total_sales FROM orders WHERE status != 'cancelled' AND strftime('%Y', order_date) = '2025' GROUP BY quarter, status ORDER BY quarter, status",
+      "failure_type": "wrong_date_group",
+      "root_cause": "日期分组格式非法（如 strftime %Q）或时间维度理解错误"
+    },
+    {
+      "eval_id": "E-0072",
+      "question": "2025年中订单量高于全年月均订单量的月份有哪些？（请给出月份与订单量）",
+      "difficulty": "hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "date_group",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery"
+      ],
+      "gold_sql": "SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' GROUP BY month HAVING COUNT(*) > (SELECT COUNT(*) / 12.0 FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31') ORDER BY order_count DESC, month",
+      "pred_sql": "WITH monthly_orders AS (SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2025' AND status != 'cancelled' GROUP BY month), yearly_avg AS (SELECT AVG(order_count) AS avg_monthly_orders FROM monthly_orders) SELECT month, order_count FROM monthly_orders, yearly_avg WHERE order_count > avg_monthly_orders ORDER BY month",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0073",
+      "question": "最近90天（2026年6月14日至9月12日）内，日均销售额最高的5个商品分类是哪些？（请给出分类名称与日均销售额）",
+      "difficulty": "hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "date_group",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "gold_sql": "SELECT c.name, ROUND(SUM(oi.subtotal) * 1.0 / COUNT(DISTINCT o.order_date), 2) AS daily_avg_revenue FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2026-06-14' AND o.order_date <= '2026-09-12' AND o.status != 'cancelled' GROUP BY c.id, c.name ORDER BY daily_avg_revenue DESC, c.name LIMIT 5",
+      "pred_sql": "SELECT c.name AS category_name, ROUND(SUM(oi.subtotal) / 90.0, 2) AS daily_avg_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date BETWEEN '2026-06-14' AND '2026-09-12' AND o.status != 'cancelled' GROUP BY c.id ORDER BY daily_avg_sales DESC LIMIT 5",
+      "failure_type": "wrong_daily_avg",
+      "root_cause": "日均分母用固定天数，而非实际有订单的不同日期数"
+    },
+    {
+      "eval_id": "E-0075",
+      "question": "2026年下半年的订单数量是上半年订单数量的几倍？（保留两位小数）",
+      "difficulty": "hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "aggregate",
+        "ratio",
+        "subquery"
+      ],
+      "gold_sql": "SELECT ROUND((SELECT COUNT(*) FROM orders WHERE order_date >= '2026-07-01') * 1.0 / (SELECT COUNT(*) FROM orders WHERE order_date >= '2026-01-01' AND order_date <= '2026-06-30'), 2) AS h2_to_h1_ratio",
+      "pred_sql": "SELECT ROUND(CAST(SUM(CASE WHEN strftime('%m', order_date) BETWEEN '07' AND '12' THEN 1 ELSE 0 END) AS REAL) / SUM(CASE WHEN strftime('%m', order_date) BETWEEN '01' AND '06' THEN 1 ELSE 0 END), 2) AS times FROM orders WHERE strftime('%Y', order_date) = '2026' AND status != 'cancelled'",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0076",
+      "question": "订单数量最多的5个收货地区是哪几个？它们各占订单总量的百分之几？（请给出地区、订单数与占比）",
+      "difficulty": "hard",
+      "scenario": "regional_analysis",
+      "operators": [
+        "group_by",
+        "aggregate",
+        "order_by",
+        "limit",
+        "top_n",
+        "ratio",
+        "subquery"
+      ],
+      "gold_sql": "SELECT region, COUNT(*) AS order_count, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM orders), 2) AS pct FROM orders GROUP BY region ORDER BY order_count DESC, region LIMIT 5",
+      "pred_sql": "SELECT region, COUNT(*) AS order_count, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM orders WHERE status != 'cancelled'), 2) AS percentage FROM orders WHERE status != 'cancelled' GROUP BY region ORDER BY order_count DESC LIMIT 5",
+      "failure_type": "wrong_cancelled",
+      "root_cause": "结构统计（订单数/状态分布等）误加 cancelled 过滤，或金额口径未排除取消"
+    },
+    {
+      "eval_id": "E-0077",
+      "question": "2025年各收货地区的非取消订单销售额中，高于各地区平均销售额的地区有哪些？（请给出地区名称与销售额）",
+      "difficulty": "hard",
+      "scenario": "regional_analysis",
+      "operators": [
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "gold_sql": "WITH region_sales AS (SELECT o.region, SUM(oi.subtotal) AS sales FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY o.region) SELECT region, ROUND(sales, 2) AS revenue FROM region_sales WHERE sales > (SELECT AVG(sales) FROM region_sales) ORDER BY revenue DESC, region",
+      "pred_sql": "WITH region_sales AS (SELECT region, ROUND(SUM(total_amount), 2) AS total_sales FROM orders WHERE status != 'cancelled' AND strftime('%Y', order_date) = '2025' GROUP BY region), avg_sales AS (SELECT AVG(total_sales) AS avg_total_sales FROM region_sales) SELECT region, total_sales FROM region_sales WHERE total_sales > (SELECT avg_total_sales FROM avg_sales) ORDER BY total_sales DESC",
+      "failure_type": "wrong_amount_field",
+      "root_cause": "金额字段选错（subtotal vs total_amount / price vs unit_price）"
+    },
+    {
+      "eval_id": "E-0081",
+      "question": "广东省的用户占全部用户的比例是多少？（百分比，保留两位小数）",
+      "difficulty": "hard",
+      "scenario": "ratio",
+      "operators": [
+        "where",
+        "aggregate",
+        "ratio",
+        "subquery"
+      ],
+      "gold_sql": "SELECT ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM users), 2) AS pct FROM users WHERE region = '广东'",
+      "pred_sql": "SELECT ROUND(CAST(SUM(CASE WHEN region = '广东省' THEN 1 ELSE 0 END) AS REAL) * 100.0 / COUNT(*), 2) AS percentage FROM users",
+      "failure_type": "enum_hallucination",
+      "root_cause": "枚举值幻想（地区/状态等非库内原值）"
+    },
+    {
+      "eval_id": "E-0082",
+      "question": "休闲零食类别在全部非取消订单明细中的销售金额占全平台商品销售总额的比例是多少？（百分比，保留两位小数）",
+      "difficulty": "hard",
+      "scenario": "ratio",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "ratio",
+        "subquery"
+      ],
+      "gold_sql": "SELECT c.name, ROUND(SUM(oi.subtotal) * 100.0 / (SELECT SUM(oi2.subtotal) FROM order_items oi2 JOIN orders o2 ON o2.id = oi2.order_id WHERE o2.status != 'cancelled'), 2) AS pct FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' AND c.name = '休闲零食' GROUP BY c.id, c.name",
+      "pred_sql": "SELECT ROUND(100.0 * SUM(CASE WHEN c.name = '休闲零食' THEN oi.subtotal ELSE 0 END) / SUM(oi.subtotal), 2) AS percentage FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled'",
+      "failure_type": "wrong_output_shape",
+      "root_cause": "SELECT 输出列/列数不完整（§D1 判错）：问题要求的字段未逐一对应输出"
+    },
+    {
+      "eval_id": "E-0083",
+      "question": "2025年第四季度中，家用电器类目销售金额占该季度全部商品销售金额的比例是多少？（百分比，保留两位小数）",
+      "difficulty": "hard",
+      "scenario": "ratio",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "ratio",
+        "subquery"
+      ],
+      "gold_sql": "SELECT c.name, ROUND(SUM(oi.subtotal) * 100.0 / (SELECT SUM(oi3.subtotal) FROM order_items oi3 JOIN orders o3 ON o3.id = oi3.order_id WHERE o3.order_date >= '2025-10-01' AND o3.order_date <= '2025-12-31' AND o3.status != 'cancelled'), 2) AS pct FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.order_date >= '2025-10-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' AND c.name = '家用电器' GROUP BY c.id, c.name",
+      "pred_sql": "SELECT ROUND(SUM(CASE WHEN c.name = '家用电器' THEN oi.subtotal ELSE 0 END) * 100.0 / SUM(oi.subtotal), 2) AS percentage FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2025-10-01' AND o.order_date < '2026-01-01' AND o.status != 'cancelled'",
+      "failure_type": "wrong_output_shape",
+      "root_cause": "SELECT 输出列/列数不完整（§D1 判错）：问题要求的字段未逐一对应输出"
+    },
+    {
+      "eval_id": "E-0086",
+      "question": "累计消费金额超过全平台用户平均累计消费2倍、且累计下单超过8笔的用户有哪些？（请给出用户名、累计金额、订单数与购买商品种数）",
+      "difficulty": "extra_hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "nested_subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "gold_sql": "WITH user_stats AS (SELECT o.user_id AS uid, SUM(o.total_amount) AS spent, COUNT(DISTINCT o.id) AS orders, COUNT(DISTINCT oi.product_id) AS sku_cnt FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY o.user_id) SELECT u.username, ROUND(us.spent, 2) AS total_spent, us.orders, us.sku_cnt FROM user_stats us JOIN users u ON u.id = us.uid WHERE us.spent > 2 * (SELECT AVG(spent) FROM (SELECT SUM(total_amount) AS spent FROM orders WHERE status != 'cancelled' GROUP BY user_id) t) AND us.orders > 8 ORDER BY us.spent DESC, u.id",
+      "pred_sql": "WITH user_stats AS (SELECT u.id, u.username, ROUND(SUM(o.total_amount), 2) AS total_spent, COUNT(o.id) AS order_count, COUNT(DISTINCT oi.product_id) AS product_count FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY u.id), platform_avg AS (SELECT AVG(total_spent) AS avg_spent FROM user_stats) SELECT us.username, us.total_spent, us.order_count, us.product_count FROM user_stats us, platform_avg pa WHERE us.total_spent > pa.avg_spent * 2 AND us.order_count > 8 ORDER BY us.total_spent DESC",
+      "failure_type": "wrong_avg_granularity",
+      "root_cause": "用户/商品维度均值需两阶段聚合，模型用订单/明细均值代替"
+    },
+    {
+      "eval_id": "E-0090",
+      "question": "2025年各订单状态下，实付金额高于5000元的高金额订单数与5000元及以下的普通订单数分别是多少？（含取消订单的结构统计）",
+      "difficulty": "extra_hard",
+      "scenario": "order_analysis",
+      "operators": [
+        "conditional_aggregation",
+        "case_when",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "order_by"
+      ],
+      "gold_sql": "SELECT status, COUNT(CASE WHEN total_amount > 5000 AND status != 'cancelled' THEN 1 END) AS high_cnt, COUNT(CASE WHEN total_amount <= 5000 AND status != 'cancelled' THEN 1 END) AS normal_cnt, COUNT(*) AS total_cnt FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' GROUP BY status ORDER BY status",
+      "pred_sql": "SELECT status, SUM(CASE WHEN total_amount > 5000 THEN 1 ELSE 0 END) AS high_amount_orders, SUM(CASE WHEN total_amount <= 5000 THEN 1 ELSE 0 END) AS normal_amount_orders FROM orders GROUP BY status",
+      "failure_type": "wrong_output_shape",
+      "root_cause": "SELECT 输出列/列数不完整（§D1 判错）：问题要求的字段未逐一对应输出"
+    },
+    {
+      "eval_id": "E-0095",
+      "question": "最近30天（2026年8月14日至9月12日）中，有哪些地区-分类组合的销售金额高于该地区各组合的平均销售金额？（请给出地区、分类与销售额，取前10）",
+      "difficulty": "extra_hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "nested_subquery",
+        "comparison_to_average",
+        "multi_dimension_grouping",
+        "having",
+        "order_by",
+        "limit"
+      ],
+      "gold_sql": "WITH pair_sales AS (SELECT o.region, c.name AS cat_name, SUM(oi.subtotal) AS revenue FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2026-08-14' AND o.order_date <= '2026-09-12' AND o.status != 'cancelled' GROUP BY o.region, c.id, c.name HAVING SUM(oi.subtotal) > 30000) SELECT ps.region, ps.cat_name, ROUND(ps.revenue, 2) AS revenue FROM pair_sales ps WHERE ps.revenue > (SELECT AVG(t.avg_rev) FROM (SELECT region, AVG(revenue) AS avg_rev FROM pair_sales GROUP BY region) t WHERE t.region = ps.region) ORDER BY ps.revenue DESC, ps.region, ps.cat_name LIMIT 10",
+      "pred_sql": "WITH region_category_sales AS (SELECT o.region, c.name AS category_name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date BETWEEN '2026-08-14' AND '2026-09-12' AND o.status != 'cancelled' GROUP BY o.region, c.id), region_avg_sales AS (SELECT region, AVG(total_sales) AS avg_sales FROM region_category_sales GROUP BY region) SELECT rcs.region, rcs.category_name, rcs.total_sales FROM region_category_sales rcs JOIN region_avg_sales ras ON rcs.region = ras.region WHERE rcs.total_sales > ras.avg_sales ORDER BY rcs.total_sales DESC LIMIT 10",
+      "failure_type": "wrong_context_filter",
+      "root_cause": "遗漏题面显式过滤条件/阈值（如 HAVING>30000）导致基准失真"
+    },
+    {
+      "eval_id": "E-0097",
+      "question": "2025年中，商品销售金额高于全国地区平均销售金额、且订单笔数也高于全国地区平均订单笔数的区域有哪些？（请给出地区、销售额与订单数）",
+      "difficulty": "extra_hard",
+      "scenario": "regional_analysis",
+      "operators": [
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "nested_subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "gold_sql": "SELECT o.region, ROUND(SUM(oi.subtotal), 2) AS revenue, COUNT(DISTINCT o.id) AS orders FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY o.region HAVING SUM(oi.subtotal) > (SELECT AVG(v.revenue) FROM (SELECT region, SUM(oi2.subtotal) AS revenue FROM orders o2 JOIN order_items oi2 ON oi2.order_id = o2.id WHERE o2.order_date >= '2025-01-01' AND o2.order_date <= '2025-12-31' AND o2.status != 'cancelled' GROUP BY o2.region) v) AND COUNT(DISTINCT o.id) > (SELECT AVG(w.orders) FROM (SELECT COUNT(DISTINCT o3.id) AS orders FROM orders o3 JOIN order_items oi3 ON oi3.order_id = o3.id WHERE o3.order_date >= '2025-01-01' AND o3.order_date <= '2025-12-31' AND o3.status != 'cancelled' GROUP BY o3.region) w) ORDER BY revenue DESC, o.region",
+      "pred_sql": "WITH region_stats AS (SELECT region, ROUND(SUM(total_amount), 2) AS total_sales, COUNT(id) AS order_count FROM orders WHERE status != 'cancelled' AND strftime('%Y', order_date) = '2025' GROUP BY region), national_avg AS (SELECT ROUND(AVG(total_sales), 2) AS avg_sales, ROUND(AVG(order_count), 2) AS avg_orders FROM region_stats) SELECT rs.region, rs.total_sales, rs.order_count FROM region_stats rs, national_avg na WHERE rs.total_sales > na.avg_sales AND rs.order_count > na.avg_orders ORDER BY rs.total_sales DESC",
+      "failure_type": "wrong_amount_field",
+      "root_cause": "金额字段选错（subtotal vs total_amount / price vs unit_price）"
+    },
+    {
+      "eval_id": "E-0098",
+      "question": "每个商品分类中，销量最高的3款商品分别是哪些？（请给出分类、商品名与销量；仅统计销量超过50的商品）",
+      "difficulty": "extra_hard",
+      "scenario": "ranking",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "having",
+        "subquery",
+        "order_by",
+        "top_n"
+      ],
+      "gold_sql": "WITH cat_prod AS (SELECT c.name AS cat_name, p.name AS prod_name, SUM(oi.quantity) AS sold FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY c.id, p.id, p.name HAVING SUM(oi.quantity) > 50), ranked AS (SELECT cat_name, prod_name, sold, ROW_NUMBER() OVER (PARTITION BY cat_name ORDER BY sold DESC) AS rk FROM cat_prod) SELECT cat_name, prod_name, sold AS sold_qty FROM ranked WHERE rk <= 3 ORDER BY cat_name, rk",
+      "pred_sql": "WITH ranked_products AS (SELECT c.name AS category_name, p.name AS product_name, SUM(oi.quantity) AS total_sold, ROW_NUMBER() OVER (PARTITION BY c.id ORDER BY SUM(oi.quantity) DESC) AS rn FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' GROUP BY c.id, p.id HAVING SUM(oi.quantity) > 50) SELECT category_name, product_name, total_sold FROM ranked_products WHERE rn <= 3 ORDER BY category_name, total_sold DESC",
+      "failure_type": "ranking_tie_risk",
+      "root_cause": "排名题并列无稳定 tiebreaker，结果非确定性"
+    }
+  ]
+}

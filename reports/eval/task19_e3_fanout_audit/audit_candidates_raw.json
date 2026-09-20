@@ -1,0 +1,105 @@
+{
+  "note": "Task17 中存在 orders+order_items（SQL 文本同时含两表名）但 Detector 未报警的候选",
+  "candidates": [
+    {
+      "case_id": "E-0059",
+      "severity": "none",
+      "pred_sql": "SELECT p.name AS product_name, SUM(oi.quantity) AS total_sold FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status != 'cancelled' GROUP BY p.id ORDER BY total_sold DESC LIMIT 5"
+    },
+    {
+      "case_id": "E-0061",
+      "severity": "none",
+      "pred_sql": "WITH leaf_categories AS (SELECT id, name FROM categories WHERE id NOT IN (SELECT DISTINCT parent_id FROM categories WHERE parent_id IS NOT NULL)), category_sales AS (SELECT c.id, c.name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM leaf_categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY c.id), overall_avg AS (SELECT AVG(total_sales) AS avg_sales FROM category_sales) SELECT cs.name AS category_name, cs.total_sales FROM category_sales cs, overall_avg oa WHERE cs.total_sales > oa.avg_sales ORDER BY cs.total_sales DESC"
+    },
+    {
+      "case_id": "E-0062",
+      "severity": "none",
+      "pred_sql": "SELECT c.name AS category_name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2025-01-01' AND o.order_date < '2026-01-01' AND o.status != 'cancelled' GROUP BY c.id ORDER BY total_sales DESC LIMIT 5"
+    },
+    {
+      "case_id": "E-0067",
+      "severity": "none",
+      "pred_sql": "SELECT o.region, c.name AS category_name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date BETWEEN '2026-06-14' AND '2026-09-12' AND o.status != 'cancelled' GROUP BY o.region, c.id ORDER BY total_sales DESC LIMIT 8"
+    },
+    {
+      "case_id": "E-0073",
+      "severity": "low",
+      "pred_sql": "SELECT c.name AS category_name, ROUND(SUM(oi.subtotal) * 1.0 / COUNT(DISTINCT o.order_date), 2) AS daily_avg_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date BETWEEN '2026-06-14' AND '2026-09-12' AND o.status != 'cancelled' GROUP BY c.id ORDER BY daily_avg_sales DESC LIMIT 5"
+    },
+    {
+      "case_id": "E-0074",
+      "severity": "none",
+      "pred_sql": "SELECT c.name AS category_name, SUM(oi.quantity) AS total_sold FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' AND o.order_date >= '2025-10-01' AND o.order_date < '2026-01-01' GROUP BY c.id ORDER BY total_sold DESC LIMIT 3"
+    },
+    {
+      "case_id": "E-0080",
+      "severity": "none",
+      "pred_sql": "SELECT p.name AS product_name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.order_date BETWEEN '2026-06-14' AND '2026-09-12' AND o.status != 'cancelled' GROUP BY p.id ORDER BY total_sales DESC LIMIT 5"
+    },
+    {
+      "case_id": "E-0082",
+      "severity": "none",
+      "pred_sql": "SELECT ROUND(100.0 * SUM(CASE WHEN c.name = '休闲零食' THEN oi.subtotal ELSE 0 END) / SUM(oi.subtotal), 2) AS percentage FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled'"
+    },
+    {
+      "case_id": "E-0083",
+      "severity": "none",
+      "pred_sql": "SELECT ROUND(SUM(CASE WHEN c.name = '家用电器' THEN oi.subtotal ELSE 0 END) * 100.0 / SUM(oi.subtotal), 2) AS percentage FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' AND o.order_date >= '2025-10-01' AND o.order_date <= '2025-12-31'"
+    },
+    {
+      "case_id": "E-0085",
+      "severity": "none",
+      "pred_sql": "SELECT c.name AS category_name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' AND c.name IN ('男装', '女装') GROUP BY c.id"
+    },
+    {
+      "case_id": "E-0087",
+      "severity": "none",
+      "pred_sql": "WITH leaf_categories AS (SELECT c.id, c.name FROM categories c WHERE c.id NOT IN (SELECT DISTINCT parent_id FROM categories WHERE parent_id IS NOT NULL)), product_sales AS (SELECT p.id AS product_id, p.name AS product_name, p.category_id, SUM(oi.quantity) AS total_sold FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status != 'cancelled' GROUP BY p.id), category_avg AS (SELECT lc.id AS category_id, lc.name AS category_name, AVG(ps.total_sold) AS avg_sold FROM leaf_categories lc JOIN product_sales ps ON ps.category_id = lc.id GROUP BY lc.id) SELECT ps.product_name, ca.category_name, ps.total_sold FROM product_sales ps JOIN category_avg ca ON ca.category_id = ps.category_id WHERE ps.total_sold > ca.avg_sold ORDER BY ps.total_sold DESC LIMIT 10"
+    },
+    {
+      "case_id": "E-0088",
+      "severity": "none",
+      "pred_sql": "WITH yearly_sales AS (SELECT p.name AS product_name, SUM(oi.subtotal) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.order_date LIKE '2025-%' AND o.status != 'cancelled' GROUP BY p.id ORDER BY total_sales DESC LIMIT 5), half_year_sales AS (SELECT p.name AS product_name, CASE WHEN SUBSTR(o.order_date, 6, 2) <= '06' THEN 'H1' ELSE 'H2' END AS half_year, SUM(oi.subtotal) AS sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.order_date LIKE '2025-%' AND o.status != 'cancelled' AND p.name IN (SELECT product_name FROM yearly_sales) GROUP BY p.name, half_year) SELECT y.product_name, ROUND(SUM(CASE WHEN h.half_year = 'H1' THEN h.sales ELSE 0 END), 2) AS first_half_sales, ROUND(SUM(CASE WHEN h.half_year = 'H2' THEN h.sales ELSE 0 END), 2) AS second_half_sales, ROUND(y.total_sales, 2) AS total_sales FROM yearly_sales y LEFT JOIN half_year_sales h ON y.product_name = h.product_name GROUP BY y.product_name ORDER BY y.total_sales DESC"
+    },
+    {
+      "case_id": "E-0089",
+      "severity": "none",
+      "pred_sql": "WITH leaf_categories AS (SELECT c.id, c.name FROM categories c WHERE c.id NOT IN (SELECT DISTINCT parent_id FROM categories WHERE parent_id IS NOT NULL)), category_sales AS (SELECT lc.id AS category_id, lc.name AS category_name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM leaf_categories lc JOIN products p ON p.category_id = lc.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY lc.id, lc.name), all_category_avg AS (SELECT AVG(total_sales) AS avg_sales FROM category_sales), platform_total AS (SELECT SUM(oi.subtotal) AS total_amount FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled') SELECT cs.category_name, cs.total_sales, ROUND(cs.total_sales * 100.0 / pt.total_amount, 2) AS percentage FROM category_sales cs, all_category_avg aca, platform_total pt WHERE cs.total_sales > aca.avg_sales ORDER BY cs.total_sales DESC"
+    },
+    {
+      "case_id": "E-0093",
+      "severity": "none",
+      "pred_sql": "WITH region_category_sales AS ( SELECT o.region, c.name AS category_name, ROUND(SUM(oi.subtotal), 2) AS total_sales, ROW_NUMBER() OVER (PARTITION BY o.region ORDER BY SUM(oi.subtotal) DESC) AS rn FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date LIKE '2025%' AND o.status != 'cancelled' GROUP BY o.region, c.id ) SELECT region, category_name, total_sales FROM region_category_sales WHERE rn <= 3 ORDER BY region, rn"
+    },
+    {
+      "case_id": "E-0095",
+      "severity": "none",
+      "pred_sql": "WITH region_category_sales AS (SELECT o.region, c.name AS category_name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date BETWEEN '2026-08-14' AND '2026-09-12' AND o.status != 'cancelled' GROUP BY o.region, c.id), region_avg AS (SELECT region, AVG(total_sales) AS avg_sales FROM region_category_sales GROUP BY region) SELECT rcs.region, rcs.category_name, rcs.total_sales FROM region_category_sales rcs JOIN region_avg ra ON rcs.region = ra.region WHERE rcs.total_sales > 30000 AND rcs.total_sales > ra.avg_sales ORDER BY rcs.total_sales DESC LIMIT 10"
+    },
+    {
+      "case_id": "E-0096",
+      "severity": "none",
+      "pred_sql": "WITH monthly_sales AS (SELECT strftime('%Y-%m', o.order_date) AS month, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' AND strftime('%Y', o.order_date) = '2025' GROUP BY month), monthly_with_lag AS (SELECT month, total_sales, LAG(total_sales, 1) OVER (ORDER BY month) AS prev_month_sales FROM monthly_sales) SELECT month, total_sales, ROUND((total_sales - prev_month_sales) * 100.0 / prev_month_sales, 2) AS growth_rate_pct FROM monthly_with_lag WHERE prev_month_sales IS NOT NULL AND prev_month_sales > 0 ORDER BY growth_rate_pct DESC LIMIT 3"
+    },
+    {
+      "case_id": "E-0097",
+      "severity": "low",
+      "pred_sql": "WITH region_stats AS ( SELECT o.region, ROUND(SUM(oi.subtotal), 2) AS total_sales, COUNT(DISTINCT o.id) AS order_count FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' AND strftime('%Y', o.order_date) = '2025' GROUP BY o.region ), national_avg AS ( SELECT AVG(total_sales) AS avg_sales, AVG(order_count) AS avg_orders FROM region_stats ) SELECT rs.region, rs.total_sales, rs.order_count FROM region_stats rs, national_avg na WHERE rs.total_sales > na.avg_sales AND rs.order_count > na.avg_orders ORDER BY rs.total_sales DESC"
+    },
+    {
+      "case_id": "E-0098",
+      "severity": "none",
+      "pred_sql": "WITH product_sales AS (SELECT p.category_id, p.id AS product_id, p.name AS product_name, SUM(oi.quantity) AS total_sold FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status != 'cancelled' GROUP BY p.id HAVING total_sold > 50), ranked_products AS (SELECT ps.category_id, c.name AS category_name, ps.product_name, ps.total_sold, ROW_NUMBER() OVER (PARTITION BY ps.category_id ORDER BY ps.total_sold DESC) AS rn FROM product_sales ps JOIN categories c ON c.id = ps.category_id) SELECT category_name, product_name, total_sold FROM ranked_products WHERE rn <= 3 ORDER BY category_name, total_sold DESC"
+    },
+    {
+      "case_id": "E-0099",
+      "severity": "none",
+      "pred_sql": "WITH region_sales AS (SELECT o.region, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY o.region), region_appliance_sales AS (SELECT o.region, ROUND(SUM(oi.subtotal), 2) AS appliance_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' AND c.name = '家用电器' GROUP BY o.region), platform_appliance_ratio AS (SELECT SUM(CASE WHEN c.name = '家用电器' THEN oi.subtotal ELSE 0 END) * 100.0 / SUM(oi.subtotal) AS platform_ratio FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled') SELECT r.region, ras.appliance_sales, ROUND(ras.appliance_sales * 100.0 / rs.total_sales, 2) AS appliance_ratio_pct FROM region_sales rs JOIN region_appliance_sales ras ON ras.region = rs.region CROSS JOIN platform_appliance_ratio par WHERE ras.appliance_sales * 100.0 / rs.total_sales > par.platform_ratio ORDER BY appliance_ratio_pct DESC"
+    },
+    {
+      "case_id": "E-0100",
+      "severity": "low",
+      "pred_sql": "SELECT ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN oi.subtotal ELSE 0 END), 2) AS sales_may, ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN oi.subtotal ELSE 0 END), 2) AS sales_feb, COUNT(DISTINCT CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN o.id END) AS orders_may, COUNT(DISTINCT CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN o.id END) AS orders_feb, ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN oi.subtotal ELSE 0 END) * 1.0 / SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN oi.subtotal ELSE 0 END), 2) AS sales_ratio FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' AND (strftime('%Y-%m', o.order_date) = '2025-05' OR strftime('%Y-%m', o.order_date) = '2025-02')"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "experiment": "task17_e3_fanout_validator",
+  "task": "Task 17 / E3：Aggregation/Fan-out Read-only Detector（离线静态扫描，ONLY-OBSERVE）",
+  "status": "DONE_OFFLINE_SCAN（未跑 100 条 Mimo Benchmark）",
+  "clean_baseline": {
+    "dataset_version": "1.1",
+    "dataset_sha256": "DBA277CC0BE7CC282DF67C86DD7EABFEA1337458612A86885F6DAEF0C6829F1A",
+    "database_version": "dev-2026-09-14",
+    "database_sha256": "65E5D8B2727CFA064174F9A08AA7D4B08209E0EDD1EBA81F3155698F1A4491D9",
+    "seed": 20260914,
+    "schema_version": "1.0",
+    "prompt_version": "SQLGENERATOR_PROMPT_V1.3",
+    "prompt_sha256": "10583478b3a7d972865050501cd6e4b9062531503f1c3852cdd79cbf66f796d5",
+    "fewshot_version": "FEWSHOT_V3",
+    "fewshot_count": 23,
+    "fewshot_sha256": "EE12FCC994C6AFEC42A94F4E327109961AC2022466673BC4A37485638F7D4CEE",
+    "model": "mimo-v2.5-pro",
+    "provider": "mimo",
+    "baseline_ex": 90.0
+  },
+  "detector": {
+    "module": "backend/app/sqlcheck/fanout_detector.py",
+    "mode": "read-only static AST (sqlglot)",
+    "gold_dependent": false,
+    "modifies_sql": false,
+    "triggers_repair": false,
+    "touches_agent_pipeline": false,
+    "patterns": ["order_join_item_order_agg", "count_star_ambiguous", "order_join_item_order_agg(protected)"]
+  },
+  "scan": {
+    "input": "reports/eval/clean_baseline_v1_1/eval_clean_baseline_v1_1.json",
+    "input_count": 100,
+    "fan_out_suspected": 1,
+    "severity_high": 1,
+    "severity_medium": 0,
+    "severity_low": 3,
+    "severity_none": 96,
+    "alerts": ["E-0086"],
+    "ex_pass_alerted": 0,
+    "known_positive_hit": {"E-0086": "high / order_join_item_order_agg / SUM(o.total_amount) fan-out 4.1x"},
+    "known_negative_fp": [],
+    "precision_recall_reliable": false,
+    "precision_recall_reason": "100 条中仅 E-0086 有明确的 fan-out 标签（Task14.3 人工论证），其余 99 条无非人工 fan-out 标签；Gold 标签禁用（Gold-independent 约束）。无法构造可靠 confusion matrix。"
+  },
+  "tests": {
+    "detector_tests": "backend/tests/test_e3_fanout_detector.py（12 条，全部 PASS）",
+    "full_pytest": "PASS（352 passed）"
+  },
+  "artifacts": [
+    "reports/eval/task17_e3_fanout_validator/experiment_config.json",
+    "reports/eval/task17_e3_fanout_validator/static_scan_report.json",
+    "reports/eval/task17_e3_fanout_validator/static_scan_report.md",
+    "reports/eval/task17_e3_fanout_validator/detector_rules.md",
+    "scripts/scan_fanout_report.py"
+  ],
+  "protected_files": [
+    "data/eval/ecommerce_eval_v1.json 未修改",
+    "data/fewshot/ecommerce_examples.json 未修改",
+    "backend/app/sqlgen/prompt.py 未修改",
+    "db/ecommerce.db 未修改",
+    "evaluation/ 未修改",
+    "evaluation/runner.py 未修改"
+  ]
+}

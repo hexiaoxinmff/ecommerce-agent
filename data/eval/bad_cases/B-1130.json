@@ -1,0 +1,23 @@
+{
+  "case_id": "B-1130",
+  "eval_id": "E-0084",
+  "question": "2025年与2026年（截至9月12日）非取消订单的平均实付金额（客单价）分别是多少？",
+  "difficulty": "hard",
+  "scenario": "comparison",
+  "operators": [
+    "where",
+    "date_filter",
+    "aggregate"
+  ],
+  "gold_sql": "SELECT '2025' AS year, ROUND(AVG(total_amount), 2) AS avg_amount FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' UNION ALL SELECT '2026', ROUND(AVG(total_amount), 2) FROM orders WHERE order_date >= '2026-01-01' AND status != 'cancelled'",
+  "pred_sql": "SELECT CASE WHEN strftime('%Y', order_date) = '2025' THEN '2025年' WHEN strftime('%Y', order_date) = '2026' AND order_date <= '2026-09-12' THEN '2026年(截至9月12日)' END AS period, ROUND(AVG(total_amount), 2) AS avg_order_amount FROM orders WHERE status != 'cancelled' AND ((strftime('%Y', order_date) = '2025') OR (strftime('%Y', order_date) = '2026' AND order_date <= '2026-09-12')) GROUP BY period ORDER BY period",
+  "initial_sql": "SELECT CASE WHEN strftime('%Y', order_date) = '2025' THEN '2025年' WHEN strftime('%Y', order_date) = '2026' AND order_date <= '2026-09-12' THEN '2026年(截至9月12日)' END AS period, ROUND(AVG(total_amount), 2) AS avg_order_amount FROM orders WHERE status != 'cancelled' AND ((strftime('%Y', order_date) = '2025') OR (strftime('%Y', order_date) = '2026' AND order_date <= '2026-09-12')) GROUP BY period ORDER BY period",
+  "final_sql": "SELECT CASE WHEN strftime('%Y', order_date) = '2025' THEN '2025年' WHEN strftime('%Y', order_date) = '2026' AND order_date <= '2026-09-12' THEN '2026年(截至9月12日)' END AS period, ROUND(AVG(total_amount), 2) AS avg_order_amount FROM orders WHERE status != 'cancelled' AND ((strftime('%Y', order_date) = '2025') OR (strftime('%Y', order_date) = '2026' AND order_date <= '2026-09-12')) GROUP BY period ORDER BY period",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 25950.62,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

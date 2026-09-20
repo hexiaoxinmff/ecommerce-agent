@@ -1,0 +1,28 @@
+{
+  "case_id": "B-1014",
+  "eval_id": "E-0048",
+  "question": "2026年订单数量最多的5个月份是哪几个？（请给出月份与订单数）",
+  "difficulty": "medium",
+  "scenario": "time_analysis",
+  "operators": [
+    "where",
+    "aggregate",
+    "date_filter",
+    "date_group",
+    "group_by",
+    "order_by",
+    "limit",
+    "top_n"
+  ],
+  "gold_sql": "SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-01-01' GROUP BY month ORDER BY order_count DESC, month LIMIT 5",
+  "pred_sql": "SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2026' AND status != 'cancelled' GROUP BY month ORDER BY order_count DESC LIMIT 5",
+  "initial_sql": "SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2026' AND status != 'cancelled' GROUP BY month ORDER BY order_count DESC LIMIT 5",
+  "final_sql": "SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2026' AND status != 'cancelled' GROUP BY month ORDER BY order_count DESC LIMIT 5",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 11475.61,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

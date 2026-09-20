@@ -1,0 +1,505 @@
+{
+  "meta": {
+    "run_id": "20260915_33974",
+    "timestamp": "2026-09-15T09:26:14Z",
+    "dataset_version": "1.0",
+    "database_version": "dev-2026-09-14",
+    "schema_version": "1.0",
+    "seed": 20260914,
+    "model": "mimo-v2.5-pro",
+    "provider": "mimo",
+    "base_url": "https://api.xiaomimimo.com/v1",
+    "prompt_version": "",
+    "randomness": "provider API controlled randomness unavailable",
+    "mode": "subset",
+    "per_item_timeout_s": 60.0,
+    "total_items": 5
+  },
+  "summary": {
+    "run_id": "20260915_33974",
+    "timestamp": "2026-09-15T09:26:14Z",
+    "total": 5,
+    "valid_model_runs": 4,
+    "provider_failures": 1,
+    "timeouts": 1,
+    "exec_rate": 80.0,
+    "ex": 60.0,
+    "conditional_ex": 75.0,
+    "pass_at_1": 60.0,
+    "final_ex": 60.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "avg_latency_ms": 25373.38,
+    "p50_latency_ms": 20219.0,
+    "p95_latency_ms": 60000.0
+  },
+  "results": [
+    {
+      "eval_id": "E-0001",
+      "question": "平台上一共有多少用户？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT COUNT(*) AS user_count FROM users",
+      "pred_sql": "SELECT COUNT(*) AS total_users FROM users",
+      "initial_sql": "SELECT COUNT(*) AS total_users FROM users",
+      "final_sql": "SELECT COUNT(*) AS total_users FROM users",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 9429.28,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 4811.365699999442,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "users"
+            ],
+            "columns_count": 1,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.2193000000261236,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_002",
+              "ex_007",
+              "ex_011"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 4608.270099997753,
+          "message": "",
+          "output_summary": {
+            "sql_length": 41,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.25859999732347205,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 1.2816000016755424,
+          "message": "",
+          "output_summary": {
+            "row_count": 1,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0006000009307172149,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0012",
+      "question": "平台上一共有多少订单？",
+      "difficulty": "easy",
+      "scenario": "order_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT COUNT(*) AS order_count FROM orders",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "timeout",
+      "latency_ms": 60000.0,
+      "valid_model_run": false,
+      "trace_summary": "timeout",
+      "trace": []
+    },
+    {
+      "eval_id": "E-0026",
+      "question": "2024年及以后注册的用户数量按注册年份分布是怎样的？",
+      "difficulty": "medium",
+      "scenario": "user_analysis",
+      "operators": [
+        "where",
+        "group_by",
+        "date_group",
+        "aggregate",
+        "date_filter"
+      ],
+      "gold_sql": "SELECT strftime('%Y', register_date) AS reg_year, COUNT(*) AS user_count FROM users WHERE register_date >= '2024-01-01' GROUP BY reg_year ORDER BY reg_year",
+      "pred_sql": "SELECT strftime('%Y', register_date) AS register_year, COUNT(*) AS user_count FROM users WHERE register_date >= '2024-01-01' GROUP BY register_year ORDER BY register_year",
+      "initial_sql": "SELECT strftime('%Y', register_date) AS register_year, COUNT(*) AS user_count FROM users WHERE register_date >= '2024-01-01' GROUP BY register_year ORDER BY register_year",
+      "final_sql": "SELECT strftime('%Y', register_date) AS register_year, COUNT(*) AS user_count FROM users WHERE register_date >= '2024-01-01' GROUP BY register_year ORDER BY register_year",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 16984.97,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 7976.586799999495,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "users"
+            ],
+            "columns_count": 2,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.33830000029411167,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_011",
+              "ex_002",
+              "ex_007"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 9000.936299999012,
+          "message": "",
+          "output_summary": {
+            "sql_length": 170,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.5587999985436909,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 2.3581999994348735,
+          "message": "",
+          "output_summary": {
+            "row_count": 3,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.000700001692166552,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0056",
+      "question": "累计消费金额超过全平台用户平均累计消费3倍的用户有哪些？（请给出用户名与累计非取消实付金额）",
+      "difficulty": "hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "join",
+        "where",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "gold_sql": "WITH user_spent AS (SELECT o.user_id AS uid, SUM(o.total_amount) AS spent FROM orders o WHERE o.status != 'cancelled' GROUP BY o.user_id) SELECT u.username, ROUND(us.spent, 2) AS total_spent FROM user_spent us JOIN users u ON u.id = us.uid GROUP BY u.id, u.username, us.spent HAVING us.spent > 3 * (SELECT AVG(spent) FROM user_spent) ORDER BY total_spent DESC, u.id",
+      "pred_sql": "SELECT u.username, ROUND(SUM(o.total_amount), 2) AS cumulative_spent FROM users u JOIN orders o ON u.id = o.user_id WHERE o.status != 'cancelled' GROUP BY u.id HAVING SUM(o.total_amount) > (SELECT AVG(user_total) FROM (SELECT SUM(total_amount) AS user_total FROM orders WHERE status != 'cancelled' GROUP BY user_id)) * 3 ORDER BY cumulative_spent DESC",
+      "initial_sql": "SELECT u.username, ROUND(SUM(o.total_amount), 2) AS cumulative_spent FROM users u JOIN orders o ON u.id = o.user_id WHERE o.status != 'cancelled' GROUP BY u.id HAVING SUM(o.total_amount) > (SELECT AVG(user_total) FROM (SELECT SUM(total_amount) AS user_total FROM orders WHERE status != 'cancelled' GROUP BY user_id)) * 3 ORDER BY cumulative_spent DESC",
+      "final_sql": "SELECT u.username, ROUND(SUM(o.total_amount), 2) AS cumulative_spent FROM users u JOIN orders o ON u.id = o.user_id WHERE o.status != 'cancelled' GROUP BY u.id HAVING SUM(o.total_amount) > (SELECT AVG(user_total) FROM (SELECT SUM(total_amount) AS user_total FROM orders WHERE status != 'cancelled' GROUP BY user_id)) * 3 ORDER BY cumulative_spent DESC",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 20233.67,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 13164.852199999586,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "users",
+              "orders"
+            ],
+            "columns_count": 5,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.19429999883868732,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_010",
+              "ex_016",
+              "ex_009"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 7049.393000001146,
+          "message": "",
+          "output_summary": {
+            "sql_length": 351,
+            "tables": 2
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 1.8583999990369193,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 13.194900002417853,
+          "message": "",
+          "output_summary": {
+            "row_count": 43,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.000800002453615889,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0086",
+      "question": "累计消费金额超过全平台用户平均累计消费2倍、且累计下单超过8笔的用户有哪些？（请给出用户名、累计金额、订单数与购买商品种数）",
+      "difficulty": "extra_hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "nested_subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "gold_sql": "WITH user_stats AS (SELECT o.user_id AS uid, SUM(o.total_amount) AS spent, COUNT(DISTINCT o.id) AS orders, COUNT(DISTINCT oi.product_id) AS sku_cnt FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY o.user_id) SELECT u.username, ROUND(us.spent, 2) AS total_spent, us.orders, us.sku_cnt FROM user_stats us JOIN users u ON u.id = us.uid WHERE us.spent > 2 * (SELECT AVG(spent) FROM (SELECT SUM(total_amount) AS spent FROM orders WHERE status != 'cancelled' GROUP BY user_id) t) AND us.orders > 8 ORDER BY us.spent DESC, u.id",
+      "pred_sql": "WITH user_stats AS (SELECT u.id, u.username, ROUND(SUM(o.total_amount), 2) AS total_spent, COUNT(o.id) AS order_count, COUNT(DISTINCT oi.product_id) AS product_count FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY u.id), platform_avg AS (SELECT AVG(total_spent) AS avg_spent FROM user_stats) SELECT us.username, us.total_spent, us.order_count, us.product_count FROM user_stats us, platform_avg pa WHERE us.total_spent > pa.avg_spent * 2 AND us.order_count > 8 ORDER BY us.total_spent DESC",
+      "initial_sql": "WITH user_stats AS (SELECT u.id, u.username, ROUND(SUM(o.total_amount), 2) AS total_spent, COUNT(o.id) AS order_count, COUNT(DISTINCT oi.product_id) AS product_count FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY u.id), platform_avg AS (SELECT AVG(total_spent) AS avg_spent FROM user_stats) SELECT us.username, us.total_spent, us.order_count, us.product_count FROM user_stats us, platform_avg pa WHERE us.total_spent > pa.avg_spent * 2 AND us.order_count > 8 ORDER BY us.total_spent DESC",
+      "final_sql": "WITH user_stats AS (SELECT u.id, u.username, ROUND(SUM(o.total_amount), 2) AS total_spent, COUNT(o.id) AS order_count, COUNT(DISTINCT oi.product_id) AS product_count FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY u.id), platform_avg AS (SELECT AVG(total_spent) AS avg_spent FROM user_stats) SELECT us.username, us.total_spent, us.order_count, us.product_count FROM user_stats us, platform_avg pa WHERE us.total_spent > pa.avg_spent * 2 AND us.order_count > 8 ORDER BY us.total_spent DESC",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "result",
+      "error_type": "result_mismatch",
+      "latency_ms": 20219.0,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 3890.1870000008785,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "users",
+              "orders",
+              "order_items"
+            ],
+            "columns_count": 7,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.352399998519104,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_010",
+              "ex_016",
+              "ex_009"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 16298.061599998618,
+          "message": "",
+          "output_summary": {
+            "sql_length": 568,
+            "tables": 3
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 1.7932999980985187,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 24.42470000096364,
+          "message": "",
+          "output_summary": {
+            "row_count": 219,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0007999988156370819,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    }
+  ]
+}

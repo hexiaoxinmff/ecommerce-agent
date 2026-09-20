@@ -1,0 +1,25 @@
+{
+  "case_id": "B-1011",
+  "eval_id": "E-0034",
+  "question": "在售商品中价格最高的5款商品是哪些？（请给出商品名称、价格与所属分类）",
+  "difficulty": "medium",
+  "scenario": "ranking",
+  "operators": [
+    "where",
+    "join",
+    "order_by",
+    "limit",
+    "top_n"
+  ],
+  "gold_sql": "SELECT p.name, p.price, c.name AS category_name FROM products p JOIN categories c ON c.id = p.category_id WHERE p.status = 'on_sale' ORDER BY p.price DESC, p.id LIMIT 5",
+  "pred_sql": "SELECT p.name, p.price, c.name AS category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.status = 'active' ORDER BY p.price DESC LIMIT 5",
+  "initial_sql": "SELECT p.name, p.price, c.name AS category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.status = 'active' ORDER BY p.price DESC LIMIT 5",
+  "final_sql": "SELECT p.name, p.price, c.name AS category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.status = 'active' ORDER BY p.price DESC LIMIT 5",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 9302.44,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

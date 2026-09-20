@@ -1,0 +1,26 @@
+{
+  "case_id": "B-1015",
+  "eval_id": "E-0049",
+  "question": "按季度统计2024年的订单数量，每个季度各有多少笔订单？",
+  "difficulty": "medium",
+  "scenario": "time_analysis",
+  "operators": [
+    "where",
+    "aggregate",
+    "date_filter",
+    "case_when",
+    "group_by",
+    "date_group"
+  ],
+  "gold_sql": "SELECT CASE WHEN substr(order_date, 6, 2) IN ('01','02','03') THEN 'Q1' WHEN substr(order_date, 6, 2) IN ('04','05','06') THEN 'Q2' WHEN substr(order_date, 6, 2) IN ('07','08','09') THEN 'Q3' ELSE 'Q4' END AS quarter, COUNT(*) AS order_count FROM orders WHERE order_date >= '2024-01-01' AND order_date <= '2024-12-31' GROUP BY 1 ORDER BY 1",
+  "pred_sql": "SELECT CASE WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 10 AND 12 THEN 'Q4' END AS quarter, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2024' AND status != 'cancelled' GROUP BY quarter ORDER BY quarter",
+  "initial_sql": "SELECT CASE WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 10 AND 12 THEN 'Q4' END AS quarter, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2024' AND status != 'cancelled' GROUP BY quarter ORDER BY quarter",
+  "final_sql": "SELECT CASE WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 1 AND 3 THEN 'Q1' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 4 AND 6 THEN 'Q2' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 7 AND 9 THEN 'Q3' WHEN CAST(strftime('%m', order_date) AS INTEGER) BETWEEN 10 AND 12 THEN 'Q4' END AS quarter, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2024' AND status != 'cancelled' GROUP BY quarter ORDER BY quarter",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 12417.77,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

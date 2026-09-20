@@ -1,0 +1,16 @@
+[
+  {
+    "case_id": "E-0086",
+    "detector_alarm": true,
+    "hint_injected": true,
+    "regeneration_count": 1,
+    "initial_sql": "WITH user_stats AS (SELECT u.id, u.username, SUM(o.total_amount) AS total_spent, COUNT(DISTINCT o.id) AS order_count, COUNT(DISTINCT oi.product_id) AS product_count FROM users u JOIN orders o ON o.user_id = u.id JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY u.id), platform_avg AS (SELECT AVG(total_spent) AS avg_spent FROM user_stats) SELECT us.username, ROUND(us.total_spent, 2) AS total_spent, us.order_count, us.product_count FROM user_stats us, platform_avg pa WHERE us.total_spent > pa.avg_spent * 2 AND us.order_count > 8 ORDER BY us.total_spent DESC",
+    "regenerated_sql": "WITH user_order_stats AS (SELECT o.user_id, COUNT(o.id) AS order_count, SUM(o.total_amount) AS total_spent FROM orders o WHERE o.status != 'cancelled' GROUP BY o.user_id), user_product_stats AS (SELECT o.user_id, COUNT(DISTINCT oi.product_id) AS product_count FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY o.user_id), platform_avg AS (SELECT AVG(total_spent) AS avg_spent FROM user_order_stats) SELECT u.username, ROUND(uos.total_spent, 2) AS total_spent, uos.order_count, ups.product_count FROM user_order_stats uos JOIN users u ON u.id = uos.user_id JOIN user_product_stats ups ON ups.user_id = uos.user_id CROSS JOIN platform_avg pa WHERE uos.total_spent > pa.avg_spent * 2 AND uos.order_count > 8 ORDER BY uos.total_spent DESC",
+    "final_sql": "WITH user_order_stats AS (SELECT o.user_id, COUNT(o.id) AS order_count, SUM(o.total_amount) AS total_spent FROM orders o WHERE o.status != 'cancelled' GROUP BY o.user_id), user_product_stats AS (SELECT o.user_id, COUNT(DISTINCT oi.product_id) AS product_count FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY o.user_id), platform_avg AS (SELECT AVG(total_spent) AS avg_spent FROM user_order_stats) SELECT u.username, ROUND(uos.total_spent, 2) AS total_spent, uos.order_count, ups.product_count FROM user_order_stats uos JOIN users u ON u.id = uos.user_id JOIN user_product_stats ups ON ups.user_id = uos.user_id CROSS JOIN platform_avg pa WHERE uos.total_spent > pa.avg_spent * 2 AND uos.order_count > 8 ORDER BY uos.total_spent DESC",
+    "initial_ex": false,
+    "final_ex": true,
+    "regen_error": "",
+    "exec_ok": true,
+    "execution_accuracy": true
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "case_id": "B-1070",
+  "eval_id": "E-0009",
+  "question": "售价最高的商品价格是多少？",
+  "difficulty": "easy",
+  "scenario": "product_analysis",
+  "operators": [
+    "aggregate"
+  ],
+  "gold_sql": "SELECT MAX(price) FROM products",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

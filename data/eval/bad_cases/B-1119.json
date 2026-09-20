@@ -1,0 +1,22 @@
+{
+  "case_id": "B-1119",
+  "eval_id": "E-0025",
+  "question": "非取消订单的平均实付金额（客单价）是多少？",
+  "difficulty": "easy",
+  "scenario": "sales_analysis",
+  "operators": [
+    "aggregate",
+    "where"
+  ],
+  "gold_sql": "SELECT ROUND(AVG(total_amount), 2) FROM orders WHERE status != 'cancelled'",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

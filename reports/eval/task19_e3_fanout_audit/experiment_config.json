@@ -1,0 +1,25 @@
+{
+  "experiment": "task19_e3_fanout_audit",
+  "task": "Task 19：E3 Fan-out Detector 潜在漏报人工审计（无 Detector 修改、无干预）",
+  "status": "DONE",
+  "input": "reports/eval/task17_e3_fanout_validator/static_scan_report.json",
+  "candidate_selection": "fan_out_suspected=false 且 pred_sql 文本同时含 order_items 与 orders",
+  "candidate_count": 20,
+  "candidate_ids": ["E-0059","E-0061","E-0062","E-0067","E-0073","E-0074","E-0080","E-0082","E-0083","E-0085","E-0087","E-0088","E-0089","E-0093","E-0095","E-0096","E-0097","E-0098","E-0099","E-0100"],
+  "audit_result": {
+    "human_fanout_true_FN": 0,
+    "human_fanout_false_TN": 20,
+    "uncertain": 0,
+    "known_positive_E0086_hit": true,
+    "cased_condition_no_recurrence": true
+  },
+  "subset_metrics": {
+    "audit_subset_precision": 1.0,
+    "audit_subset_recall": 1.0,
+    "note": "仅覆盖『E-0086 已知正例 + 20 条候选』人工审计子集，正例 n=1；不代表 ECO-SQL-Bench 全集 Recall"
+  },
+  "conclusion": "KEEP",
+  "conclusion_note": "潜在漏报候选全部人工判定为无 fan-out（TN=20），未发现真实 FN；E-0086 正例继续命中；CASE 条件列误报修复未复发。无需修改 Detector。",
+  "detector_modified": false,
+  "protected_files": ["Benchmark/Gold/Few-shot/Prompt/DB/Agent/Detector 均未改动"]
+}

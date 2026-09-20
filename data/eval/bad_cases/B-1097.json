@@ -1,0 +1,23 @@
+{
+  "case_id": "B-1097",
+  "eval_id": "E-0084",
+  "question": "2025年与2026年（截至9月12日）非取消订单的平均实付金额（客单价）分别是多少？",
+  "difficulty": "hard",
+  "scenario": "comparison",
+  "operators": [
+    "where",
+    "date_filter",
+    "aggregate"
+  ],
+  "gold_sql": "SELECT '2025' AS year, ROUND(AVG(total_amount), 2) AS avg_amount FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' UNION ALL SELECT '2026', ROUND(AVG(total_amount), 2) FROM orders WHERE order_date >= '2026-01-01' AND status != 'cancelled'",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

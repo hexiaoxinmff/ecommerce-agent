@@ -1,0 +1,38 @@
+[
+  {
+    "id": "cand_C1_order_grain_join",
+    "question": "2024年7月至12月各收货地区的订单实付总额与售出商品件数分别是多少？请给出地区、实付总额与件数。",
+    "scenario": "region_order_item_dual_grain",
+    "tables": ["orders", "order_items"],
+    "columns": [
+      "orders.region",
+      "orders.status",
+      "orders.order_date",
+      "orders.total_amount",
+      "order_items.order_id",
+      "order_items.quantity"
+    ],
+    "sql": "WITH region_orders AS (SELECT o.region, SUM(o.total_amount) AS paid_amount FROM orders o WHERE o.status != 'cancelled' AND o.order_date BETWEEN '2024-07-01' AND '2024-12-31' GROUP BY o.region), region_items AS (SELECT o.region, SUM(oi.quantity) AS sold_qty FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' AND o.order_date BETWEEN '2024-07-01' AND '2024-12-31' GROUP BY o.region) SELECT ro.region, ROUND(ro.paid_amount, 2) AS paid_amount, ri.sold_qty AS sold_qty FROM region_orders ro JOIN region_items ri ON ri.region = ro.region ORDER BY ro.paid_amount DESC",
+    "explanation": "订单粒度指标（total_amount）先在订单粒度独立聚合，再与明细粒度指标（quantity）在维度键上 JOIN，避免 orders × order_items 直连导致订单金额被放大重复累计。",
+    "tags": ["地区", "实付", "销量", "两阶段", "防放大"]
+  },
+  {
+    "id": "cand_C2_filtered_avg",
+    "question": "2024年7月至12月各商品分类中，销售额高于10000元的分类里，有哪些分类的销售额高于所有达标分类的平均销售额？请给出分类名称与销售额。",
+    "scenario": "category_above_avg_after_threshold",
+    "tables": ["categories", "products", "order_items", "orders"],
+    "columns": [
+      "orders.status",
+      "orders.order_date",
+      "order_items.product_id",
+      "order_items.subtotal",
+      "products.category_id",
+      "products.id",
+      "categories.id",
+      "categories.name"
+    ],
+    "sql": "WITH cat_sales AS (SELECT c.name AS category_name, SUM(oi.subtotal) AS sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' AND o.order_date BETWEEN '2024-07-01' AND '2024-12-31' GROUP BY c.id HAVING SUM(oi.subtotal) > 10000) SELECT cs.category_name, ROUND(cs.sales, 2) AS sales FROM cat_sales cs WHERE cs.sales > (SELECT AVG(cs2.sales) FROM cat_sales cs2) ORDER BY cs.sales DESC",
+    "explanation": "先在 CTE 内对所有达标分类（HAVING 显式阈值10000）完成第一层聚合，再对达标结果计算平均基准进行第二层比较；过滤条件前置保证平均基准不被未达标组合干扰。",
+    "tags": ["分类", "销售额", "平均", "两阶段", "阈值过滤"]
+  }
+]

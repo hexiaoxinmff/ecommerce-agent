@@ -1,0 +1,2301 @@
+{
+  "metadata": {
+    "dataset_name": "ECO-SQL-Bench",
+    "subtitle": "项目自建电商 Text2SQL 评测集",
+    "version": "1.1",
+    "database_version": "dev-2026-09-14",
+    "seed": 20260914,
+    "schema_version": "1.0",
+    "generator_version": "1.1",
+    "created_at": "2026-09-15",
+    "review_status": "reviewed",
+    "description": "ECO-SQL-Bench 单轮评测集 v1.1（Task 14.3 卫生修订版）：E-0086 修复金额 fan-out 膨胀、E-0095 题面与 Gold 对齐、E-0098 增加排名 tiebreaker；其余 97 条 Gold/hash 保持不变。历史 v1.0（含原 E-0086/0095/0098）见 docs/evaluation-batch-4-review.md 与 git 历史。"
+  },
+  "items": [
+    {
+      "id": "E-0001",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "question": "平台上一共有多少用户？",
+      "gold_sql": "SELECT COUNT(*) AS user_count FROM users",
+      "gold_result_hash": "2c04142863b2fd997ef6b9a833297a878d4849db3cc075e6c2bf049ef1b116e8",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "基础计数：单表单聚合。"
+    },
+    {
+      "id": "E-0002",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "question": "广东省有多少用户？",
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE region = '广东'",
+      "gold_result_hash": "cd8c581b40cb853fd9a09958b7918a76f485d999ff9358b9e65a9a872b8bbe75",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "地区条件过滤（users.region 为省级地区）。"
+    },
+    {
+      "id": "E-0003",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "question": "平台有多少活跃用户？",
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE status = 'active'",
+      "gold_result_hash": "c42a3e8444084d7b4268ab692d9a667c44b180a5f3617abe3cb49bee82f49d07",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "用户状态过滤。"
+    },
+    {
+      "id": "E-0004",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where",
+        "date_filter"
+      ],
+      "question": "2023年注册的用户有多少？",
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE register_date >= '2023-01-01' AND register_date <= '2023-12-31'",
+      "gold_result_hash": "af9fe711fc695d74ba42c72b607fa7610877a6e663a4e9dfcdf233ad843ec3ed",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "整年日期范围过滤。"
+    },
+    {
+      "id": "E-0005",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "注册时间最早的3位用户是哪些？（请给出用户名和注册日期）",
+      "gold_sql": "SELECT username, register_date FROM users ORDER BY register_date ASC LIMIT 3",
+      "gold_result_hash": "cd003bea1acf0fac77fbee8d09eca3ce7582f5b3d4f92df0e4b71eb601a571a0",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "易档 Top-N（单表排序+截断），匿名数据为用户建模名。"
+    },
+    {
+      "id": "E-0006",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "question": "北京和上海两个地区的用户一共有多少？",
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE region IN ('北京', '上海')",
+      "gold_result_hash": "c64acbd5e892b7485a26c179bc5f2e61140a1af3296f6c47f318c872ff6c0ce0",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "IN 多值条件。"
+    },
+    {
+      "id": "E-0007",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "question": "平台上一共有多少商品？",
+      "gold_sql": "SELECT COUNT(*) AS product_count FROM products",
+      "gold_result_hash": "61e3d5fcc31eac01f7890c1d06d14a72c717080a63c84e8b1466139765cdb280",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "基础计数。"
+    },
+    {
+      "id": "E-0008",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "question": "所有商品的平均售价是多少？",
+      "gold_sql": "SELECT ROUND(AVG(price), 2) AS avg_price FROM products",
+      "gold_result_hash": "2d99cb592d3028160a0628e2b68b8ed7603278bf162886861655a37b47dd89da",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "currency",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "AVG 聚合，金额保留两位小数。"
+    },
+    {
+      "id": "E-0009",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "question": "售价最高的商品价格是多少？",
+      "gold_sql": "SELECT MAX(price) FROM products",
+      "gold_result_hash": "8d9356481c95613772d067c5875de9391709677e9c6550652429206aed794d0a",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "currency",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "MAX 聚合。"
+    },
+    {
+      "id": "E-0010",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "question": "在售商品中售价最低的是多少？",
+      "gold_sql": "SELECT MIN(price) FROM products WHERE status = 'on_sale'",
+      "gold_result_hash": "6c7c45697267599f90dccf410d1db8ad193f20c86fe45e83a5d84ad868e27fe3",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "currency",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "MIN + 状态过滤。"
+    },
+    {
+      "id": "E-0011",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "question": "售价超过500元的商品有多少？",
+      "gold_sql": "SELECT COUNT(*) FROM products WHERE price > 500",
+      "gold_result_hash": "4b357390ba55e89e62e1b96383b32fef65662753e4a6955d3db490586d6237e7",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "数值阈值过滤。"
+    },
+    {
+      "id": "E-0012",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "order_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "question": "平台上一共有多少订单？",
+      "gold_sql": "SELECT COUNT(*) AS order_count FROM orders",
+      "gold_result_hash": "90c7d352e24d05ebd9d860c6e78bc006f75fa678885a50d59f73b9add434c305",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "订单量=结构统计，不排除取消订单。"
+    },
+    {
+      "id": "E-0013",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "order_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "question": "已取消的订单有多少？",
+      "gold_sql": "SELECT COUNT(*) FROM orders WHERE status = 'cancelled'",
+      "gold_result_hash": "00ddc7fe51c939eccb2ea0813eca19108f8c86364c37db3762fd4d395db80077",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "订单结构类统计口径：取消订单计数（与销售额口径相区别）。"
+    },
+    {
+      "id": "E-0014",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "order_analysis",
+      "operators": [
+        "aggregate",
+        "where",
+        "date_filter"
+      ],
+      "question": "2024年6月下了多少订单？",
+      "gold_sql": "SELECT COUNT(*) FROM orders WHERE order_date >= '2024-06-01' AND order_date <= '2024-06-30'",
+      "gold_result_hash": "57626b2837a54d4859f24c9e08c4fb20b0b4c302c024e26a6809e7efca2703cf",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "月份日期范围过滤（订单结构计数，不涉金额）。"
+    },
+    {
+      "id": "E-0015",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "order_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "question": "非取消订单中实付金额最高的是多少？",
+      "gold_sql": "SELECT MAX(total_amount) FROM orders WHERE status != 'cancelled'",
+      "gold_result_hash": "a41e023e5312366d47ce2b2ab949692ba5bf6750ce5c9a9fd1b02e5449cc1cc0",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "currency",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "金额口径：orders.total_amount=订单最终实付；排除取消订单。"
+    },
+    {
+      "id": "E-0016",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "order_analysis",
+      "operators": [
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "最近下的5笔订单是哪几笔？（请给出订单ID和下单日期）",
+      "gold_sql": "SELECT id, order_date FROM orders ORDER BY order_date DESC LIMIT 5",
+      "gold_result_hash": "9595d1bff3f563e36a088157a216087d97fbb1e9c84343c06e3422d1c04158d3",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "时间倒序 Top-5（固定库内日期，可复现）。"
+    },
+    {
+      "id": "E-0017",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "order_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "2024年实付金额最高的5笔非取消订单是哪几笔？（请给出订单ID和金额）",
+      "gold_sql": "SELECT id, total_amount FROM orders WHERE order_date >= '2024-01-01' AND order_date <= '2024-12-31' AND status != 'cancelled' ORDER BY total_amount DESC LIMIT 5",
+      "gold_result_hash": "fd40b30e52710756983d7c77b8519f400f4662859e20b5cbb60fb6eb716be47e",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "日期+状态+金额排序复合条件（不跨表，仍属易档）。"
+    },
+    {
+      "id": "E-0018",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "category_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "question": "平台上一共有多少个商品分类？",
+      "gold_sql": "SELECT COUNT(*) AS category_count FROM categories",
+      "gold_result_hash": "cb2129a04835c6d30abae679d735c166ffeb256306c946feff2e3fb29c7a53ea",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "基础计数。"
+    },
+    {
+      "id": "E-0019",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "category_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "question": "有多少个一级（顶级）商品分类？",
+      "gold_sql": "SELECT COUNT(*) FROM categories WHERE parent_id IS NULL",
+      "gold_result_hash": "5735af052a0aac50340d1845b24a3d1f0c5229e0807e3f1c365d8bc0c2994d01",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "分类层级结构（parent_id IS NULL=一级分类）。"
+    },
+    {
+      "id": "E-0020",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "regional_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "question": "收货地为广东的订单有多少？",
+      "gold_sql": "SELECT COUNT(*) FROM orders WHERE region = '广东'",
+      "gold_result_hash": "9f312289a187802f6f246a0910341f692161cf7211011f97776a401184286fc1",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "地区维度（orders.region=收货省份），订单结构计数。"
+    },
+    {
+      "id": "E-0021",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "regional_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "question": "收货地为上海或北京的订单有多少？",
+      "gold_sql": "SELECT COUNT(*) FROM orders WHERE region IN ('上海', '北京')",
+      "gold_result_hash": "de4dd663a8d7df692ef730a71b30082415082b239df69671a2ef300edb60f32a",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "多值地区过滤。"
+    },
+    {
+      "id": "E-0022",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "time_analysis",
+      "operators": [
+        "aggregate",
+        "where",
+        "date_filter"
+      ],
+      "question": "2025年全年一共下了多少订单？",
+      "gold_sql": "SELECT COUNT(*) FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31'",
+      "gold_result_hash": "1816c2a0164a9314bf0e4aaf0c01c6a96468df41ccfcb42c9f38e1bd93d5edf2",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "整年日期范围过滤。"
+    },
+    {
+      "id": "E-0023",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "time_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "question": "平台最早的订单是哪一天下的？",
+      "gold_sql": "SELECT MIN(order_date) FROM orders",
+      "gold_result_hash": "9f282ef0f82cad5cdca6e006d45699876fb28bbf102ead8a4dab75d768886758",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "date"
+      },
+      "multi_turn": null,
+      "notes": "MIN 日期聚合。"
+    },
+    {
+      "id": "E-0024",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "sales_analysis",
+      "operators": [
+        "aggregate",
+        "where",
+        "date_filter"
+      ],
+      "question": "2026年非取消订单的实付总额是多少？",
+      "gold_sql": "SELECT ROUND(SUM(total_amount), 2) FROM orders WHERE order_date >= '2026-01-01' AND status != 'cancelled'",
+      "gold_result_hash": "2860b57b0945af67394e74556cd1807f8259d5d980a7dd823f7afb90329723be",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "currency",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "口径：销售额=orders.total_amount 合计，默认排除 cancelled。数据截止 2026-09-12，2026-01-01 起即库内当年全部。"
+    },
+    {
+      "id": "E-0025",
+      "split": "eval",
+      "difficulty": "easy",
+      "scenario": "sales_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "question": "非取消订单的平均实付金额（客单价）是多少？",
+      "gold_sql": "SELECT ROUND(AVG(total_amount), 2) FROM orders WHERE status != 'cancelled'",
+      "gold_result_hash": "0280abf5709f234fec31faa8572744b2b3c75faccf9f20ad3d0401f8cb6b794a",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "currency",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "口径：客单价=非取消订单的平均实付金额；排除 cancelled。"
+    },
+    {
+      "id": "E-0026",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "user_analysis",
+      "operators": [
+        "where",
+        "group_by",
+        "date_group",
+        "aggregate",
+        "date_filter"
+      ],
+      "question": "2024年及以后注册的用户数量按注册年份分布是怎样的？",
+      "gold_sql": "SELECT strftime('%Y', register_date) AS reg_year, COUNT(*) AS user_count FROM users WHERE register_date >= '2024-01-01' GROUP BY reg_year ORDER BY reg_year",
+      "gold_result_hash": "57baaac3ff241676343ae8d4cbe6784c3be2836ecc881e2957e62af64b95f123",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "GROUP BY+date_group（注册年份），date_filter 2024 起。结构统计。"
+    },
+    {
+      "id": "E-0027",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "user_analysis",
+      "operators": [
+        "group_by",
+        "aggregate"
+      ],
+      "question": "各地区的用户数量分布是怎样的？",
+      "gold_sql": "SELECT region, COUNT(*) AS user_count FROM users GROUP BY region ORDER BY user_count DESC",
+      "gold_result_hash": "136c3c48fa611bb2c8c548963e6064aaa8e204de4a59200f6b52390b362b23c8",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "GROUP BY 单表分布（users.region 15 省级地区）。与 Easy 单地区计数不同：本题为全量分组分布。"
+    },
+    {
+      "id": "E-0028",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "user_analysis",
+      "operators": [
+        "join",
+        "group_by",
+        "having",
+        "aggregate"
+      ],
+      "question": "累计下单次数不少于13次的用户有哪些？（请给出用户名与订单次数）",
+      "gold_sql": "SELECT u.username, COUNT(*) AS order_count FROM users u JOIN orders o ON o.user_id = u.id GROUP BY u.id, u.username HAVING COUNT(*) >= 13 ORDER BY order_count DESC, u.id",
+      "gold_result_hash": "ad5803063a6980c9948f2b0ad04634b5d3f46491f9448f830c4a6d5722fcb4ed",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "两表 JOIN(users×orders)+GROUP BY+HAVING。下单次数=订单结构统计（口径与 E-0012 一致，不排除取消）。"
+    },
+    {
+      "id": "E-0029",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "product_analysis",
+      "operators": [
+        "case_when",
+        "group_by",
+        "aggregate"
+      ],
+      "question": "按售价将商品划分为四档（低于100元、100至500元、500至2000元、2000元以上），各档分别有多少款商品？",
+      "gold_sql": "SELECT CASE WHEN price < 100 THEN '低于100元' WHEN price < 500 THEN '100至500元' WHEN price < 2000 THEN '500至2000元' ELSE '2000元以上' END AS price_band, COUNT(*) AS product_count FROM products GROUP BY 1 ORDER BY 1",
+      "gold_result_hash": "b3a60c07ddc5754c51a23d20d940326e37efc6c319f3593fae426cc1e18a4ca8",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "CASE WHEN 分档 + GROUP BY 表达式 + 计数。真实价格区间 26.47~9351.34。"
+    },
+    {
+      "id": "E-0030",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "product_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "join",
+        "group_by",
+        "having"
+      ],
+      "question": "在售商品数量超过20款的叶子分类有哪些？（请给出分类名称与在售商品数）",
+      "gold_sql": "SELECT c.name, COUNT(*) AS cnt FROM products p JOIN categories c ON c.id = p.category_id WHERE p.status = 'on_sale' GROUP BY c.id, c.name HAVING COUNT(*) > 20 ORDER BY cnt DESC",
+      "gold_result_hash": "000197e67100cf45c99aa691ce52fade7ebaee88372473c7c789c51fffd2b972",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "两表 JOIN(products×categories)+WHERE(在售)+GROUP BY+HAVING。阈值 20 有真实业务分布（10 个分类）。"
+    },
+    {
+      "id": "E-0031",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "product_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "join",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "售价低于100元的商品中，款数最多的5个分类是哪些？（请给出分类名称与款数）",
+      "gold_sql": "SELECT c.name, COUNT(*) AS cnt FROM products p JOIN categories c ON c.id = p.category_id WHERE p.price < 100 GROUP BY c.id, c.name ORDER BY cnt DESC, c.name LIMIT 5",
+      "gold_result_hash": "92f1d4dd9496fcb8989e39d97b40f443b03be1a884313dae1f204ec2f7d7230c",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "JOIN+WHERE 价格+GROUP BY+ORDER+LIMIT（Top-5）。低价品集中度业务分析。"
+    },
+    {
+      "id": "E-0032",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate",
+        "join",
+        "group_by"
+      ],
+      "question": "每个叶子分类的商品最高售价和最低售价分别是多少？（请给出分类名称、最高价与最低价）",
+      "gold_sql": "SELECT c.name, MAX(p.price) AS max_price, MIN(p.price) AS min_price FROM products p JOIN categories c ON c.id = p.category_id GROUP BY c.id, c.name ORDER BY c.id",
+      "gold_result_hash": "78c8580ec9827489070257e0cc5283090357aa496d766282dbe5880c226ac02d",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "两表 JOIN+GROUP BY，一题携带 MAX/MIN 双聚合。"
+    },
+    {
+      "id": "E-0033",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate",
+        "join",
+        "group_by",
+        "having"
+      ],
+      "question": "平均售价超过1500元的商品分类有哪些？（请给出分类名称与商品平均售价）",
+      "gold_sql": "SELECT c.name, ROUND(AVG(p.price), 2) AS avg_price FROM products p JOIN categories c ON c.id = p.category_id GROUP BY c.id, c.name HAVING AVG(p.price) > 1500 ORDER BY avg_price DESC",
+      "gold_result_hash": "5d7a768966d41ebd38b175c5370b92f1e4213dcd7f8ed43f574d9f7954738c45",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "JOIN+GROUP BY+HAVING（AVG 聚合阈值过滤）。结果 3 个高均价分类，业务可解释。"
+    },
+    {
+      "id": "E-0034",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "ranking",
+      "operators": [
+        "where",
+        "join",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "在售商品中价格最高的5款商品是哪些？（请给出商品名称、价格与所属分类）",
+      "gold_sql": "SELECT p.name, p.price, c.name AS category_name FROM products p JOIN categories c ON c.id = p.category_id WHERE p.status = 'on_sale' ORDER BY p.price DESC, p.id LIMIT 5",
+      "gold_result_hash": "3f07dbe7e28e1b48e8cf7f985cad35df8fdb6d7bc0ef203de6ee5db7f47921c9",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "两表 JOIN+WHERE 在售+ORDER BY 倒序+LIMIT（Top-5）。ranking 场景。"
+    },
+    {
+      "id": "E-0035",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "category_analysis",
+      "operators": [
+        "aggregate",
+        "join",
+        "group_by"
+      ],
+      "question": "每个一级分类下面各有多少个子分类？（请给出一级分类名称与子分类数量）",
+      "gold_sql": "SELECT pc.name AS top_category, COUNT(lc.id) AS sub_count FROM categories pc JOIN categories lc ON lc.parent_id = pc.id GROUP BY pc.id, pc.name ORDER BY sub_count DESC, pc.name",
+      "gold_result_hash": "43b750d8047f1c1da0143f4cd69f08d2e099c0b4c2ac552754ea47e56f9c82e9",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "分类自关联（categories×categories，单次 JOIN，非 multiple_join）+GROUP BY。层级结构分析。"
+    },
+    {
+      "id": "E-0036",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "category_analysis",
+      "operators": [
+        "aggregate",
+        "join",
+        "group_by",
+        "having"
+      ],
+      "question": "哪些分类下没有挂载任何商品？",
+      "gold_sql": "SELECT c.name FROM categories c LEFT JOIN products p ON p.category_id = c.id GROUP BY c.id, c.name HAVING COUNT(p.id) = 0 ORDER BY c.id",
+      "gold_result_hash": "69b5467b133c9d1e7fdc23c2f8a6b22972f351ea77191b8f69f63aa45c99e282",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "LEFT JOIN+GROUP BY+HAVING COUNT=0（空分类检测）。结果为一组一级分类（商品只挂叶子分类），业务可解释。"
+    },
+    {
+      "id": "E-0037",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "category_analysis",
+      "operators": [
+        "aggregate",
+        "join",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "挂载商品数量最多的5个分类是哪些？（请给出分类名称与商品数量）",
+      "gold_sql": "SELECT c.name, COUNT(*) AS product_count FROM products p JOIN categories c ON c.id = p.category_id GROUP BY c.id, c.name ORDER BY product_count DESC, c.name LIMIT 5",
+      "gold_result_hash": "64accf2a87c36f26929a4839bad157285c7a232a809e82d5f02d3cc290e04767",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "JOIN+GROUP BY+ORDER+LIMIT（Top-5）。商品 SKU 集中度分析。"
+    },
+    {
+      "id": "E-0038",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "category_analysis",
+      "operators": [
+        "aggregate",
+        "join",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "整个平台售价最高的商品属于哪个分类？最高价是多少？",
+      "gold_sql": "SELECT c.name, MAX(p.price) AS max_price FROM products p JOIN categories c ON c.id = p.category_id GROUP BY c.id, c.name ORDER BY max_price DESC, c.id LIMIT 1",
+      "gold_result_hash": "e5c5a0bed8d7969888636baee16f4fa36be1546eae35bfc1e862db960fb19d9b",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "JOIN+GROUP BY MAX+LIMIT 1。问题语义为 Top-1（售价最高品类的归属）。"
+    },
+    {
+      "id": "E-0039",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "order_analysis",
+      "operators": [
+        "group_by",
+        "aggregate"
+      ],
+      "question": "各订单状态的订单数量分别是多少？",
+      "gold_sql": "SELECT status, COUNT(*) AS order_count FROM orders GROUP BY status ORDER BY order_count DESC",
+      "gold_result_hash": "e5f18e0cbfd0f971761dd1d33ea9db1d7ba48a4b8c52e1dc962020f2a3605f96",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "订单状态结构统计（含 cancelled，口径同 E-0012/E-0013）。单表 GROUP BY。"
+    },
+    {
+      "id": "E-0040",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "order_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "aggregate"
+      ],
+      "question": "2026年实付金额超过5000元的非取消订单有多少笔？",
+      "gold_sql": "SELECT COUNT(*) FROM orders WHERE order_date >= '2026-01-01' AND status != 'cancelled' AND total_amount > 5000",
+      "gold_result_hash": "f0f804b2aa77ade7a6204951f9f88a37805b3a79ea01922362157f55498f223b",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "金额+日期+状态三条件组合过滤（orders.total_amount），时间窗与库内数据一致（截至 2026-09-12）。"
+    },
+    {
+      "id": "E-0041",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "order_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "group_by",
+        "order_by"
+      ],
+      "question": "每个订单状态的平均实付金额是多少？（不含取消订单，按平均金额降序）",
+      "gold_sql": "SELECT status, ROUND(AVG(total_amount), 2) AS avg_amount FROM orders WHERE status != 'cancelled' GROUP BY status ORDER BY avg_amount DESC",
+      "gold_result_hash": "30e21a9cf2c28cb4d94e36fda3b2274e375a19ccb83433ed8958c1e0ef168571",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "GROUP BY status + AVG(total_amount)，状态维度金额口径，正确排除 cancelled。"
+    },
+    {
+      "id": "E-0042",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "sales_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "非取消订单实付销售额最高的10个收货地区是哪些？（请给出地区名称与销售额）",
+      "gold_sql": "SELECT region, ROUND(SUM(total_amount), 2) AS revenue FROM orders WHERE status != 'cancelled' GROUP BY region ORDER BY revenue DESC LIMIT 10",
+      "gold_result_hash": "3455fe8cd7b007a82cfada2427d603066c5baa6ba461f9b37de4a71650b5bc23",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "GROUP BY 地区+SUM(total_amount)，排除 cancelled；TOP-10 排序。销售额口径=实付金额。"
+    },
+    {
+      "id": "E-0043",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "sales_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "date_group",
+        "date_filter",
+        "group_by"
+      ],
+      "question": "2025年每个月的非取消订单实付销售额是多少？（按月份列出）",
+      "gold_sql": "SELECT strftime('%Y-%m', order_date) AS month, ROUND(SUM(total_amount), 2) AS revenue FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' GROUP BY month ORDER BY month",
+      "gold_result_hash": "f08514d73724df698a4b8296b8573bff1dad0b06e6bf05bae212958718676cee",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "date_group（月份趋势）+SUM(total_amount)，整年窗+排除 cancelled。12 个月趋势可审计。"
+    },
+    {
+      "id": "E-0044",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "sales_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "case_when",
+        "group_by",
+        "order_by"
+      ],
+      "question": "按实付金额将非取消订单划分为三档（低于5000元、5000至20000元、20000元以上），各档分别有多少笔订单？",
+      "gold_sql": "SELECT CASE WHEN total_amount < 5000 THEN '低于5000元' WHEN total_amount < 20000 THEN '5000至20000元' ELSE '20000元以上' END AS amount_tier, COUNT(*) AS order_count FROM orders WHERE status != 'cancelled' GROUP BY 1 ORDER BY 1",
+      "gold_result_hash": "947f4fe28a6f092b5cb2eac4f7c7af5709e7d85bcff31fdba6088aaeed4796c2",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "CASE WHEN 金额分档+GROUP BY 表达式（订单价值分层），排除 cancelled。与 E-0024 的整窗求和相区别，避免纯时间窗模板重复。"
+    },
+    {
+      "id": "E-0045",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "sales_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "非取消订单平均实付金额（客单价）最高的5个收货地区是哪些？（请给出地区名称与平均金额）",
+      "gold_sql": "SELECT region, ROUND(AVG(total_amount), 2) AS avg_amount FROM orders WHERE status != 'cancelled' GROUP BY region ORDER BY avg_amount DESC, region LIMIT 5",
+      "gold_result_hash": "d4cf0982a0b47a3d5fda1f822cff2932d611e8fe9b042d904a9cc0e132df822c",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "GROUP BY 地区+AVG(total_amount) 客单价，排除 cancelled，TOP-5。"
+    },
+    {
+      "id": "E-0046",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "sales_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "aggregate"
+      ],
+      "question": "2025年发放的订单优惠（折扣）金额合计是多少？（仅统计存在优惠的订单）",
+      "gold_sql": "SELECT ROUND(SUM(discount_amount), 2) FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND discount_amount > 0",
+      "gold_result_hash": "defc9c496a472be8705abe682baae3dc948e6b3464874c7fad583e9b8be19dbb",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "currency",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "SUM(orders.discount_amount)，仅含优惠>0 订单（折扣真实发生）。促销成本口径。"
+    },
+    {
+      "id": "E-0047",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "time_analysis",
+      "operators": [
+        "aggregate",
+        "date_group",
+        "group_by"
+      ],
+      "question": "2024年至2026年每年的订单数量分别是多少？",
+      "gold_sql": "SELECT strftime('%Y', order_date) AS order_year, COUNT(*) AS order_count FROM orders GROUP BY order_year ORDER BY order_year",
+      "gold_result_hash": "197608f0536671d1d759f06b6632228e2b232f97aba7bee4600609f1bb373ca0",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "date_group（年度分组）+COUNT，跨年趋势（2024~2026 全量数据）。订单数结构统计。"
+    },
+    {
+      "id": "E-0048",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "time_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "date_filter",
+        "date_group",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "2026年订单数量最多的5个月份是哪几个？（请给出月份与订单数）",
+      "gold_sql": "SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-01-01' GROUP BY month ORDER BY order_count DESC, month LIMIT 5",
+      "gold_result_hash": "eab6d15b769bf8002ecbf3a5ac87d7635e067c6c30eb22350f95ea5b28af7e56",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "date_filter(2026)+date_group+ORDER BY+LIMIT（月份 Top-5），真实高峰月 8 月/6 月/7 月。"
+    },
+    {
+      "id": "E-0049",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "time_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "date_filter",
+        "case_when",
+        "group_by",
+        "date_group"
+      ],
+      "question": "按季度统计2024年的订单数量，每个季度各有多少笔订单？",
+      "gold_sql": "SELECT CASE WHEN substr(order_date, 6, 2) IN ('01','02','03') THEN 'Q1' WHEN substr(order_date, 6, 2) IN ('04','05','06') THEN 'Q2' WHEN substr(order_date, 6, 2) IN ('07','08','09') THEN 'Q3' ELSE 'Q4' END AS quarter, COUNT(*) AS order_count FROM orders WHERE order_date >= '2024-01-01' AND order_date <= '2024-12-31' GROUP BY 1 ORDER BY 1",
+      "gold_result_hash": "5d8b95ee6e0f0ba954137a7baecb886a912f8417f1ad8674793415ead4428bf2",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "CASE WHEN 划分季度+GROUP BY 表达式，date_group 变体。2024 全年窗。"
+    },
+    {
+      "id": "E-0050",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "time_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "case_when",
+        "group_by",
+        "date_filter",
+        "order_by"
+      ],
+      "question": "2026年工作日与周末的订单数量分别是多少？",
+      "gold_sql": "SELECT CASE WHEN strftime('%w', order_date) IN ('0','6') THEN '周末' ELSE '工作日' END AS day_type, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-01-01' GROUP BY 1 ORDER BY order_count DESC, 1",
+      "gold_result_hash": "d5b01f5158987da4e181690427405452aab61de16d6d7197fc92a9faf136f374",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "工作日/周末分类聚合（strftime %w+CASE WHEN），周内消费行为分析。"
+    },
+    {
+      "id": "E-0051",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "regional_analysis",
+      "operators": [
+        "aggregate",
+        "group_by"
+      ],
+      "question": "各收货地区的订单数量分布是怎样的？",
+      "gold_sql": "SELECT region, COUNT(*) AS order_count FROM orders GROUP BY region ORDER BY order_count DESC",
+      "gold_result_hash": "3aa909949f9d4b144d2236e5074548ba0686204ba13510b8c07bffc1999d7b4d",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "GROUP BY orders.region 全量分布（15 地区）。订单结构统计。"
+    },
+    {
+      "id": "E-0052",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "regional_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "group_by",
+        "having"
+      ],
+      "question": "收货地区中，非取消订单实付销售额超过200万元的地区有哪些？（请给出地区名称与销售额）",
+      "gold_sql": "SELECT region, ROUND(SUM(total_amount), 2) AS revenue FROM orders WHERE status != 'cancelled' GROUP BY region HAVING SUM(total_amount) > 2000000 ORDER BY revenue DESC",
+      "gold_result_hash": "38b66cab738e25a82fce59553c693d81b765e483de92f7362140d7930c950d9a",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "GROUP BY 地区 + HAVING SUM(total_amount) 阈值过滤（地区销售规模分层），排除 cancelled。与 E-0051 计数分布、E-0042 全量排序相区别。"
+    },
+    {
+      "id": "E-0053",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "regional_analysis",
+      "operators": [
+        "where",
+        "aggregate",
+        "date_filter",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "2026年7月至8月，订单数量最高的5个收货地区是哪些？（请给出地区名称与订单数量）",
+      "gold_sql": "SELECT region, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-07-01' AND order_date <= '2026-08-31' GROUP BY region ORDER BY order_count DESC, region LIMIT 5",
+      "gold_result_hash": "62135bdb083ac858f8e8e915de247f9cbc8788c0172ca2048a6394cd8400af6c",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "时间窗（7-8 月）+地区分组+ORDER+LIMIT（Top-5）。夏季区域性需求分布。"
+    },
+    {
+      "id": "E-0054",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "ranking",
+      "operators": [
+        "aggregate",
+        "join",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "平均售价最高的5个商品分类是哪些？（请给出分类名称与平均售价）",
+      "gold_sql": "SELECT c.name, ROUND(AVG(p.price), 2) AS avg_price FROM products p JOIN categories c ON c.id = p.category_id GROUP BY c.id, c.name ORDER BY avg_price DESC, c.name LIMIT 5",
+      "gold_result_hash": "cf6d84c8ecb89ff8f212f80b3e20ed5da4d9c12e4331b5a6facaac963183a52c",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "JOIN+GROUP BY AVG+ORDER+LIMIT（高客单分类 Top-5）。与 E-0033（HAVING 阈值）区分。"
+    },
+    {
+      "id": "E-0055",
+      "split": "eval",
+      "difficulty": "medium",
+      "scenario": "ranking",
+      "operators": [
+        "where",
+        "aggregate",
+        "join",
+        "group_by",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "累计消费金额最高的5位用户是哪些？（请给出用户名与累计非取消实付金额）",
+      "gold_sql": "SELECT u.username, ROUND(SUM(o.total_amount), 2) AS total_spent FROM users u JOIN orders o ON o.user_id = u.id WHERE o.status != 'cancelled' GROUP BY u.id, u.username ORDER BY total_spent DESC, u.id LIMIT 5",
+      "gold_result_hash": "0fe157dc71b9f5bc599e632d2c808278ef13009cd03862a5f3a72957a2a32d20",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "两表 JOIN(users×orders)+GROUP BY+SUM(total_amount)，排除 cancelled；高价值用户 Top-5。"
+    },
+    {
+      "id": "E-0056",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "join",
+        "where",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "question": "累计消费金额超过全平台用户平均累计消费3倍的用户有哪些？（请给出用户名与累计非取消实付金额）",
+      "gold_sql": "WITH user_spent AS (SELECT o.user_id AS uid, SUM(o.total_amount) AS spent FROM orders o WHERE o.status != 'cancelled' GROUP BY o.user_id) SELECT u.username, ROUND(us.spent, 2) AS total_spent FROM user_spent us JOIN users u ON u.id = us.uid GROUP BY u.id, u.username, us.spent HAVING us.spent > 3 * (SELECT AVG(spent) FROM user_spent) ORDER BY total_spent DESC, u.id",
+      "gold_result_hash": "8cf160ddd15e00fc7ede2eb5b2c5a89547daffce41b6d7d0dbb9685f87284121",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "CTE 用户累计消费（排除 cancelled）+JOIN 用户表+HAVING 与用户均值3倍比较（comparison_to_average+标量子查询）。"
+    },
+    {
+      "id": "E-0057",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "subquery",
+        "case_when",
+        "group_by",
+        "aggregate"
+      ],
+      "question": "按用户累计下单次数将用户分为三档（1-3单、4-10单、11单及以上），各档分别有多少用户？",
+      "gold_sql": "SELECT CASE WHEN cnt <= 3 THEN '1-3单' WHEN cnt <= 10 THEN '4-10单' ELSE '11单及以上' END AS tier, COUNT(*) AS user_count FROM (SELECT o.user_id AS uid, COUNT(*) AS cnt FROM orders o GROUP BY o.user_id) AS u GROUP BY tier ORDER BY tier",
+      "gold_result_hash": "80dd214e24cc6fd82ba071b22706342fbf26be412797c1350b3c899568248cd4",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "内层 GROUP BY 派生表（subquery）+CASE WHEN 分层+外层聚合。订单数=结构统计（含取消）。"
+    },
+    {
+      "id": "E-0058",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "product_analysis",
+      "operators": [
+        "join",
+        "where",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by",
+        "limit"
+      ],
+      "question": "在售商品平均售价高于全平台商品平均售价的商品分类有哪些？（请给出分类名称与平均售价，取前5名）",
+      "gold_sql": "SELECT c.name, ROUND(AVG(p.price), 2) AS avg_price FROM products p JOIN categories c ON c.id = p.category_id WHERE p.status = 'on_sale' GROUP BY c.id, c.name HAVING AVG(p.price) > (SELECT AVG(price) FROM products) ORDER BY avg_price DESC, c.name LIMIT 5",
+      "gold_result_hash": "1653ebb10032be328c0f415204b1b69292f4d5997502f7f9c1c6418a0a6dcd9b",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "JOIN+GROUP BY+HAVING 与全平台均价标量子查询比较（comparison_to_average）。实际达标分类恰 5 个，LIMIT 5 与结果一致。"
+    },
+    {
+      "id": "E-0059",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "product_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "非取消订单中销量最高的5款商品是哪些？（请给出商品名称与累计销量）",
+      "gold_sql": "SELECT p.name, SUM(oi.quantity) AS sold FROM products p JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY p.id, p.name ORDER BY sold DESC, p.id LIMIT 5",
+      "gold_result_hash": "c16a40884bc7dd79107c086a408df1b179971bd8f6de741c3a0489cca9458a60",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "三表 JOIN(products×order_items×orders)=multiple_join，销量=SUM(quantity)，排除 cancelled，Top-5（第5名126与第6名125无并列）。"
+    },
+    {
+      "id": "E-0060",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "product_analysis",
+      "operators": [
+        "join",
+        "where",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "question": "每个分类中，售价高于该分类平均售价的商品至少有多少款？请列出此类分类（含高级款数≥2的分类）及其款数。",
+      "gold_sql": "SELECT c.name, COUNT(*) AS above_cnt FROM products p JOIN categories c ON c.id = p.category_id WHERE p.price > (SELECT AVG(p2.price) FROM products p2 WHERE p2.category_id = p.category_id) GROUP BY c.id, c.name HAVING COUNT(*) >= 2 ORDER BY above_cnt DESC, c.name",
+      "gold_result_hash": "89d8d30067796047326d2ec663ad9dd483b7e62771172762571afcec2de1860f",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "相关子查询（分类内平均）作比较基准（comparison_to_average）+GROUP BY+HAVING。"
+    },
+    {
+      "id": "E-0061",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "category_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "question": "销售金额高于全部分类平均销售金额的叶子分类有哪些？（请给出分类名称与销售额）",
+      "gold_sql": "WITH cat_sales AS (SELECT c.id, c.name, SUM(oi.subtotal) AS sales FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY c.id, c.name) SELECT name, ROUND(sales, 2) AS revenue FROM cat_sales WHERE sales > (SELECT AVG(sales) FROM cat_sales) ORDER BY revenue DESC",
+      "gold_result_hash": "169f7fc8d5ab16813245d3e818489e76efabf4d36d9564e2364e71928449afbd",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "四表 JOIN(分类×商品×明细×订单)=multiple_join；CTE 聚合后与分类销售额均值比较（comparison_to_average）；金额用明细口径 subtotal。"
+    },
+    {
+      "id": "E-0062",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "category_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "2025年销售金额最高的5个商品分类是哪些？（请给出分类名称与销售额）",
+      "gold_sql": "SELECT c.name, ROUND(SUM(oi.subtotal), 2) AS revenue FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' AND o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' GROUP BY c.id, c.name ORDER BY revenue DESC, c.name LIMIT 5",
+      "gold_result_hash": "03c576689cf6b726385b261037f6a547cfd9a8566ae22cc7c1130b248606c3b9",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "四表多表 JOIN+年度时间窗+分类维度 Top-5；明细金额 subtotal，排除 cancelled。"
+    },
+    {
+      "id": "E-0063",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "category_analysis",
+      "operators": [
+        "join",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "question": "哪些商品分类的平均售价低于全平台商品平均售价的一半？（请给出分类名称与平均售价）",
+      "gold_sql": "SELECT c.name, ROUND(AVG(p.price), 2) AS avg_price FROM products p JOIN categories c ON c.id = p.category_id GROUP BY c.id, c.name HAVING AVG(p.price) < (SELECT AVG(price) FROM products) * 0.5 ORDER BY avg_price ASC, c.name",
+      "gold_result_hash": "3abca098caae0e43ecc8b6b92bfbfc319360c63404d265911100f75c971b9462",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "HAVING 与平台均价一半比较，低价类识别。价格比较基准=全平台商品均价。"
+    },
+    {
+      "id": "E-0064",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "order_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "ratio",
+        "subquery",
+        "order_by"
+      ],
+      "question": "2025年各订单状态的订单数及其占2025年总订单数的比例是多少？",
+      "gold_sql": "SELECT status, COUNT(*) AS order_count, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31'), 2) AS pct FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' GROUP BY status ORDER BY order_count DESC",
+      "gold_result_hash": "a71d8a8ee3a79fb7ab2674432c828395fdb9807a6e2780bfef8585280db45f65",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "状态结构统计（含 cancelled）+比例（标量子查询分母，ratio）。"
+    },
+    {
+      "id": "E-0065",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "order_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "aggregate",
+        "subquery",
+        "comparison_to_average"
+      ],
+      "question": "2026年实付金额高于全平台非取消订单平均实付金额的订单有多少笔？",
+      "gold_sql": "SELECT COUNT(*) FROM orders WHERE order_date >= '2026-01-01' AND status != 'cancelled' AND total_amount > (SELECT AVG(total_amount) FROM orders WHERE status != 'cancelled')",
+      "gold_result_hash": "b87c2c9b9bebe582db60891486db22f13257cffb8b7b27080f94a1a66bc1fa4d",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "integer"
+      },
+      "multi_turn": null,
+      "notes": "订单金额与整体均值比较（comparison_to_average）+时间窗+取消排除。"
+    },
+    {
+      "id": "E-0066",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "sales_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "case_when",
+        "date_group",
+        "group_by",
+        "aggregate",
+        "multi_dimension_grouping",
+        "order_by"
+      ],
+      "question": "2025年各季度、各订单状态的实付销售额分别是多少？（不含取消订单；请按季度与状态列出）",
+      "gold_sql": "SELECT CASE WHEN substr(order_date, 6, 2) IN ('01','02','03') THEN 'Q1' WHEN substr(order_date, 6, 2) IN ('04','05','06') THEN 'Q2' WHEN substr(order_date, 6, 2) IN ('07','08','09') THEN 'Q3' ELSE 'Q4' END AS quarter, status, ROUND(SUM(total_amount), 2) AS revenue FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' GROUP BY quarter, status ORDER BY quarter, status",
+      "gold_result_hash": "11c68d575327a94f0db6bc5b5cfc4101934789958fa90525dca88b3b2458134d",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "季度×状态双维分组（multi_dimension_grouping）+CASE WHEN 季度；SUM(total_amount) 排除 cancelled。"
+    },
+    {
+      "id": "E-0067",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "sales_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "multi_dimension_grouping",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "最近90天（2026年6月14日至9月12日）各地区各类别的销售金额最高的8个组合是哪些？（请给出地区、分类与金额）",
+      "gold_sql": "SELECT o.region, c.name, ROUND(SUM(oi.subtotal), 2) AS revenue FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2026-06-14' AND o.status != 'cancelled' GROUP BY o.region, c.name ORDER BY revenue DESC, o.region, c.name LIMIT 8",
+      "gold_result_hash": "eaf133a7132cbc0cdea8c42771a72dce95a6186cba330b4189dcb703b65d4dff",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "四表 JOIN+90天窗+地区×分类多维分组（multi_dimension_grouping）+Top-8；明细金额 subtotal。"
+    },
+    {
+      "id": "E-0068",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "sales_analysis",
+      "operators": [
+        "where",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "question": "哪些收货地区的客单价（平均实付金额）高于全平台非取消订单客单价？（请给出地区名称与客单价）",
+      "gold_sql": "SELECT region, ROUND(AVG(total_amount), 2) AS avg_amount FROM orders WHERE status != 'cancelled' GROUP BY region HAVING AVG(total_amount) > (SELECT AVG(total_amount) FROM orders WHERE status != 'cancelled') ORDER BY avg_amount DESC, region",
+      "gold_result_hash": "685e40458310a017768e220a922b247d21909b55e62913ef070eb3ff17e7e53d",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "地区客单价与整体均值比较（comparison_to_average）+GROUP BY+HAVING+取消排除。"
+    },
+    {
+      "id": "E-0069",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "sales_analysis",
+      "operators": [
+        "where",
+        "date_group",
+        "group_by",
+        "aggregate",
+        "ratio",
+        "subquery",
+        "order_by"
+      ],
+      "question": "2024年至2026年每年的非取消订单实付销售额是多少，并分别占三年总销售额的百分之几？",
+      "gold_sql": "SELECT strftime('%Y', order_date) AS order_year, ROUND(SUM(total_amount), 2) AS revenue, ROUND(SUM(total_amount) * 100.0 / (SELECT SUM(total_amount) FROM orders WHERE status != 'cancelled'), 2) AS pct FROM orders WHERE status != 'cancelled' GROUP BY order_year ORDER BY order_year",
+      "gold_result_hash": "6772af37fe58a16241c947fa95d387ac504345d797e052c22d868ff4da175a8e",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "date_group 年度分组+双指标：Sales SUM + 占比 ratio（标量子查询分母）。"
+    },
+    {
+      "id": "E-0070",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "sales_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "date_group",
+        "group_by",
+        "having",
+        "aggregate",
+        "order_by"
+      ],
+      "question": "2026年实付销售额超过100万元的月份有哪些？（请给出月份与销售额）",
+      "gold_sql": "SELECT strftime('%Y-%m', order_date) AS month, ROUND(SUM(total_amount), 2) AS revenue FROM orders WHERE order_date >= '2026-01-01' AND status != 'cancelled' GROUP BY month HAVING SUM(total_amount) > 1000000 ORDER BY revenue DESC, month",
+      "gold_result_hash": "93c73502d1d37f1704e0915ffca3a39485883c5caa42fa4a35381a88b8b9c4c3",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "月份分组+HAVING 金额阈值过滤，识别高销月；排除 cancelled。"
+    },
+    {
+      "id": "E-0071",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "date_group",
+        "group_by",
+        "aggregate",
+        "multi_dimension_grouping",
+        "order_by"
+      ],
+      "question": "2025年各月、各订单状态的订单数量分别是多少？（请按月份与状态列出）",
+      "gold_sql": "SELECT strftime('%Y-%m', order_date) AS month, status, COUNT(*) AS order_count FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' GROUP BY month, status ORDER BY month, status",
+      "gold_result_hash": "94886d592158981dc97095ece1ceeb7f321dc31943ac3399645de072ca782ab1",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "月份×状态双维分组（multi_dimension_grouping）+date_group；订单量结构统计（含取消）。"
+    },
+    {
+      "id": "E-0072",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "date_group",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery"
+      ],
+      "question": "2025年中订单量高于全年月均订单量的月份有哪些？（请给出月份与订单量）",
+      "gold_sql": "SELECT strftime('%Y-%m', order_date) AS month, COUNT(*) AS order_count FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' GROUP BY month HAVING COUNT(*) > (SELECT COUNT(*) / 12.0 FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31') ORDER BY order_count DESC, month",
+      "gold_result_hash": "be3db8772a156f6b8d8e399e0d40162a97038480c674ceaf41d214de625f02a8",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "月度分组+HAVING 与月均（2025 全年 12 个月）标量子查询比较（comparison_to_average）。"
+    },
+    {
+      "id": "E-0073",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "date_group",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "最近90天（2026年6月14日至9月12日）内，日均销售额最高的5个商品分类是哪些？（请给出分类名称与日均销售额）",
+      "gold_sql": "SELECT c.name, ROUND(SUM(oi.subtotal) * 1.0 / COUNT(DISTINCT o.order_date), 2) AS daily_avg_revenue FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2026-06-14' AND o.order_date <= '2026-09-12' AND o.status != 'cancelled' GROUP BY c.id, c.name ORDER BY daily_avg_revenue DESC, c.name LIMIT 5",
+      "gold_result_hash": "bc51ab9ba856e4df30ae177c1a2d941b12fc2d44a7c04af11bace48b44cd91e3",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "四表多表 JOIN+90天窗+日均销售额（SUM(subtotal)/COUNT(DISTINCT 日期)）Top-5；排除 cancelled。"
+    },
+    {
+      "id": "E-0074",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "2025年第四季度中，销量最高的3个商品分类是哪些？（请给出分类名称与销量）",
+      "gold_sql": "SELECT c.name, SUM(oi.quantity) AS sold FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2025-10-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY c.id, c.name ORDER BY sold DESC, c.name LIMIT 3",
+      "gold_result_hash": "45ca285fa3a29a6ff03bfb4a530ba6bd737262afdd3dacedcf51b656ed78575e",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "四表 JOIN+季度时间窗+分类维度销量 Top-3；销量=SUM(quantity)，排除 cancelled。"
+    },
+    {
+      "id": "E-0075",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "where",
+        "date_filter",
+        "aggregate",
+        "ratio",
+        "subquery"
+      ],
+      "question": "2026年下半年的订单数量是上半年订单数量的几倍？（保留两位小数）",
+      "gold_sql": "SELECT ROUND((SELECT COUNT(*) FROM orders WHERE order_date >= '2026-07-01') * 1.0 / (SELECT COUNT(*) FROM orders WHERE order_date >= '2026-01-01' AND order_date <= '2026-06-30'), 2) AS h2_to_h1_ratio",
+      "gold_result_hash": "f1e450083cde66460ba2984716cd4e0a67256c19d7cffebafb777d81b735a133",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ratio",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "半年对比 ratio（两个带时间窗的标量子查询比值）；订单结构统计。"
+    },
+    {
+      "id": "E-0076",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "regional_analysis",
+      "operators": [
+        "group_by",
+        "aggregate",
+        "order_by",
+        "limit",
+        "top_n",
+        "ratio",
+        "subquery"
+      ],
+      "question": "订单数量最多的5个收货地区是哪几个？它们各占订单总量的百分之几？（请给出地区、订单数与占比）",
+      "gold_sql": "SELECT region, COUNT(*) AS order_count, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM orders), 2) AS pct FROM orders GROUP BY region ORDER BY order_count DESC, region LIMIT 5",
+      "gold_result_hash": "afee0c55d9c50e99dbd4685f89d6e0fea574e7e42b07e3fad2baab32266ec1d7",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "地区订单占比（标量子查询分母，ratio）+Top-5；订单结构统计。"
+    },
+    {
+      "id": "E-0077",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "regional_analysis",
+      "operators": [
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "question": "2025年各收货地区的非取消订单销售额中，高于各地区平均销售额的地区有哪些？（请给出地区名称与销售额）",
+      "gold_sql": "WITH region_sales AS (SELECT o.region, SUM(oi.subtotal) AS sales FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY o.region) SELECT region, ROUND(sales, 2) AS revenue FROM region_sales WHERE sales > (SELECT AVG(sales) FROM region_sales) ORDER BY revenue DESC, region",
+      "gold_result_hash": "e451b1f8be834ea52c8849844be18e080f69693f4b0981afd4f515f33ce6167f",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "两表 JOIN(订单×明细)+年度窗+CTE 地区聚合，与地区销售均值比较（comparison_to_average）。"
+    },
+    {
+      "id": "E-0078",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "regional_analysis",
+      "operators": [
+        "join",
+        "where",
+        "aggregate",
+        "ratio",
+        "subquery"
+      ],
+      "question": "收货地区与用户注册地区不一致的订单占全部订单的百分之几？",
+      "gold_sql": "SELECT ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM orders), 2) AS cross_region_pct FROM orders o JOIN users u ON u.id = o.user_id WHERE u.region != o.region",
+      "gold_result_hash": "f2b50132c8a7aa003b1a9399c9a0aec3a00bd36bf45c2372065fa7b2a9837634",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ratio",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "跨区购买行为占比：JOIN 用户表判断两地区不一致，标量子查询作分母（ratio）。"
+    },
+    {
+      "id": "E-0079",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "ranking",
+      "operators": [
+        "where",
+        "date_filter",
+        "date_group",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "question": "2025年中实付销售额高于该年月均销售额的月份有哪些？（请给出月份与销售额）",
+      "gold_sql": "WITH monthly_rev AS (SELECT strftime('%Y-%m', order_date) AS month, SUM(total_amount) AS revenue FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' GROUP BY month) SELECT month, ROUND(revenue, 2) AS revenue FROM monthly_rev WHERE revenue > (SELECT AVG(revenue) FROM monthly_rev) ORDER BY revenue DESC, month",
+      "gold_result_hash": "252755e03150417808c71915f6614b0a4bc1da4dc209b0c7a02962c9f370bcea",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "月份维度销售额与月均比较（CTE+标量子查询，comparison_to_average）；优于 E-0048 的订单量 Top-N 结构。"
+    },
+    {
+      "id": "E-0080",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "ranking",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "最近90天内（2026年6月14日至9月12日），销售金额最高的5款商品是哪些？（请给出商品名称与销售额）",
+      "gold_sql": "SELECT p.name, ROUND(SUM(oi.subtotal), 2) AS revenue FROM products p JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.order_date >= '2026-06-14' AND o.status != 'cancelled' GROUP BY p.id, p.name ORDER BY revenue DESC, p.id LIMIT 5",
+      "gold_result_hash": "9ea9497a7df610c79e25ee94f3dad28caa98f5ad47920a84d9fb3681656bfdbd",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "三表 JOIN+90天窗+商品销售金额 Top-5；明细金额 subtotal，排除 cancelled。"
+    },
+    {
+      "id": "E-0081",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "ratio",
+      "operators": [
+        "where",
+        "aggregate",
+        "ratio",
+        "subquery"
+      ],
+      "question": "广东省的用户占全部用户的比例是多少？（百分比，保留两位小数）",
+      "gold_sql": "SELECT ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM users), 2) AS pct FROM users WHERE region = '广东'",
+      "gold_result_hash": "fab14ecd0f6400c3d7f466ec603bf95652c3c3bfc1e406b719b400072d3237c0",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ratio",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "单表 ratio：广东用户数 / 用户总数（标量子查询分母）。"
+    },
+    {
+      "id": "E-0082",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "ratio",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "ratio",
+        "subquery"
+      ],
+      "question": "休闲零食类别在全部非取消订单明细中的销售金额占全平台商品销售总额的比例是多少？（百分比，保留两位小数）",
+      "gold_sql": "SELECT c.name, ROUND(SUM(oi.subtotal) * 100.0 / (SELECT SUM(oi2.subtotal) FROM order_items oi2 JOIN orders o2 ON o2.id = oi2.order_id WHERE o2.status != 'cancelled'), 2) AS pct FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' AND c.name = '休闲零食' GROUP BY c.id, c.name",
+      "gold_result_hash": "587371358c2b4efac2a126ed252afaade04786b985342d66462293695bdf3c6f",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ratio",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "类目占比：分子子查询分母均用明细金额 subtotal（同一口径），四表 JOIN+ratio。"
+    },
+    {
+      "id": "E-0083",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "ratio",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "ratio",
+        "subquery"
+      ],
+      "question": "2025年第四季度中，家用电器类目销售金额占该季度全部商品销售金额的比例是多少？（百分比，保留两位小数）",
+      "gold_sql": "SELECT c.name, ROUND(SUM(oi.subtotal) * 100.0 / (SELECT SUM(oi3.subtotal) FROM order_items oi3 JOIN orders o3 ON o3.id = oi3.order_id WHERE o3.order_date >= '2025-10-01' AND o3.order_date <= '2025-12-31' AND o3.status != 'cancelled'), 2) AS pct FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.order_date >= '2025-10-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' AND c.name = '家用电器' GROUP BY c.id, c.name",
+      "gold_result_hash": "7490d3a46660f927cc19cafc9db34caeb6faf3d910d4ef9b149220af2276f235",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ratio",
+        "tolerance": 0.01
+      },
+      "multi_turn": null,
+      "notes": "季度窗口内类目占比（分子分母均限当季且同口径 subtotal），ratio+时间窗。"
+    },
+    {
+      "id": "E-0084",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "comparison",
+      "operators": [
+        "where",
+        "date_filter",
+        "aggregate"
+      ],
+      "question": "2025年与2026年（截至9月12日）非取消订单的平均实付金额（客单价）分别是多少？",
+      "gold_sql": "SELECT '2025' AS year, ROUND(AVG(total_amount), 2) AS avg_amount FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' UNION ALL SELECT '2026', ROUND(AVG(total_amount), 2) FROM orders WHERE order_date >= '2026-01-01' AND status != 'cancelled'",
+      "gold_result_hash": "1e2f2b036d5bb773b59fd3ea5c5827568f4ffe51d0ee9209ef91306f1d6d3274",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "两年客单价对比（comparison 场景），AVG(total_amount) 分年度统计。"
+    },
+    {
+      "id": "E-0085",
+      "split": "eval",
+      "difficulty": "hard",
+      "scenario": "comparison",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "order_by"
+      ],
+      "question": "男装与女装两个分类的累计销售金额分别是多少？（请给出分类名称与销售金额）",
+      "gold_sql": "SELECT c.name, ROUND(SUM(oi.subtotal), 2) AS sales FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' AND c.name IN ('男装', '女装') GROUP BY c.id, c.name ORDER BY sales DESC, c.name",
+      "gold_result_hash": "84f560c7fa1f73ab3ac0be342b7c48507a17f7aa78d2a31b2bc234e0800e1661",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "两个分类对比（comparison 场景），四表 JOIN+分类过滤+明细金额；排除 cancelled。"
+    },
+    {
+      "id": "E-0086",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "nested_subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "question": "累计消费金额超过全平台用户平均累计消费2倍、且累计下单超过8笔的用户有哪些？（请给出用户名、累计金额、订单数与购买商品种数）",
+      "gold_sql": "WITH user_orders AS (SELECT o.user_id AS uid, SUM(o.total_amount) AS spent, COUNT(*) AS orders FROM orders o WHERE o.status != 'cancelled' GROUP BY o.user_id), user_sku AS (SELECT o.user_id AS uid, COUNT(DISTINCT oi.product_id) AS sku_cnt FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY o.user_id) SELECT u.username, ROUND(uo.spent, 2) AS total_spent, uo.orders, us.sku_cnt FROM user_orders uo JOIN user_sku us ON us.uid = uo.uid JOIN users u ON u.id = uo.uid WHERE uo.spent > 2 * (SELECT AVG(spent) FROM user_orders) AND uo.orders > 8 ORDER BY uo.spent DESC, u.id",
+      "gold_result_hash": "727834dc8f85bcb4b455318310b8603a890a1147845712a2757d74586226703b",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "Task 14.3 v1.1 修正：修复 orders×order_items 一对多导致的 SUM(total_amount) 重复累计（fan-out 膨胀）；金额按订单表先按用户聚合、SKU 数按明细粒度聚合。"
+    },
+    {
+      "id": "E-0087",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "product_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "nested_subquery",
+        "comparison_to_average",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "销量高于其所属叶子分类平均销量的商品中，销量最高的10款商品是哪些？（请给出商品名、分类名与销量）",
+      "gold_sql": "WITH prod_sales AS (SELECT p.id, p.name, p.category_id, c.name AS cat_name, SUM(oi.quantity) AS sold FROM products p JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' GROUP BY p.id) SELECT ps.name, ps.cat_name, ps.sold FROM prod_sales ps WHERE ps.sold > (SELECT AVG(d.sold) FROM (SELECT p2.id, SUM(oi2.quantity) AS sold FROM products p2 JOIN order_items oi2 ON oi2.product_id = p2.id JOIN orders o2 ON o2.id = oi2.order_id WHERE o2.status != 'cancelled' AND p2.category_id = ps.category_id GROUP BY p2.id) d) ORDER BY ps.sold DESC, ps.id LIMIT 10",
+      "gold_result_hash": "5e1f3fcbe23cd3564db5135d3e4906d2a881fe94b9b75545e3f5df32cb8a572d",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "四表 JOIN+相关嵌套子查询（分类内平均商品销量，comparison_to_average）+Top-10。全量 248 款，取 Top-10 合理。"
+    },
+    {
+      "id": "E-0088",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "product_analysis",
+      "operators": [
+        "conditional_aggregation",
+        "case_when",
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "2025年销售金额最高的5款商品中，它们上半年与下半年的销售额分别是多少？（请给出商品名、上半年额、下半年额与全年额）",
+      "gold_sql": "WITH sales AS (SELECT p.name, SUM(CASE WHEN substr(o.order_date, 6, 2) <= '06' THEN oi.subtotal ELSE 0 END) AS h1, SUM(CASE WHEN substr(o.order_date, 6, 2) >= '07' THEN oi.subtotal ELSE 0 END) AS h2, SUM(oi.subtotal) AS total FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY p.id, p.name) SELECT name, ROUND(h1, 2) AS first_half, ROUND(h2, 2) AS second_half, ROUND(total, 2) AS total FROM sales ORDER BY total DESC, name LIMIT 5",
+      "gold_result_hash": "1c3eaa6778ef8c4690e7a54cc6cbe04eeba145f54053e7cf397bf6e610996fdf",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "SUM(CASE WHEN...) 条件聚合拆分上下半年（conditional_aggregation+case_when），多表 JOIN，全年 Top-5。"
+    },
+    {
+      "id": "E-0089",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "category_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "nested_subquery",
+        "comparison_to_average",
+        "ratio",
+        "order_by"
+      ],
+      "question": "销售金额高于全部分类平均销售金额的叶子分类有哪些，并给出它们占全平台总销售金额的比例？（请给出分类名、销售额与占比百分比）",
+      "gold_sql": "WITH cat_sales AS (SELECT c.name, SUM(oi.subtotal) AS sales FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY c.id, c.name) SELECT name, ROUND(sales, 2) AS revenue, ROUND(sales * 100.0 / (SELECT SUM(sales) FROM cat_sales), 2) AS pct FROM cat_sales WHERE sales > (SELECT AVG(sales) FROM (SELECT sales FROM cat_sales)) ORDER BY revenue DESC",
+      "gold_result_hash": "18e7ea641c5627bca5ca4381cfb6e6a8805c44b9e1b25d5e5e1b02adfb4ee44d",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "四表 JOIN+嵌套子查询（分类均值比较，comparison_to_average）+占比 ratio（子查询分母）。"
+    },
+    {
+      "id": "E-0090",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "order_analysis",
+      "operators": [
+        "conditional_aggregation",
+        "case_when",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "order_by"
+      ],
+      "question": "2025年各订单状态下，实付金额高于5000元的高金额订单数与5000元及以下的普通订单数分别是多少？（含取消订单的结构统计）",
+      "gold_sql": "SELECT status, COUNT(CASE WHEN total_amount > 5000 AND status != 'cancelled' THEN 1 END) AS high_cnt, COUNT(CASE WHEN total_amount <= 5000 AND status != 'cancelled' THEN 1 END) AS normal_cnt, COUNT(*) AS total_cnt FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' GROUP BY status ORDER BY status",
+      "gold_result_hash": "df6b09372db4eb9f3588231044cc43ee2ab0b116665d8ecd6920673bba1ca09e",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "COUNT(CASE WHEN...) 条件聚合双口径统计；cancelled 计入 total_cnt（结构统计）但不在金额档内（金额口径）。"
+    },
+    {
+      "id": "E-0091",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "sales_analysis",
+      "operators": [
+        "multi_dimension_grouping",
+        "date_group",
+        "case_when",
+        "group_by",
+        "aggregate",
+        "having",
+        "where",
+        "date_filter",
+        "order_by"
+      ],
+      "question": "2025年各收货地区、各季度的平均实付金额（客单价）是多少，每个组合的订单量如何？（仅列订单数不少于10的地点-季度组合）",
+      "gold_sql": "SELECT o.region, CASE WHEN substr(o.order_date, 6, 2) IN ('01','02','03') THEN 'Q1' WHEN substr(o.order_date, 6, 2) IN ('04','05','06') THEN 'Q2' WHEN substr(o.order_date, 6, 2) IN ('07','08','09') THEN 'Q3' ELSE 'Q4' END AS quarter, ROUND(AVG(o.total_amount), 2) AS avg_amount, COUNT(*) AS order_count FROM orders o WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY o.region, quarter HAVING COUNT(*) >= 10 ORDER BY o.region, quarter",
+      "gold_result_hash": "a0760b88c778b01ff3d6a2dcb16f479573ae77503ba05062454be0de23c595f6",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "地区×季度多维分组（multi_dimension_grouping）+CASE WHEN 季度（date_group）+HAVING 样本量过滤。"
+    },
+    {
+      "id": "E-0092",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "sales_analysis",
+      "operators": [
+        "conditional_aggregation",
+        "case_when",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "ratio",
+        "order_by"
+      ],
+      "question": "2025年下半年实付销售额高于上半年、且增长幅度最大的是哪些收货地区？（请给出地区、上半年额、下半年额与增长百分比）",
+      "gold_sql": "WITH region_sales AS (SELECT o.region, SUM(CASE WHEN substr(o.order_date, 6, 2) <= '06' THEN o.total_amount ELSE 0 END) AS h1, SUM(CASE WHEN substr(o.order_date, 6, 2) >= '07' THEN o.total_amount ELSE 0 END) AS h2 FROM orders o WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY o.region) SELECT region, ROUND(h1, 2) AS first_half, ROUND(h2, 2) AS second_half, ROUND((h2 - h1) * 100.0 / h1, 2) AS growth_pct FROM region_sales WHERE h2 > h1 ORDER BY growth_pct DESC, region",
+      "gold_result_hash": "8eb1dc14489a0d9c58276db35ad8fa6c1f6ab2794f38ec812b8700dfe77c812d",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "SUM(CASE WHEN...) 条件聚合分上下半年+增长 ratio；半年维度比较（comparison 语义）。"
+    },
+    {
+      "id": "E-0093",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "sales_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "order_by",
+        "top_n",
+        "multi_dimension_grouping"
+      ],
+      "question": "2025年各收货地区中，销售金额最高的3个商品分类分别是哪些？（请给出地区、分类与销售额，按地区与名次排列）",
+      "gold_sql": "WITH region_cat AS (SELECT o.region, c.name AS cat_name, SUM(oi.subtotal) AS revenue FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY o.region, c.id, c.name), ranked AS (SELECT region, cat_name, revenue, ROW_NUMBER() OVER (PARTITION BY region ORDER BY revenue DESC) AS rk FROM region_cat) SELECT region, cat_name, ROUND(revenue, 2) AS revenue FROM ranked WHERE rk <= 3 ORDER BY region, rk",
+      "gold_result_hash": "893b1e99c1b1e9c13b42d944b19232270e79dec77e56067eda3757bc41c2c23c",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "四表 JOIN+地区×分类多维分组+窗口函数 ROW_NUMBER 分组内 Top-3（每地区前3类）。"
+    },
+    {
+      "id": "E-0094",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "date_group",
+        "group_by",
+        "aggregate",
+        "where",
+        "date_filter",
+        "subquery",
+        "ratio",
+        "order_by"
+      ],
+      "question": "2025年各月的非取消订单实付销售额与2024年同月相比的同比增速是多少？（请给出月份、2024年销售额、2025年销售额与同比百分比）",
+      "gold_sql": "WITH monthly AS (SELECT strftime('%Y', order_date) AS yr, strftime('%m', order_date) AS mo, SUM(total_amount) AS revenue FROM orders WHERE order_date >= '2024-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' GROUP BY yr, mo) SELECT m.mo AS month, ROUND(p.revenue, 2) AS revenue_2024, ROUND(m.revenue, 2) AS revenue_2025, ROUND((m.revenue - p.revenue) * 100.0 / p.revenue, 2) AS yoy_pct FROM monthly m JOIN monthly p ON p.mo = m.mo AND p.yr = '2024' WHERE m.yr = '2025' ORDER BY m.mo",
+      "gold_result_hash": "3b1b8d58b56a9ceb25bbfc6b0906d5a685d43d9d1acf1ff9253620ae856a0201",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "CTE 自联结（两年同月对齐）Compute 同比增速 ratio；date_group 月度维度。"
+    },
+    {
+      "id": "E-0095",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "nested_subquery",
+        "comparison_to_average",
+        "multi_dimension_grouping",
+        "having",
+        "order_by",
+        "limit"
+      ],
+      "question": "最近30天（2026年8月14日至9月12日）中，有哪些地区-分类组合的销售金额高于30000元、且高于该地区各组合的平均销售金额？（请给出地区、分类与销售额，取前10）",
+      "gold_sql": "WITH pair_sales AS (SELECT o.region, c.name AS cat_name, SUM(oi.subtotal) AS revenue FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2026-08-14' AND o.order_date <= '2026-09-12' AND o.status != 'cancelled' GROUP BY o.region, c.id, c.name HAVING SUM(oi.subtotal) > 30000) SELECT ps.region, ps.cat_name, ROUND(ps.revenue, 2) AS revenue FROM pair_sales ps WHERE ps.revenue > (SELECT AVG(t.avg_rev) FROM (SELECT region, AVG(revenue) AS avg_rev FROM pair_sales GROUP BY region) t WHERE t.region = ps.region) ORDER BY ps.revenue DESC, ps.region, ps.cat_name LIMIT 10",
+      "gold_result_hash": "70cf5b38211e86bda10398576f70790c335fb19fe3f43dedc5df524a26ca1364",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "Task 14.3 v1.1 题面修正：补充 Gold 已含的「组合销售金额高于30000元」前提，使题面与 Gold 一致（Gold 不变，hash 不变）。"
+    },
+    {
+      "id": "E-0096",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "time_analysis",
+      "operators": [
+        "date_group",
+        "group_by",
+        "aggregate",
+        "where",
+        "date_filter",
+        "subquery",
+        "ratio",
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "question": "2025年环比增速最快的3个月份是哪几个？（请给出月份、当月销售额与环比增速百分比）",
+      "gold_sql": "WITH monthly AS (SELECT strftime('%Y-%m', order_date) AS month, SUM(total_amount) AS revenue FROM orders WHERE order_date >= '2025-01-01' AND order_date <= '2025-12-31' AND status != 'cancelled' GROUP BY month), with_prev AS (SELECT month, revenue, LAG(revenue) OVER (ORDER BY month) AS prev_rev FROM monthly) SELECT month, ROUND(revenue, 2) AS revenue, ROUND((revenue - prev_rev) * 100.0 / prev_rev, 2) AS mom_pct FROM with_prev WHERE prev_rev IS NOT NULL ORDER BY mom_pct DESC, month LIMIT 3",
+      "gold_result_hash": "95de24040f0ef77cbf7ad582d6217d6d3658c393743270250f4456e0fe6937c1",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "ranking",
+        "order_sensitive": true
+      },
+      "multi_turn": null,
+      "notes": "窗口函数 LAG 环比 + ratio 增速 + date_group 月度 + Top-3。"
+    },
+    {
+      "id": "E-0097",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "regional_analysis",
+      "operators": [
+        "join",
+        "where",
+        "date_filter",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "nested_subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "question": "2025年中，商品销售金额高于全国地区平均销售金额、且订单笔数也高于全国地区平均订单笔数的区域有哪些？（请给出地区、销售额与订单数）",
+      "gold_sql": "SELECT o.region, ROUND(SUM(oi.subtotal), 2) AS revenue, COUNT(DISTINCT o.id) AS orders FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY o.region HAVING SUM(oi.subtotal) > (SELECT AVG(v.revenue) FROM (SELECT region, SUM(oi2.subtotal) AS revenue FROM orders o2 JOIN order_items oi2 ON oi2.order_id = o2.id WHERE o2.order_date >= '2025-01-01' AND o2.order_date <= '2025-12-31' AND o2.status != 'cancelled' GROUP BY o2.region) v) AND COUNT(DISTINCT o.id) > (SELECT AVG(w.orders) FROM (SELECT COUNT(DISTINCT o3.id) AS orders FROM orders o3 JOIN order_items oi3 ON oi3.order_id = o3.id WHERE o3.order_date >= '2025-01-01' AND o3.order_date <= '2025-12-31' AND o3.status != 'cancelled' GROUP BY o3.region) w) ORDER BY revenue DESC, o.region",
+      "gold_result_hash": "f6ebe5c853e3b4b724476fd3940b850180502153be79d61205ff7058ae9a9351",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "双条件嵌套子查询（地区销售额均值与地区订单均值两个比较基准，comparison_to_average）+HAVING 双指标过滤；subtotal 口径排除 cancelled。"
+    },
+    {
+      "id": "E-0098",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "ranking",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "having",
+        "subquery",
+        "order_by",
+        "top_n"
+      ],
+      "question": "每个商品分类中，销量最高的3款商品分别是哪些？（请给出分类、商品名与销量；仅统计销量超过50的商品）",
+      "gold_sql": "WITH cat_prod AS (SELECT c.name AS cat_name, p.name AS prod_name, p.id AS prod_id, SUM(oi.quantity) AS sold FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY c.id, p.id, p.name HAVING SUM(oi.quantity) > 50), ranked AS (SELECT cat_name, prod_name, sold, ROW_NUMBER() OVER (PARTITION BY cat_name ORDER BY sold DESC, prod_id) AS rk FROM cat_prod) SELECT cat_name, prod_name, sold AS sold_qty FROM ranked WHERE rk <= 3 ORDER BY cat_name, rk",
+      "gold_result_hash": "4c991746647d04e30053b025addfbd446bf944922d55afd0763b77e8fff21439",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "Task 14.3 v1.1 修正：ROW_NUMBER 增加稳定 tiebreaker（ORDER BY sold DESC, p.id），消除并列时排名不确定性。"
+    },
+    {
+      "id": "E-0099",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "ratio",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "ratio",
+        "order_by"
+      ],
+      "question": "哪些收货地区中，家用电器类目销售金额占该地区总销售金额的比例高于全平台家电占比？（请给出地区、家电销售额与占比百分比）",
+      "gold_sql": "WITH total AS (SELECT o.region, SUM(oi.subtotal) AS total_rev FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' GROUP BY o.region), elec AS (SELECT o.region, SUM(oi.subtotal) AS elec_rev FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' AND c.name = '家用电器' GROUP BY o.region) SELECT e.region, ROUND(e.elec_rev, 2) AS elec_rev, ROUND(e.elec_rev * 100.0 / t.total_rev, 2) AS pct FROM elec e JOIN total t ON t.region = e.region WHERE e.elec_rev * 100.0 / t.total_rev > 24.97 ORDER BY pct DESC, e.region",
+      "gold_result_hash": "9bcf0f7024e3349affb500713651c4a4ddf9a12ced78e0099d23c2ece8a28287",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "双 CTE（地区总额/地区家电额）+类目占比 ratio（子查询分母，分子分母同口径 subtotal 排除 cancelled）；与全平台家电占比 24.97% 比较。"
+    },
+    {
+      "id": "E-0100",
+      "split": "eval",
+      "difficulty": "extra_hard",
+      "scenario": "comparison",
+      "operators": [
+        "where",
+        "date_filter",
+        "aggregate",
+        "subquery",
+        "nested_subquery",
+        "ratio"
+      ],
+      "question": "2025年5月（传统促销月）与2月（淡季）相比：两个月的非取消订单销售额分别是多少，订单量分别是多少，5月销售额相当于2月的多少倍？",
+      "gold_sql": "WITH may AS (SELECT COUNT(*) AS cnt, SUM(total_amount) AS rev FROM orders WHERE order_date >= '2025-05-01' AND order_date <= '2025-05-31' AND status != 'cancelled'), feb AS (SELECT COUNT(*) AS cnt, SUM(total_amount) AS rev FROM orders WHERE order_date >= '2025-02-01' AND order_date <= '2025-02-28' AND status != 'cancelled') SELECT ROUND(m.rev, 2) AS may_revenue, m.cnt AS may_orders, ROUND(f.rev, 2) AS feb_revenue, f.cnt AS feb_orders, ROUND(m.rev / f.rev, 2) AS may_to_feb_ratio FROM may m, feb f",
+      "gold_result_hash": "e36f6b0beb8e7427bd7d9b7853276828942e5a6992ab4cbecd63777e1d66ba46",
+      "expected_behavior": "answer",
+      "answer_slots": {
+        "value_type": "category"
+      },
+      "multi_turn": null,
+      "notes": "双时间窗 CTE（comparison 场景）+比值 ratio（5月/2月销售额倍数）；嵌套双层查询结构，跨期对比复杂逻辑。"
+    }
+  ]
+}

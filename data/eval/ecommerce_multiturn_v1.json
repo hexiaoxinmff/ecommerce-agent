@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "dataset_name": "ECO-SQL-Bench Multiturn",
+    "subtitle": "项目自建电商 Text2SQL 多轮评测集",
+    "version": "1.0",
+    "database_version": "dev-2026-09-14",
+    "seed": 20260914,
+    "schema_version": "1.0",
+    "generator_version": "0",
+    "created_at": "2026-09-15",
+    "review_status": "draft",
+    "description": "ECO-SQL-Bench 多轮评测组。当前为结构占位（Task 11），conversations 由第二阶段（约 50~100 轮）生成后填充。多轮不混入主单轮 Benchmark。"
+  },
+  "conversations": []
+}

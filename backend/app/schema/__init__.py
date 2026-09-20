@@ -1,0 +1,1 @@
+"""Schema Understanding / Schema Linking：元数据 + 内省 + 校验 + 链接。"""

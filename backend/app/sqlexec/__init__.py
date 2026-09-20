@@ -1,0 +1,1 @@
+"""SQL Executor：对只读 SELECT/WITH 的安全执行与结构化结果。"""

@@ -1,0 +1,29 @@
+{
+  "case_id": "B-1081",
+  "eval_id": "E-0077",
+  "question": "2025年各收货地区的非取消订单销售额中，高于各地区平均销售额的地区有哪些？（请给出地区名称与销售额）",
+  "difficulty": "hard",
+  "scenario": "regional_analysis",
+  "operators": [
+    "join",
+    "where",
+    "date_filter",
+    "group_by",
+    "having",
+    "aggregate",
+    "subquery",
+    "comparison_to_average",
+    "order_by"
+  ],
+  "gold_sql": "WITH region_sales AS (SELECT o.region, SUM(oi.subtotal) AS sales FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY o.region) SELECT region, ROUND(sales, 2) AS revenue FROM region_sales WHERE sales > (SELECT AVG(sales) FROM region_sales) ORDER BY revenue DESC, region",
+  "pred_sql": "WITH region_sales AS (SELECT region, ROUND(SUM(total_amount), 2) AS total_sales FROM orders WHERE status != 'cancelled' AND strftime('%Y', order_date) = '2025' GROUP BY region), avg_sales AS (SELECT AVG(total_sales) AS avg_total_sales FROM region_sales) SELECT rs.region, rs.total_sales FROM region_sales rs, avg_sales a WHERE rs.total_sales > a.avg_total_sales ORDER BY rs.total_sales DESC",
+  "initial_sql": "WITH region_sales AS (SELECT region, ROUND(SUM(total_amount), 2) AS total_sales FROM orders WHERE status != 'cancelled' AND strftime('%Y', order_date) = '2025' GROUP BY region), avg_sales AS (SELECT AVG(total_sales) AS avg_total_sales FROM region_sales) SELECT rs.region, rs.total_sales FROM region_sales rs, avg_sales a WHERE rs.total_sales > a.avg_total_sales ORDER BY rs.total_sales DESC",
+  "final_sql": "WITH region_sales AS (SELECT region, ROUND(SUM(total_amount), 2) AS total_sales FROM orders WHERE status != 'cancelled' AND strftime('%Y', order_date) = '2025' GROUP BY region), avg_sales AS (SELECT AVG(total_sales) AS avg_total_sales FROM region_sales) SELECT rs.region, rs.total_sales FROM region_sales rs, avg_sales a WHERE rs.total_sales > a.avg_total_sales ORDER BY rs.total_sales DESC",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 10216.69,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

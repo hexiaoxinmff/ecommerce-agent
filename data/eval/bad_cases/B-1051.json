@@ -1,0 +1,26 @@
+{
+  "case_id": "B-1051",
+  "eval_id": "E-0038",
+  "question": "整个平台售价最高的商品属于哪个分类？最高价是多少？",
+  "difficulty": "medium",
+  "scenario": "category_analysis",
+  "operators": [
+    "aggregate",
+    "join",
+    "group_by",
+    "order_by",
+    "limit",
+    "top_n"
+  ],
+  "gold_sql": "SELECT c.name, MAX(p.price) AS max_price FROM products p JOIN categories c ON c.id = p.category_id GROUP BY c.id, c.name ORDER BY max_price DESC, c.id LIMIT 1",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

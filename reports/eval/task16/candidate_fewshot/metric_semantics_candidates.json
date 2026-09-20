@@ -1,0 +1,29 @@
+[
+  {
+    "id": "cand_B1_metric_contrast",
+    "question": "2025年第二季度各收货地区中，商品明细销售额（明细行金额）与订单实付销售额（订单最终支付金额）分别是多少？请分别给出两列。",
+    "scenario": "region_sales_metric_contrast",
+    "tables": ["orders", "order_items"],
+    "columns": [
+      "orders.region",
+      "orders.status",
+      "orders.order_date",
+      "orders.total_amount",
+      "order_items.order_id",
+      "order_items.subtotal"
+    ],
+    "sql": "WITH region_item AS (SELECT o.region, SUM(oi.subtotal) AS item_sales FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' AND o.order_date BETWEEN '2025-04-01' AND '2025-06-30' GROUP BY o.region), region_order AS (SELECT region, SUM(total_amount) AS paid_sales FROM orders WHERE status != 'cancelled' AND order_date BETWEEN '2025-04-01' AND '2025-06-30' GROUP BY region) SELECT ri.region, ROUND(ri.item_sales, 2) AS item_sales, ROUND(ro.paid_sales, 2) AS paid_sales FROM region_item ri JOIN region_order ro ON ro.region = ri.region ORDER BY ri.item_sales DESC",
+    "explanation": "同一问题中并用明细销售额（order_items.subtotal）与订单实付销售额（orders.total_amount），让模型看到两种金额口径各自对应的字段，以及两者同时出现在一行时的正确写法。",
+    "tags": ["地区", "销售额", "实付", "金额口径"]
+  },
+  {
+    "id": "cand_B2_order_paid_metric",
+    "question": "2025年第二季度各收货地区的客单价（平均每笔非取消订单的实付金额）是多少？",
+    "scenario": "region_avg_order_amount",
+    "tables": ["orders"],
+    "columns": ["orders.region", "orders.status", "orders.order_date", "orders.total_amount"],
+    "sql": "SELECT region, ROUND(AVG(total_amount), 2) AS avg_order_amount FROM orders WHERE status != 'cancelled' AND order_date BETWEEN '2025-04-01' AND '2025-06-30' GROUP BY region ORDER BY avg_order_amount DESC",
+    "explanation": "客单价 / 平均实付金额一律使用 orders.total_amount 而非明细金额，示范聚合指标对应的正确金额字段。",
+    "tags": ["地区", "客单", "平均", "实付", "金额口径"]
+  }
+]

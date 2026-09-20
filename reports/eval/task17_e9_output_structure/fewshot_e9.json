@@ -1,0 +1,547 @@
+[
+  {
+    "id": "ex_001",
+    "question": "近30天销售额最高的商品有哪些？",
+    "scenario": "product_sales_ranking",
+    "tables": [
+      "orders",
+      "order_items",
+      "products"
+    ],
+    "columns": [
+      "orders.order_date",
+      "orders.status",
+      "order_items.product_id",
+      "order_items.subtotal",
+      "products.id",
+      "products.name"
+    ],
+    "sql": "SELECT p.name AS product_name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.order_date >= date('now', '-30 day') AND o.status != 'cancelled' GROUP BY p.id ORDER BY total_sales DESC",
+    "explanation": "关联订单与商品，按商品汇总明细行金额（排除取消订单），按销售额降序。",
+    "tags": [
+      "商品",
+      "销售额",
+      "排名",
+      "时间范围"
+    ]
+  },
+  {
+    "id": "ex_003",
+    "question": "哪个商品类别销售额最高？",
+    "scenario": "category_sales_ranking",
+    "tables": [
+      "orders",
+      "order_items",
+      "products",
+      "categories"
+    ],
+    "columns": [
+      "orders.status",
+      "order_items.subtotal",
+      "products.category_id",
+      "categories.id",
+      "categories.name"
+    ],
+    "sql": "SELECT c.name AS category_name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' GROUP BY c.id ORDER BY total_sales DESC",
+    "explanation": "关联订单、商品与分类，按分类汇总明细行金额（排除取消订单），按销售额降序。",
+    "tags": [
+      "类别",
+      "商品",
+      "销售额",
+      "排名"
+    ]
+  },
+  {
+    "id": "ex_004",
+    "question": "近30天每天的订单量是多少？",
+    "scenario": "daily_order_trend",
+    "tables": [
+      "orders"
+    ],
+    "columns": [
+      "orders.order_date",
+      "orders.status"
+    ],
+    "sql": "SELECT order_date, COUNT(*) AS order_count FROM orders WHERE order_date >= date('now', '-30 day') AND status != 'cancelled' GROUP BY order_date ORDER BY order_date",
+    "explanation": "按日期统计有效订单数量，形成订单量趋势。",
+    "tags": [
+      "订单",
+      "趋势",
+      "时间范围",
+      "数量"
+    ]
+  },
+  {
+    "id": "ex_005",
+    "question": "上个月各地区的销售额是多少？",
+    "scenario": "region_monthly_sales",
+    "tables": [
+      "orders"
+    ],
+    "columns": [
+      "orders.order_date",
+      "orders.region",
+      "orders.status",
+      "orders.total_amount"
+    ],
+    "sql": "SELECT region, ROUND(SUM(total_amount), 2) AS total_sales FROM orders WHERE status != 'cancelled' AND strftime('%Y-%m', order_date) = strftime('%Y-%m', 'now', '-1 month') GROUP BY region ORDER BY total_sales DESC",
+    "explanation": "按收货区域汇总上个月有效订单的最终支付金额（排除取消订单）。",
+    "tags": [
+      "地区",
+      "销售额",
+      "时间范围"
+    ]
+  },
+  {
+    "id": "ex_006",
+    "question": "销量最高的商品 Top 5 是哪些？",
+    "scenario": "product_volume_ranking",
+    "tables": [
+      "orders",
+      "order_items",
+      "products"
+    ],
+    "columns": [
+      "orders.status",
+      "order_items.product_id",
+      "order_items.quantity",
+      "products.id",
+      "products.name"
+    ],
+    "sql": "SELECT p.name AS product_name, SUM(oi.quantity) AS total_sold FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status != 'cancelled' GROUP BY p.id ORDER BY total_sold DESC LIMIT 5",
+    "explanation": "统计各商品销量（件数）并取前 5（排除取消订单）。",
+    "tags": [
+      "商品",
+      "销量",
+      "排名",
+      "数量",
+      "Top"
+    ]
+  },
+  {
+    "id": "ex_007",
+    "question": "有多少活跃用户？",
+    "scenario": "active_user_count",
+    "tables": [
+      "users"
+    ],
+    "columns": [
+      "users.status"
+    ],
+    "sql": "SELECT COUNT(*) AS active_users FROM users WHERE status = 'active'",
+    "explanation": "统计状态为 active 的用户数量。",
+    "tags": [
+      "用户",
+      "数量",
+      "活跃"
+    ]
+  },
+  {
+    "id": "ex_008",
+    "question": "每个类别的商品数量是多少？",
+    "scenario": "category_product_count",
+    "tables": [
+      "categories",
+      "products"
+    ],
+    "columns": [
+      "categories.id",
+      "categories.name",
+      "products.category_id",
+      "products.id"
+    ],
+    "sql": "SELECT c.name AS category_name, COUNT(p.id) AS product_count FROM categories c LEFT JOIN products p ON p.category_id = c.id GROUP BY c.id",
+    "explanation": "按分类统计商品数量，LEFT JOIN 以保留无商品的空分类。",
+    "tags": [
+      "类别",
+      "商品",
+      "数量"
+    ]
+  },
+  {
+    "id": "ex_009",
+    "question": "平均订单金额是多少？",
+    "scenario": "average_order_amount",
+    "tables": [
+      "orders"
+    ],
+    "columns": [
+      "orders.status",
+      "orders.total_amount"
+    ],
+    "sql": "SELECT ROUND(AVG(total_amount), 2) AS avg_order_amount FROM orders WHERE status != 'cancelled'",
+    "explanation": "有效订单最终支付金额的平均值（排除取消订单）。",
+    "tags": [
+      "订单",
+      "平均",
+      "金额"
+    ]
+  },
+  {
+    "id": "ex_010",
+    "question": "消费金额最高的用户有哪些？",
+    "scenario": "top_customer_sales",
+    "tables": [
+      "users",
+      "orders"
+    ],
+    "columns": [
+      "orders.user_id",
+      "orders.status",
+      "orders.total_amount",
+      "users.id",
+      "users.username"
+    ],
+    "sql": "SELECT u.username, ROUND(SUM(o.total_amount), 2) AS total_spent FROM orders o JOIN users u ON u.id = o.user_id WHERE o.status != 'cancelled' GROUP BY u.id ORDER BY total_spent DESC LIMIT 10",
+    "explanation": "按用户汇总有效订单的最终支付金额并取前 10（排除取消订单）。",
+    "tags": [
+      "用户",
+      "销售额",
+      "排名"
+    ]
+  },
+  {
+    "id": "ex_011",
+    "question": "2026年8月注册了多少新用户？",
+    "scenario": "monthly_new_user_count",
+    "tables": [
+      "users"
+    ],
+    "columns": [
+      "users.register_date"
+    ],
+    "sql": "SELECT COUNT(*) AS new_users FROM users WHERE strftime('%Y-%m', register_date) = '2026-08'",
+    "explanation": "统计指定月份注册的用户数量。",
+    "tags": [
+      "用户",
+      "数量",
+      "时间范围",
+      "注册"
+    ]
+  },
+  {
+    "id": "ex_012",
+    "question": "有多少在售商品？",
+    "scenario": "on_sale_product_count",
+    "tables": [
+      "products"
+    ],
+    "columns": [
+      "products.status"
+    ],
+    "sql": "SELECT COUNT(*) AS on_sale_count FROM products WHERE status = 'on_sale'",
+    "explanation": "统计状态为在售（on_sale）的商品数量。",
+    "tags": [
+      "商品",
+      "数量"
+    ]
+  },
+  {
+    "id": "ex_013",
+    "question": "价格最高的商品 Top 10 是哪些？",
+    "scenario": "top_priced_products",
+    "tables": [
+      "products"
+    ],
+    "columns": [
+      "products.name",
+      "products.price"
+    ],
+    "sql": "SELECT name, price FROM products ORDER BY price DESC LIMIT 10",
+    "explanation": "按商品当前售价降序取前 10。",
+    "tags": [
+      "商品",
+      "价格",
+      "排名",
+      "Top"
+    ]
+  },
+  {
+    "id": "ex_014",
+    "question": "各类订单状态的数量与占比是多少？",
+    "scenario": "order_status_breakdown",
+    "tables": [
+      "orders"
+    ],
+    "columns": [
+      "orders.status"
+    ],
+    "sql": "SELECT status, COUNT(*) AS cnt, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM orders), 2) AS pct FROM orders GROUP BY status",
+    "explanation": "按订单状态统计数量与占比。",
+    "tags": [
+      "订单",
+      "占比",
+      "数量"
+    ]
+  },
+  {
+    "id": "ex_015",
+    "question": "2026年各月的销售趋势如何？",
+    "scenario": "monthly_sales_trend",
+    "tables": [
+      "orders"
+    ],
+    "columns": [
+      "orders.order_date",
+      "orders.status",
+      "orders.total_amount"
+    ],
+    "sql": "SELECT strftime('%Y-%m', order_date) AS ym, ROUND(SUM(total_amount), 2) AS total_sales FROM orders WHERE status != 'cancelled' GROUP BY ym ORDER BY ym",
+    "explanation": "按月汇总有效订单的最终支付金额，形成销售趋势（排除取消订单）。",
+    "tags": [
+      "订单",
+      "趋势",
+      "销售额",
+      "时间范围"
+    ]
+  },
+  {
+    "id": "ex_016",
+    "question": "每个用户的订单数是多少？",
+    "scenario": "user_order_count",
+    "tables": [
+      "users",
+      "orders"
+    ],
+    "columns": [
+      "orders.user_id",
+      "orders.id",
+      "users.id",
+      "users.username"
+    ],
+    "sql": "SELECT u.username, COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id = u.id GROUP BY u.id ORDER BY order_count DESC",
+    "explanation": "统计每个用户的订单数，LEFT JOIN 保留无订单用户。",
+    "tags": [
+      "用户",
+      "订单",
+      "数量"
+    ]
+  },
+  {
+    "id": "ex_017",
+    "question": "每个类别的平均商品价格是多少？",
+    "scenario": "category_avg_price",
+    "tables": [
+      "categories",
+      "products"
+    ],
+    "columns": [
+      "categories.id",
+      "categories.name",
+      "products.category_id",
+      "products.price"
+    ],
+    "sql": "SELECT c.name AS category_name, ROUND(AVG(p.price), 2) AS avg_price FROM categories c LEFT JOIN products p ON p.category_id = c.id GROUP BY c.id",
+    "explanation": "按分类统计商品平均售价。",
+    "tags": [
+      "类别",
+      "商品",
+      "平均",
+      "价格"
+    ]
+  },
+  {
+    "id": "ex_018",
+    "question": "平均每件商品的购买数量是多少？",
+    "scenario": "avg_item_quantity",
+    "tables": [
+      "order_items"
+    ],
+    "columns": [
+      "order_items.quantity"
+    ],
+    "sql": "SELECT ROUND(AVG(quantity), 2) AS avg_quantity FROM order_items",
+    "explanation": "计算订单明细的平均购买数量。",
+    "tags": [
+      "订单",
+      "平均",
+      "数量"
+    ]
+  },
+  {
+    "id": "ex_019",
+    "question": "累计销量超过全部商品平均销量的商品有哪些？",
+    "scenario": "product_above_avg_volume",
+    "tables": [
+      "orders",
+      "order_items",
+      "products"
+    ],
+    "columns": [
+      "orders.status",
+      "order_items.product_id",
+      "order_items.quantity",
+      "products.id",
+      "products.name"
+    ],
+    "sql": "WITH prod_sold AS (SELECT oi.product_id AS pid, SUM(oi.quantity) AS sold FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY oi.product_id) SELECT p.name AS product_name, ps.sold AS total_sold FROM prod_sold ps JOIN products p ON p.id = ps.pid WHERE ps.sold > (SELECT AVG(sold) FROM prod_sold) ORDER BY ps.sold DESC",
+    "explanation": "两阶段聚合：先按商品求累计销量，再对所有商品累计值求平均作为比较基准（商品维度均值）。",
+    "tags": [
+      "商品",
+      "销量",
+      "平均",
+      "两阶段",
+      "子查询"
+    ]
+  },
+  {
+    "id": "ex_020",
+    "question": "各订单状态的优惠金额合计是多少？",
+    "scenario": "order_status_discount_sum",
+    "tables": [
+      "orders"
+    ],
+    "columns": [
+      "orders.status",
+      "orders.discount_amount"
+    ],
+    "sql": "SELECT status, ROUND(SUM(discount_amount), 2) AS discount_total FROM orders GROUP BY status ORDER BY discount_total DESC",
+    "explanation": "按订单状态汇总优惠金额合计（订单级字段，不涉及明细）。",
+    "tags": [
+      "订单",
+      "优惠",
+      "状态",
+      "聚合"
+    ]
+  },
+  {
+    "id": "ex_021",
+    "question": "各收货地区的平均优惠金额是多少？",
+    "scenario": "region_avg_discount",
+    "tables": [
+      "orders"
+    ],
+    "columns": [
+      "orders.region",
+      "orders.discount_amount"
+    ],
+    "sql": "SELECT region, ROUND(AVG(discount_amount), 2) AS avg_discount FROM orders GROUP BY region ORDER BY avg_discount DESC",
+    "explanation": "按收货地区统计订单级优惠金额的平均值（全订单结构口径）。",
+    "tags": [
+      "地区",
+      "优惠",
+      "平均",
+      "订单"
+    ]
+  },
+  {
+    "id": "ex_022",
+    "question": "近60天各商品的日均销量是多少？",
+    "scenario": "daily_avg_product_volume",
+    "tables": [
+      "orders",
+      "order_items",
+      "products"
+    ],
+    "columns": [
+      "orders.order_date",
+      "orders.status",
+      "order_items.product_id",
+      "order_items.quantity",
+      "products.id",
+      "products.name"
+    ],
+    "sql": "SELECT p.name AS product_name, ROUND(SUM(oi.quantity) * 1.0 / COUNT(DISTINCT o.order_date), 2) AS daily_avg FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.order_date >= date('now', '-60 day') AND o.status != 'cancelled' GROUP BY p.id ORDER BY daily_avg DESC",
+    "explanation": "日均分母 = 时间区间内实际有订单的不同日期数（COUNT DISTINCT order_date），不固定除天数。",
+    "tags": [
+      "日均",
+      "商品",
+      "销量",
+      "时间范围"
+    ]
+  },
+  {
+    "id": "ex_023",
+    "question": "非取消订单中，实付金额超过10000元的订单金额占全部非取消订单实付金额的比例是多少？",
+    "scenario": "order_high_amount_share",
+    "tables": [
+      "orders"
+    ],
+    "columns": [
+      "orders.status",
+      "orders.total_amount"
+    ],
+    "sql": "SELECT ROUND(SUM(CASE WHEN total_amount > 10000 THEN total_amount ELSE 0 END) * 100.0 / SUM(total_amount), 2) AS pct FROM orders WHERE status != 'cancelled'",
+    "explanation": "金额档占比：分子分母同口径（全部非取消订单的实付金额）；单值结果。",
+    "tags": [
+      "占比",
+      "金额",
+      "档位",
+      "分子分母"
+    ]
+  },
+  {
+    "id": "ex_024",
+    "question": "各商品分类中在售商品的平均售价是多少？",
+    "scenario": "category_avg_on_sale_price",
+    "tables": [
+      "products",
+      "categories"
+    ],
+    "columns": [
+      "products.category_id",
+      "products.price",
+      "products.status",
+      "categories.id",
+      "categories.name"
+    ],
+    "sql": "SELECT c.name AS category_name, ROUND(AVG(p.price), 2) AS avg_price FROM products p JOIN categories c ON c.id = p.category_id WHERE p.status = 'on_sale' GROUP BY c.id ORDER BY avg_price DESC",
+    "explanation": "在售状态枚举是 'on_sale'（商品表）；按分类统计在售商品平均售价。",
+    "tags": [
+      "分类",
+      "商品",
+      "平均",
+      "在售",
+      "枚举"
+    ]
+  },
+  {
+    "id": "cand_A1_multi_col_ratio",
+    "question": "各商品分类在非取消订单中的销售额及其占全部商品销售总额的比例分别是多少？请给出分类名称、销售额与占比。",
+    "scenario": "category_sales_share",
+    "tables": [
+      "orders",
+      "order_items",
+      "products",
+      "categories"
+    ],
+    "columns": [
+      "orders.status",
+      "order_items.subtotal",
+      "products.category_id",
+      "products.id",
+      "categories.id",
+      "categories.name"
+    ],
+    "sql": "WITH total_sales AS (SELECT SUM(oi.subtotal) AS t FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled') SELECT c.name AS category_name, ROUND(SUM(oi.subtotal), 2) AS category_sales, ROUND(SUM(oi.subtotal) * 100.0 / ts.t, 2) AS pct FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id CROSS JOIN total_sales ts WHERE o.status != 'cancelled' GROUP BY c.id ORDER BY category_sales DESC",
+    "explanation": "输出完整维度列（分类名称）+ 指标列（销售额、占比），占比分子分母同一口径，展示多列输出结构。",
+    "tags": [
+      "分类",
+      "销售额",
+      "占比",
+      "多列输出"
+    ]
+  },
+  {
+    "id": "cand_A2_dims_with_total",
+    "question": "2024年11月前各收货地区订单中，实付金额高于8000元的高金额订单数与8000元及以下的普通订单数分别是多少？请同时给出各地区的总订单数。",
+    "scenario": "regional_order_tier",
+    "tables": [
+      "orders"
+    ],
+    "columns": [
+      "orders.region",
+      "orders.total_amount",
+      "orders.order_date"
+    ],
+    "sql": "SELECT region, COUNT(CASE WHEN total_amount > 8000 THEN 1 END) AS high_cnt, COUNT(CASE WHEN total_amount <= 8000 THEN 1 END) AS normal_cnt, COUNT(*) AS total_cnt FROM orders WHERE order_date BETWEEN '2024-02-01' AND '2024-11-30' GROUP BY region ORDER BY total_cnt DESC",
+    "explanation": "结构统计同时输出分项计数与总计数（total_cnt），各列对应题目要求的每个字段。",
+    "tags": [
+      "地区",
+      "订单",
+      "数量",
+      "多列输出",
+      "窗口过滤"
+    ]
+  }
+]

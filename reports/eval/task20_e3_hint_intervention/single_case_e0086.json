@@ -1,0 +1,75 @@
+{
+  "question": "累计消费金额超过全平台用户平均累计消费2倍、且累计下单超过8笔的用户有哪些？（请给出用户名、累计金额、订单数与购买商品种数）",
+  "initial_sql": "WITH user_stats AS ( SELECT u.id, u.username, SUM(o.total_amount) AS total_spent, COUNT(DISTINCT o.id) AS order_count, COUNT(DISTINCT oi.product_id) AS product_count FROM users u JOIN orders o ON u.id = o.user_id JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY u.id ), platform_avg AS ( SELECT AVG(total_spent) AS avg_spent FROM user_stats ) SELECT us.username, ROUND(us.total_spent, 2) AS total_spent, us.order_count, us.product_count FROM user_stats us, platform_avg pa WHERE us.total_spent > pa.avg_spent * 2 AND us.order_count > 8 ORDER BY us.total_spent DESC",
+  "gen_time_s": 32.29,
+  "detector_alarm": true,
+  "hint_injected": true,
+  "regenerated_sql": "WITH user_order_stats AS (SELECT o.user_id, COUNT(DISTINCT o.id) AS order_count, SUM(o.total_amount) AS total_spent FROM orders o WHERE o.status != 'cancelled' GROUP BY o.user_id), user_product_stats AS (SELECT o.user_id, COUNT(DISTINCT oi.product_id) AS product_count FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY o.user_id), platform_avg AS (SELECT AVG(total_spent) AS avg_spent FROM user_order_stats) SELECT u.username, ROUND(uos.total_spent, 2) AS total_spent, uos.order_count, ups.product_count FROM user_order_stats uos JOIN users u ON u.id = uos.user_id JOIN user_product_stats ups ON ups.user_id = uos.user_id CROSS JOIN platform_avg pa WHERE uos.total_spent > pa.avg_spent * 2 AND uos.order_count > 8 ORDER BY uos.total_spent DESC",
+  "regen_time_s": 9.36,
+  "gold_sql": "WITH user_orders AS (SELECT o.user_id AS uid, SUM(o.total_amount) AS spent, COUNT(*) AS orders FROM orders o WHERE o.status != 'cancelled' GROUP BY o.user_id), user_sku AS (SELECT o.user_id AS uid, COUNT(DISTINCT oi.product_id) AS sku_cnt FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY o.user_id) SELECT u.username, ROUND(uo.spent, 2) AS total_spent, uo.orders, us.sku_cnt FROM user_orders uo JOIN user_sku us ON us.uid = uo.uid JOIN users u ON u.id = uo.uid WHERE uo.spent > 2 * (SELECT AVG(spent) FROM user_orders) AND uo.orders > 8 ORDER BY uo.spent DESC, u.id",
+  "initial_outcome": {
+    "exec": true,
+    "ex": false,
+    "reason": "结果集合不一致",
+    "rows": 43,
+    "columns": [
+      "username",
+      "total_spent",
+      "order_count",
+      "product_count"
+    ],
+    "first_rows": [
+      [
+        "黄冬梅",
+        369854.65,
+        10,
+        31
+      ],
+      [
+        "曾国栋",
+        294744.79,
+        10,
+        42
+      ],
+      [
+        "杨文",
+        244084.57,
+        9,
+        33
+      ]
+    ]
+  },
+  "final_outcome": {
+    "exec": true,
+    "ex": true,
+    "reason": "",
+    "rows": 46,
+    "columns": [
+      "username",
+      "total_spent",
+      "order_count",
+      "product_count"
+    ],
+    "first_rows": [
+      [
+        "黄冬梅",
+        89397.46,
+        10,
+        31
+      ],
+      [
+        "曾国栋",
+        79076.29,
+        10,
+        42
+      ],
+      [
+        "曾家豪",
+        70758.33,
+        10,
+        33
+      ]
+    ]
+  },
+  "hint_text": "【Fan-out 自检提示】\n检测到当前 SQL 存在潜在 1:N Join 粒度风险（orders × order_items）。\n请重新检查 SQL 中 orders 与 order_items 的 Join 粒度：\n\n- 如果聚合函数作用于 orders 级字段（例如 orders.total_amount、订单数），请确认\n  是否会因 order_items 的多行展开导致重复累加 / 重复计数；\n- 不要修改查询需求的业务语义；\n- 优先通过订单级预聚合（先按订单分组后聚合）、独立聚合后再按维度 JOIN、或使用\n  EXISTS / 去重等方式避免重复累计；\n- 注意：item-level 指标（例如 order_items.subtotal、order_items.quantity）不受本提示影响，\n  请勿因本提示改写 item 级聚合。\n\n请基于上述提示与题目原始需求，重新生成唯一一条只读 SQLite SQL。"
+}

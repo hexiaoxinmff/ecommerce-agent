@@ -1,0 +1,65 @@
+{
+  "experiment": "task17_e9_output_structure",
+  "status": "STOPPED_BEFORE_RUN",
+  "stop_reason": "Task 17 任务书 §五 检索可见性检查：cand_A2 对 E-0090 未进入 top-3，候选进不了 top-k → 直接停止并报告；经用户确认按字面停止，未运行 100 条评测。",
+  "base_config": {
+    "dataset_version": "1.1",
+    "dataset_sha256": "DBA277CC0BE7CC282DF67C86DD7EABFEA1337458612A86885F6DAEF0C6829F1A",
+    "database_version": "dev-2026-09-14",
+    "database_sha256": "65E5D8B2727CFA064174F9A08AA7D4B08209E0EDD1EBA81F3155698F1A4491D9",
+    "prompt_version": "SQLGENERATOR_PROMPT_V1.3",
+    "prompt_sha256": "10583478b3a7d972865050501cd6e4b9062531503f1c3852cdd79cbf66f796d5",
+    "base_fewshot_version": "FEWSHOT_V3",
+    "base_fewshot_count": 23,
+    "base_fewshot_sha256": "EE12FCC994C6AFEC42A94F4E327109961AC2022466673BC4A37485638F7D4CEE",
+    "candidate_count": 2,
+    "candidate_ids": ["cand_A1_multi_col_ratio", "cand_A2_dims_with_total"],
+    "candidate_sha256": "ECEB00B5618F9EF8D50733D8ED8EB81F5F811D1A90302961079F4E84C8B325BF",
+    "effective_fewshot_file": "reports/eval/task17_e9_output_structure/fewshot_e9.json",
+    "effective_fewshot_count": 25,
+    "effective_fewshot_sha256": "BF6B8862305985A4AED938B61AC80D9E4D68EC9961C4E50FFE8F6AF36B5872A5",
+    "model": "mimo-v2.5-pro",
+    "provider": "mimo",
+    "runner": "scripts/run_eval.py（当前正式，未改动）",
+    "sqlgen_extra_rules": false
+  },
+  "prechecks": {
+    "benchmark_validator": "PASS",
+    "gold_hash_gate": "PASS（100/100，运行前由 Task15 基线 Gate + 本任务 prep 未改动基准）",
+    "leakage_gate_formal_23": "PASS",
+    "leakage_gate_candidate_2": "PASS",
+    "leakage_gate_merged_25": "PASS",
+    "pytest": "PASS（342 passed）",
+    "db_sha256": "PASS（65E5D8B2…1D9，未变化）",
+    "candidate_schema": "PASS（id/question/scenario/tables/columns/sql/explanation/tags 齐全）"
+  },
+  "retrieval_visibility": {
+    "E-0082": {
+      "base_top3": ["ex_003", "ex_008", "ex_001"],
+      "merged_top3": ["cand_A1_multi_col_ratio", "ex_003", "ex_008"],
+      "candidate_in_top3": ["cand_A1_multi_col_ratio"],
+      "candidate_score": 0.5375,
+      "replaced": ["ex_001"],
+      "visible": true
+    },
+    "E-0083": {
+      "base_top3": ["ex_003", "ex_001", "ex_022"],
+      "merged_top3": ["cand_A1_multi_col_ratio", "ex_003", "ex_001"],
+      "candidate_in_top3": ["cand_A1_multi_col_ratio"],
+      "candidate_score": 0.4542,
+      "replaced": ["ex_022"],
+      "visible": true
+    },
+    "E-0090": {
+      "base_top3": ["ex_009", "ex_023", "ex_015"],
+      "merged_top3": ["ex_009", "ex_023", "ex_015"],
+      "candidate_in_top3": [],
+      "candidate_score": null,
+      "replaced": [],
+      "visible": false,
+      "note": "cand_A2（2024/地区/高金额订单）关键词与 E-0090（2025/订单状态/含取消结构统计）不匹配，未进入 top-3"
+    }
+  },
+  "runs": {"run_01": "NOT_RUN", "run_02": "NOT_RUN"},
+  "stopped_at": "2026-09-16"
+}

@@ -1,0 +1,23 @@
+{
+  "case_id": "B-1089",
+  "eval_id": "E-0035",
+  "question": "每个一级分类下面各有多少个子分类？（请给出一级分类名称与子分类数量）",
+  "difficulty": "medium",
+  "scenario": "category_analysis",
+  "operators": [
+    "aggregate",
+    "join",
+    "group_by"
+  ],
+  "gold_sql": "SELECT pc.name AS top_category, COUNT(lc.id) AS sub_count FROM categories pc JOIN categories lc ON lc.parent_id = pc.id GROUP BY pc.id, pc.name ORDER BY sub_count DESC, pc.name",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

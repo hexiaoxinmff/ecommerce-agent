@@ -1,0 +1,83 @@
+{
+  "experiment": "clean_baseline_v1_1",
+  "timestamp": "2026-09-16T__REPLACE__",
+  "configuration": {
+    "benchmark": {
+      "dataset_name": "ECO-SQL-Bench",
+      "dataset_version": "1.1",
+      "file": "data/eval/ecommerce_eval_v1.json",
+      "dataset_sha256": "DBA277CC0BE7CC282DF67C86DD7EABFEA1337458612A86885F6DAEF0C6829F1A",
+      "items": 100,
+      "easy": 25,
+      "medium": 30,
+      "hard": 30,
+      "extra_hard": 15
+    },
+    "prompt": {
+      "version": "SQLGENERATOR_PROMPT_V1.3",
+      "business_rules_sha256": "10583478B3A7D972865050501CD6E4B9062531503F1C3852CDD79CBF66F796D5",
+      "snapshot": "data/prompts/sql_generator_v1.3.txt",
+      "sqlgen_extra_rules": "NOT ENABLED"
+    },
+    "fewshot": {
+      "version": "FEWSHOT_V3",
+      "count": 23,
+      "file": "data/fewshot/ecommerce_examples.json",
+      "fewshot_sha256": "EE12FCC994C6AFEC42A94F4E327109961AC2022466673BC4A37485638F7D4CEE",
+      "leaky_backups_forbidden": [
+        "data/fewshot/ecommerce_examples_v1_leaky.json",
+        "data/fewshot/ecommerce_examples_v2_leaky.json"
+      ]
+    },
+    "database": {
+      "database_version": "dev-2026-09-14",
+      "seed": 20260914,
+      "schema_version": "1.0",
+      "db_sha256": "65E5D8B2727CFA064174F9A08AA7D4B08209E0EDD1EBA81F3155698F1A4491D9",
+      "row_counts": {
+        "users": 2000,
+        "categories": 30,
+        "products": 500,
+        "orders": 10000,
+        "order_items": 30457
+      }
+    },
+    "model": {
+      "provider": "mimo",
+      "model": "mimo-v2.5-pro",
+      "base_url": "https://api.xiaomimimo.com/v1",
+      "randomness": "provider API controlled randomness unavailable"
+    },
+    "runner": {
+      "mode": "full",
+      "serial": true,
+      "timeout_s": 60,
+      "max_retries": 1,
+      "gold_hash_gate": true,
+      "leakage_gate": true,
+      "exec_rate_definitions": {
+        "overall_exec_rate": "exec_ok / total",
+        "valid_run_exec_rate": "exec_ok / valid_model_runs",
+        "conditional_ex": "ex / valid_model_runs",
+        "provider_failure_class": "LLM family errors + timeout only (classify_provider_failure)"
+      }
+    }
+  },
+  "preflight_checks": {
+    "validator": "PASS (100 items)",
+    "gold_hash_100": "PASS (NONE mismatch)",
+    "leakage_gate": "PASS",
+    "pytest": "PASS (357 passed)",
+    "db_sha256_match": "PASS"
+  },
+  "prohibited": [
+    "no prompt change",
+    "no fewshot change",
+    "no benchmark/gold change",
+    "no db change",
+    "no agent/schema/repair change",
+    "no SQLGEN_EXTRA_RULES",
+    "no per-question rule",
+    "no optimization this turn"
+  ]
+}

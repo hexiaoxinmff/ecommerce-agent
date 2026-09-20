@@ -1,0 +1,115 @@
+{
+  "experiment": "clean_baseline_v1_1",
+  "task": "Task 15 - ECO-SQL-Bench v1.1 正式 Clean Baseline（禁止优化）",
+  "timestamp": "2026-09-16T02:44:36Z",
+  "dataset": {
+    "dataset_version": "1.1",
+    "dataset_name": "ECO-SQL-Bench",
+    "dataset_sha256": "DBA277CC0BE7CC282DF67C86DD7EABFEA1337458612A86885F6DAEF0C6829F1A",
+    "id_file": "data/eval/ecommerce_eval_v1.json",
+    "item_count": 100
+  },
+  "database": {
+    "database_version": "dev-2026-09-14",
+    "schema_version": "1.0",
+    "seed": 20260914,
+    "db_file": "db/ecommerce.db",
+    "db_sha256_before": "65E5D8B2727CFA064174F9A08AA7D4B08209E0EDD1EBA81F3155698F1A4491D9",
+    "db_sha256_after": "65E5D8B2727CFA064174F9A08AA7D4B08209E0EDD1EBA81F3155698F1A4491D9",
+    "row_counts": {"users": 2000, "categories": 30, "products": 500, "orders": 10000, "order_items": 30457}
+  },
+  "prompt": {
+    "prompt_version": "SQLGENERATOR_PROMPT_V1.3",
+    "prompt_sha256": "10583478b3a7d972865050501cd6e4b9062531503f1c3852cdd79cbf66f796d5",
+    "snapshot": "data/prompts/sql_generator_v1.3.txt",
+    "extra_rules_enabled": false
+  },
+  "fewshot": {
+    "fewshot_version": "FEWSHOT_V3",
+    "fewshot_sha256": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee",
+    "fewshot_path": "data/fewshot/ecommerce_examples.json",
+    "size": 23,
+    "leakage_gate": "PASS"
+  },
+  "model": {
+    "model": "mimo-v2.5-pro",
+    "provider": "mimo",
+    "base_url": "https://api.xiaomimimo.com/v1",
+    "randomness": "provider API controlled randomness unavailable"
+  },
+  "runner": {
+    "runner_version": "scripts/run_eval.py（Task 13 创建，Task 14/14.3 修改）",
+    "mode": "full",
+    "serial": true,
+    "per_item_timeout_s": 60.0,
+    "retry_mechanism": "保持默认（无需手工触发）",
+    "agent_graph": "app.agent.graph.run_agent（当前正式图）",
+    "executor": "app.sqlexec.executor（只读）",
+    "execution_safety": "SQLSafety 校验启用"
+  },
+  "prechecks": {
+    "validator": "PASS",
+    "gold_hash_gate": "PASS（100/100）",
+    "leakage_gate": "PASS",
+    "pytest": "PASS（357 passed）"
+  },
+  "overall": {
+    "total": 100,
+    "ex": 90.0,
+    "final_ex": 90.0,
+    "conditional_ex": 90.0,
+    "overall_exec_rate": 99.0,
+    "valid_run_exec_rate": 99.0,
+    "pass_at_1": 90.0,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "model_generation_failure": 0,
+    "sql_safety_error": 0,
+    "sql_execution_error": 1,
+    "result_mismatch": 9,
+    "repair_trigger_rate": 1.0,
+    "repair_success_rate": 0.0
+  },
+  "latency_ms": {
+    "avg": 10876.08,
+    "p50": 10488.92,
+    "p95": 15440.79,
+    "total_s": 1090.5
+  },
+  "difficulty": {
+    "easy": {"count": 25, "ex": 100.0, "exec_rate": 100.0},
+    "medium": {"count": 30, "ex": 100.0, "exec_rate": 100.0},
+    "hard": {"count": 30, "ex": 86.67, "exec_rate": 100.0},
+    "extra_hard": {"count": 15, "ex": 60.0, "exec_rate": 93.33}
+  },
+  "failure_stages": {
+    "none": 90,
+    "result": 9,
+    "sql_repair": 1
+  },
+  "error_types": {
+    "none": 90,
+    "result_mismatch": 9,
+    "SQL 执行失败: no such column: r.region": 1
+  },
+  "bad_cases": [
+    {"eval_id": "E-0057", "stage": "result", "error_type": "result_mismatch", "exec_success": true, "difficulty": "hard", "latency_ms": 10139.2},
+    {"eval_id": "E-0077", "stage": "result", "error_type": "result_mismatch", "exec_success": true, "difficulty": "hard", "latency_ms": 9657.0},
+    {"eval_id": "E-0082", "stage": "result", "error_type": "result_mismatch", "exec_success": true, "difficulty": "hard", "latency_ms": 12994.9},
+    {"eval_id": "E-0083", "stage": "result", "error_type": "result_mismatch", "exec_success": true, "difficulty": "hard", "latency_ms": 15440.8},
+    {"eval_id": "E-0086", "stage": "result", "error_type": "result_mismatch", "exec_success": true, "difficulty": "extra_hard", "latency_ms": 13260.6},
+    {"eval_id": "E-0090", "stage": "result", "error_type": "result_mismatch", "exec_success": true, "difficulty": "extra_hard", "latency_ms": 9448.4},
+    {"eval_id": "E-0095", "stage": "result", "error_type": "result_mismatch", "exec_success": true, "difficulty": "extra_hard", "latency_ms": 15013.1},
+    {"eval_id": "E-0096", "stage": "result", "error_type": "result_mismatch", "exec_success": true, "difficulty": "extra_hard", "latency_ms": 13182.5},
+    {"eval_id": "E-0099", "stage": "sql_repair", "error_type": "SQL 执行失败: no such column: r.region", "exec_success": false, "difficulty": "extra_hard", "latency_ms": 25796.6},
+    {"eval_id": "E-0100", "stage": "result", "error_type": "result_mismatch", "exec_success": true, "difficulty": "extra_hard", "latency_ms": 15572.4}
+  ],
+  "task14_3_fixes_verification": {
+    "E-0086_gold_fan_out": "已生效：新 Gold 双 CTE 聚合，46 行，黄冬梅 total_spent=89397.46（真实订单表口径）。本轮模型预测量仍出现 fan-out（368854.65 → 369854.65），属模型生成问题，非 Gold 缺陷。",
+    "E-0095_question_gold_align": "已生效：题面已含「组合销售金额高于30000元」，与 Gold 30000 条件一致。本轮失败原因为 pred 多 1 行（山东_家用电器 72746.95 进入结果集），非题面/Gold 不一致。",
+    "E-0098_ranking_tiebreak": "已生效：E-0098 本轮 EX✓（Gold 含 ORDER BY sold DESC, prod_id tiebreaker）。",
+    "conditional_ex_classification": "已生效：E-0099（SQLGenerationSchema 校验类/执行错误）未计入 provider_failure，provider_failures=0 且 valid_model_runs=100；本轮全部 100 题均为有效模型运行。",
+    "exec_rate_dual": "已生效：metrics.py 定义并计算 overall_exec_rate（分母=total）与 valid_run_exec_rate（分母=valid_model_runs），本轮均为 99.0%。注：runner JSON/MD 落盘摘要仅输出单一 exec_rate 字段（=99.0），双口径值在 aggregate() 中计算，未单独写入落盘 summary——记录如下，不作本任务修复。",
+    "leakage": "已生效：FEWSHOT_V3 与 Benchmark v1.1 之间 Leakage Gate PASS（运行前 Gate + 脚本双重确认）。"
+  }
+}

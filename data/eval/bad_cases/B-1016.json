@@ -1,0 +1,26 @@
+{
+  "case_id": "B-1016",
+  "eval_id": "E-0050",
+  "question": "2026年工作日与周末的订单数量分别是多少？",
+  "difficulty": "medium",
+  "scenario": "time_analysis",
+  "operators": [
+    "where",
+    "aggregate",
+    "case_when",
+    "group_by",
+    "date_filter",
+    "order_by"
+  ],
+  "gold_sql": "SELECT CASE WHEN strftime('%w', order_date) IN ('0','6') THEN '周末' ELSE '工作日' END AS day_type, COUNT(*) AS order_count FROM orders WHERE order_date >= '2026-01-01' GROUP BY 1 ORDER BY order_count DESC, 1",
+  "pred_sql": "SELECT CASE WHEN CAST(strftime('%w', order_date) AS INTEGER) IN (0, 6) THEN '周末' ELSE '工作日' END AS day_type, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2026' AND status != 'cancelled' GROUP BY day_type",
+  "initial_sql": "SELECT CASE WHEN CAST(strftime('%w', order_date) AS INTEGER) IN (0, 6) THEN '周末' ELSE '工作日' END AS day_type, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2026' AND status != 'cancelled' GROUP BY day_type",
+  "final_sql": "SELECT CASE WHEN CAST(strftime('%w', order_date) AS INTEGER) IN (0, 6) THEN '周末' ELSE '工作日' END AS day_type, COUNT(*) AS order_count FROM orders WHERE strftime('%Y', order_date) = '2026' AND status != 'cancelled' GROUP BY day_type",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 11361.99,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

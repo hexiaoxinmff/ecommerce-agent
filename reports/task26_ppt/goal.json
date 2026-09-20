@@ -1,0 +1,764 @@
+{
+  "title": "基于Text2SQL的电商智能数据分析Agent",
+  "goal": "课程项目最终答辩PPT：自然语言到可执行SQL的电商分析Agent。覆盖背景、目标、系统架构、Agent流程、数据库、SQL安全与可靠性、前端真实页面、评测体系(ECO-SQL-Bench v1.1, EX 90%)、难度分层、Bad Case、E3 Fan-out检测创新与实验边界、现场Demo(4条已实测问题)、局限与未来工作、总结。10~15分钟答辩。",
+  "audience": "课程评审 / 答辩评委",
+  "owner": "何钊新",
+  "randomSeed": "text2sql-20260916-r9k",
+  "themePack": "theme03",
+  "pageCount": 16,
+  "slides": [
+    {
+      "layout": "theme03_page002",
+      "props": {
+        "eyebrow": "课程项目答辩 · 2026",
+        "kicker": "基于 Text2SQL 的电商智能数据分析 Agent",
+        "titleA": "Text2SQL",
+        "titleAccent": "电商智能",
+        "titleB": "数据分析",
+        "titleC": "Agent",
+        "sub": "面向电商业务的自然语言数据分析与可验证 SQL Agent",
+        "stats": [
+          {
+            "v": "90.0%",
+            "u": "EX",
+            "k": "Clean Baseline"
+          },
+          {
+            "v": "99.0%",
+            "u": "Exec",
+            "k": "执行成功率"
+          },
+          {
+            "v": "100",
+            "u": "题",
+            "k": "评测集 ECO-SQL-Bench"
+          }
+        ],
+        "meta": [
+          "报告人：何钊新",
+          "嘉应学院·数据科学",
+          "与大数据技术本科",
+          "2026 年 9 月"
+        ],
+        "statCount": 3
+      }
+    },
+    {
+      "layout": "theme03_page038",
+      "props": {
+        "copy": {
+          "t001": "背景与问题",
+          "t002": "为什么需要这个系统？",
+          "t003": "传统提数链路",
+          "t004": "三个核心痛点",
+          "t005": "业务问题 → 理解 Schema → 手写 SQL → 检查 → 执行 → 分析",
+          "t006": "结论：需要的是 Agent 而非生成器"
+        },
+        "takeaways": [
+          {
+            "idx": "01",
+            "axis": "不会 SQL 的门槛",
+            "key": "痛点",
+            "title": "业务人员不会 SQL",
+            "desc": "运营/管理层提数依赖分析师排期，响应周期长"
+          },
+          {
+            "idx": "02",
+            "axis": "生成 ≠ 可信",
+            "key": "痛点",
+            "title": "SQL 需执行验证纠错",
+            "desc": "生成后要能执行、安全校验、自动修复"
+          },
+          {
+            "idx": "03",
+            "axis": "本项目定位",
+            "key": "答案",
+            "title": "不是聊天机器人",
+            "desc": "是能执行、验证、纠错、评测的 Text2SQL Agent"
+          }
+        ],
+        "itemCount": 3
+      }
+    },
+    {
+      "layout": "theme03_page046",
+      "props": {
+        "copy": {
+          "t001": "项目目标",
+          "t002": "从提问到可信结论",
+          "t003": "自然语言 → 可执行 SQL → 安全执行 → 可评测",
+          "t004": "核心指标",
+          "t005": "任务书 SQL 执行准确率目标 ≥85%，已达成",
+          "t006": "四个能力支柱",
+          "t007": "Exec 99.0% · Pass@1 90.0% · 0 Provider · 0 Timeout"
+        },
+        "center": {
+          "cn": "90.0%",
+          "en": "EX",
+          "desc": "ECO-SQL-Bench v1.1 执行准确率",
+          "lvl": 90
+        },
+        "meterLabel": "任务书目标 ≥85%",
+        "showMeter": false,
+        "forces": [
+          {
+            "cn": "自然语言分析",
+            "en": "NL Query",
+            "desc": "业务人员直接向数据提问",
+            "lvl": 1
+          },
+          {
+            "cn": "Schema 理解",
+            "en": "Schema",
+            "desc": "表/字段/口径结构化管理",
+            "lvl": 2
+          },
+          {
+            "cn": "Text2SQL+安全",
+            "en": "Gen+Guard",
+            "desc": "生成 SQL + 独立安全校验层",
+            "lvl": 3
+          },
+          {
+            "cn": "执行·修复·评测",
+            "en": "Loop",
+            "desc": "只读执行、有界 Repair、可评测",
+            "lvl": 3
+          }
+        ],
+        "levelLabels": [
+          "基础能力",
+          "核心增强",
+          "扩展能力"
+        ]
+      }
+    },
+    {
+      "layout": "theme03_page049",
+      "props": {
+        "copy": {
+          "t001": "系统总体架构",
+          "t002": "Mimo 是外部 LLM Provider",
+          "t003": "外部调用 · 非系统内部层",
+          "t004": "用户 → 前端 → API → Agent → 只读库",
+          "t005": "实际技术栈",
+          "t006": "Python 3.12 · React 19 · Vite · ECharts 6 · LangGraph 1.2"
+        },
+        "layers": [
+          {
+            "cn": "Mimo V2.5 Pro",
+            "en": "LLM Provider",
+            "note": "OpenAI-compatible · 外部推理服务"
+          },
+          {
+            "cn": "用户",
+            "en": "User",
+            "note": "自然语言提问 / 结果消费"
+          },
+          {
+            "cn": "React + ECharts",
+            "en": "Frontend",
+            "note": "提问 · 结果 · Trace · 图表"
+          },
+          {
+            "cn": "FastAPI",
+            "en": "API",
+            "note": "REST 路由 · /docs 自动文档"
+          },
+          {
+            "cn": "LangGraph Agent",
+            "en": "Orchestration",
+            "note": "Schema → Few-shot → 生成 → 安全 → 执行 → 修复"
+          },
+          {
+            "cn": "SQLite 只读",
+            "en": "ecommerce.db",
+            "note": "mode=ro · query_only=ON"
+          }
+        ],
+        "layerCount": 6
+      }
+    },
+    {
+      "layout": "theme03_page048",
+      "props": {
+        "copy": {
+          "t001": "Agent 核心流程",
+          "t002": "LangGraph 有界状态图",
+          "t003": "用户问题",
+          "t004": "repair_count≤1 · execute_count≤2 · 绝不无限循环",
+          "t005": "阶段",
+          "t006": "执行行为",
+          "t007": "全链路 Trace · 状态/失败/Skip/耗时",
+          "t008": "异常处理"
+        },
+        "stages": [
+          {
+            "cn": "Schema Linking",
+            "en": "link",
+            "behaviour": "识别表/字段/置信度",
+            "score": 0.95,
+            "mood": "理解",
+            "opp": "失败 → 受控拒答"
+          },
+          {
+            "cn": "Few-shot 检索",
+            "en": "retrieve",
+            "behaviour": "规则型 Top-K 示例",
+            "score": 0.9,
+            "mood": "辅助",
+            "opp": "无示例仍可生成"
+          },
+          {
+            "cn": "SQL 生成",
+            "en": "generate",
+            "behaviour": "LLM 生成候选 SQL",
+            "score": 0.9,
+            "mood": "生成",
+            "opp": "进入 Safety 校验"
+          },
+          {
+            "cn": "Safety 校验",
+            "en": "safety",
+            "behaviour": "独立校验层把关",
+            "score": 0.9,
+            "mood": "把关",
+            "opp": "不安全 → 拦截"
+          },
+          {
+            "cn": "执行 + Repair",
+            "en": "execute",
+            "behaviour": "失败 → Repair≤1 → Re-check → 重执",
+            "score": 0.5,
+            "mood": "纠错",
+            "opp": "仍失败 → 完整诊断"
+          }
+        ],
+        "stageCount": 5
+      }
+    },
+    {
+      "layout": "theme03_page012",
+      "props": {
+        "eyebrow": "数据库设计",
+        "kicker": "5 张核心表 · 固定 Seed · 可复现",
+        "title": "ecommerce.db",
+        "headers": [
+          "表",
+          "行数",
+          "所属域",
+          "核心关系"
+        ],
+        "calloutLabel": "金额口径",
+        "calloutBody": "subtotal=明细行金额 · total_amount=订单最终实付 · cancelled=不计入实际销售",
+        "rows": [
+          {
+            "co": "users",
+            "amt": 2000,
+            "sector": "用户域",
+            "layer": "1—N orders"
+          },
+          {
+            "co": "categories",
+            "amt": 30,
+            "sector": "商品域",
+            "layer": "1—N products"
+          },
+          {
+            "co": "products",
+            "amt": 500,
+            "sector": "商品域",
+            "layer": "1—N order_items"
+          },
+          {
+            "co": "orders",
+            "amt": 10000,
+            "sector": "交易域",
+            "layer": "1—N order_items"
+          },
+          {
+            "co": "order_items",
+            "amt": 30457,
+            "sector": "交易域",
+            "layer": "明细行"
+          }
+        ],
+        "itemCount": 5
+      }
+    },
+    {
+      "layout": "theme03_page034",
+      "props": {
+        "copy": {
+          "t001": "SQL 安全与可靠性",
+          "t002": "生成 ≠ 可执行 · 确定性代码把关",
+          "t003": "三道防线",
+          "t004": "Safety → 只读 → Repair（全链路 Trace 留痕）"
+        },
+        "chains": [
+          {
+            "tag": "① Safety",
+            "title": "SQL 安全校验",
+            "nodes": [
+              "SELECT/WITH 白名单",
+              "写/多语句拒绝",
+              "AST+Schema 校验",
+              "LIMIT≤500注入"
+            ],
+            "outcomes": [
+              "不安全→拦截",
+              "合法→放行"
+            ]
+          },
+          {
+            "tag": "② 只读",
+            "title": "只读执行",
+            "nodes": [
+              "mode=ro",
+              "query_only=ON",
+              "500行截断"
+            ],
+            "outcomes": [
+              "写操作→拒绝",
+              "结果→结构化"
+            ]
+          },
+          {
+            "tag": "③ Repair",
+            "title": "有界自修复",
+            "nodes": [
+              "Repair≤1次",
+              "二次校验+执行",
+              "失败→诊断"
+            ],
+            "outcomes": [
+              "成功→Result",
+              "仍失败→诊断"
+            ]
+          }
+        ],
+        "chainCount": 3
+      }
+    },
+    {
+      "layout": "theme03_page063",
+      "props": {
+        "copy": {
+          "t001": "前端产品界面",
+          "t002": "真实运行界面 · 分析结果与 SQL 留痕",
+          "t003": "提问 → Agent → SQL → Result → Trace",
+          "t004": "",
+          "t005": "主图展示真实分析结果，副图与证据辅助",
+          "t009": "非原型 · 真实运行"
+        },
+        "labs": [
+          {
+            "name": "智能分析",
+            "tag": "主图",
+            "note": "自然语言提问真实结果"
+          },
+          {
+            "name": "首页概览",
+            "tag": "副图",
+            "note": "指标概览"
+          },
+          {
+            "name": "SQL Trace",
+            "tag": "证据",
+            "note": "全链路留痕"
+          }
+        ],
+        "images": [
+          "assets/user-media/03-result.png",
+          "assets/user-media/01-home.png",
+          "assets/user-media/05-sql-trace.png"
+        ],
+        "imageCount": 3,
+        "labCount": 3
+      }
+    },
+    {
+      "layout": "theme03_page021",
+      "props": {
+        "eyebrow": "评测体系",
+        "kicker": "ECO-SQL-Bench v1.1",
+        "title": "100 题 · 冻结基线",
+        "cornerLabel": "唯一正式指标",
+        "calloutLabel": "锁定口径",
+        "calloutBody": "v1.1 / Prompt V1.3 / FEWSHOT_V3(23) / dev-2026-09-14 / Mimo V2.5 Pro",
+        "companies": [
+          {
+            "name": "总体",
+            "en": "v1.1 · 100 题",
+            "tier": "全量 100 题"
+          },
+          {
+            "name": "分档 · 观测",
+            "en": "Hash 门禁",
+            "tier": "Easy · Hard · P95"
+          },
+          {
+            "name": "分档 · 判定",
+            "en": "result-hash",
+            "tier": "Extra · 判定 · 目标"
+          }
+        ],
+        "rows": [
+          {
+            "metric": "90.0%",
+            "en": "EX 执行准确率",
+            "vals": [
+              "90/100",
+              "86.67% Hard",
+              "60% Extra"
+            ],
+            "unit": "",
+            "strong": true,
+            "edge": false
+          },
+          {
+            "metric": "99.0%",
+            "en": "Exec 执行成功率",
+            "vals": [
+              "99/100",
+              "100% Easy",
+              "93.3% Extra"
+            ],
+            "unit": "",
+            "strong": false,
+            "edge": false
+          },
+          {
+            "metric": "90.0%",
+            "en": "Pass@1 一次生成",
+            "vals": [
+              "90/100",
+              "无重试",
+              "直接通过"
+            ],
+            "unit": "",
+            "strong": false,
+            "edge": false
+          },
+          {
+            "metric": "0",
+            "en": "Provider 失败",
+            "vals": [
+              "0/100",
+              "Timeout 0",
+              "无异常"
+            ],
+            "unit": "",
+            "strong": false,
+            "edge": true
+          },
+          {
+            "metric": "10.9s",
+            "en": "平均延迟",
+            "vals": [
+              "P50 10.5s",
+              "P95 15.4s",
+              "目标≤8s"
+            ],
+            "unit": "",
+            "strong": false,
+            "edge": false
+          }
+        ]
+      }
+    },
+    {
+      "layout": "theme03_page029",
+      "props": {
+        "copy": {
+          "t001": "评测结果",
+          "t002": "难度分层 EX 准确率",
+          "t003": "评测结果",
+          "t004": "",
+          "t005": "",
+          "t006": "观察",
+          "t007": "Easy / Medium 全对；Hard / Extra Hard 的 EX 有所下降",
+          "t009": "90",
+          "t010": "合计 EX",
+          "t011": "100 题 · ECO-SQL-Bench v1.1",
+          "t012": "90",
+          "t013": "合计 EX 90.00%"
+        },
+        "data": [
+          {
+            "region": "Easy",
+            "en": "25 / 25",
+            "amt": 25,
+            "pct": 100
+          },
+          {
+            "region": "Medium",
+            "en": "30 / 30",
+            "amt": 30,
+            "pct": 100
+          },
+          {
+            "region": "Hard",
+            "en": "26 / 30",
+            "amt": 30,
+            "pct": 86.67
+          },
+          {
+            "region": "Extra Hard",
+            "en": "9 / 15",
+            "amt": 15,
+            "pct": 60
+          }
+        ],
+        "images": [],
+        "imageCount": 0,
+        "itemCount": 4
+      }
+    },
+    {
+      "layout": "theme03_page018",
+      "props": {
+        "eyebrow": "Bad Case 分析",
+        "kicker": "10 个失败样本 → 3 类机制",
+        "caseTag": "E-0086 / E-0099 / 输出结构",
+        "title": "讲错误机制，而非堆 SQL",
+        "lead": "从 Clean Baseline 最终 10 个 Bad Case 中归纳出 3 类代表性错误机制",
+        "quoteBody": "错误集中于复杂聚合、粒度与输出结构问题",
+        "quoteAttribution": "Clean Baseline v1.1 观察",
+        "milestones": [
+          {
+            "time": "E-0086",
+            "label": "Fan-out 粒度",
+            "detail": "orders×order_items 金额放大 4.14×"
+          },
+          {
+            "time": "E-0099",
+            "label": "别名/列引用",
+            "detail": "生成后执行报错→触发 Repair，但该样本修复仍失败"
+          },
+          {
+            "time": "E-0082/83",
+            "label": "输出结构",
+            "detail": "数值正确但缺列，需规范输出形状"
+          },
+          {
+            "time": "改进",
+            "label": "示例库+Prompt",
+            "detail": "bad case 沉淀反哺迭代"
+          }
+        ],
+        "images": [],
+        "imageCount": 0
+      }
+    },
+    {
+      "layout": "theme03_page019",
+      "props": {
+        "copy": {
+          "t001": "E3 创新点",
+          "t002": "E-0086 · Fan-out",
+          "t003": "一个案例讲清楚",
+          "t004": "orders × order_items",
+          "t005": " ｜ Pred 与真实结果对比",
+          "t006": "→ 修正为真实口径（DB 直连验证）",
+          "t007": "链路",
+          "t008": "Pred SQL → Detector → Alarm → FANOUT_RECHECK_HINT → 1 次再生成 → EX✗→EX✓",
+          "t012": "Gold-independent · PoC"
+        },
+        "stats": [
+          {
+            "num": "4.14",
+            "unit": "×",
+            "note": "订单×明细 粒度放大"
+          },
+          {
+            "num": "369854.65",
+            "unit": "",
+            "note": "Pred 累计消费额"
+          },
+          {
+            "num": "89397.46",
+            "unit": "",
+            "note": "修正后真实结果"
+          }
+        ],
+        "statCount": 3,
+        "images": [],
+        "imageCount": 0
+      }
+    },
+    {
+      "layout": "theme03_page055",
+      "props": {
+        "copy": {
+          "t001": "E3 实验边界",
+          "t002": "BOUNDARY · 限制与归因",
+          "t003": "90% → 93%",
+          "t004": "观测差异，不代表整体 EX 稳定提升",
+          "t005": "限制项",
+          "t006": "严重度",
+          "t007": "可能性",
+          "t008": "触发",
+          "t009": "影响",
+          "t010": "结论限制",
+          "t011": "范围 orders×items · 超时/管道",
+          "t012": "禁止表述「Hint 提升 3 个百分点」"
+        },
+        "rows": [
+          {
+            "name": "Alarm n=1",
+            "sev": 5,
+            "like": 4,
+            "trig": "仅 E-0086 命中",
+            "impact": "+1pt 直接归因"
+          },
+          {
+            "name": "OFF/ON",
+            "sev": 4,
+            "like": 4,
+            "trig": "非严格单变量",
+            "impact": "机制层观测"
+          },
+          {
+            "name": "PoC",
+            "sev": 3,
+            "like": 4,
+            "trig": "范围 orders×items",
+            "impact": "子查询剪枝·盲区"
+          }
+        ],
+        "itemCount": 3
+      }
+    },
+    {
+      "layout": "theme03_page014",
+      "props": {
+        "copy": {
+          "t001": "Demo 清单",
+          "t002": "4 条真实验证问题",
+          "t003": "现场 Demo",
+          "t004": "全部来自 Task 23 E2E Smoke 实测（真实 Mimo 全链路）",
+          "t005": "",
+          "t006": "",
+          "t007": "Repair/E3 证据讲解",
+          "t008": "不作为稳定现场交互 Demo"
+        },
+        "showAxis": true,
+        "cells": [
+          {
+            "name": "哪个地区的用户最多？",
+            "tag": "普通查询",
+            "desc": "结果 246 行",
+            "chips": [
+              "E2E 实测",
+              "真实 Mimo"
+            ]
+          },
+          {
+            "name": "2025 年每月销售额？",
+            "tag": "聚合 / 时间",
+            "desc": "结果 12 行",
+            "chips": [
+              "E2E 实测",
+              "真实 Mimo"
+            ]
+          },
+          {
+            "name": "近30天销量 Top5？",
+            "tag": "排名",
+            "desc": "结果 5 行",
+            "chips": [
+              "E2E 实测",
+              "真实 Mimo"
+            ]
+          },
+          {
+            "name": "哪个类目销售额最高？",
+            "tag": "多表 JOIN",
+            "desc": "结果 1 行",
+            "chips": [
+              "E2E 实测",
+              "真实 Mimo"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "layout": "theme03_page028",
+      "props": {
+        "copy": {
+          "t001": "总结 · 三问三答",
+          "t002": "FINAL DEFENSE · 面向电商分析",
+          "t003": "90.0",
+          "t004": "面向电商分析的",
+          "t005": "Text2SQL",
+          "t006": "Agent",
+          "t007": "总结",
+          "t008": "E3：验证典型 Fan-out 风险检测与条件干预机制 ｜ 可执行 · 可验证 · 可纠错 · 可评测"
+        },
+        "stats": [
+          {
+            "value": "Text2SQL",
+            "unit": "Agent",
+            "label": "我们做了什么？"
+          },
+          {
+            "value": "闭环",
+            "unit": "生成→安全→执行→修复→评测",
+            "label": "核心价值？"
+          },
+          {
+            "value": "90.0%",
+            "unit": "EX",
+            "label": "如何证明？100 题 · ECO-SQL v1.1"
+          }
+        ],
+        "statCount": 3
+      }
+    },
+    {
+      "layout": "theme03_page077",
+      "props": {
+        "eyebrow": "THANKS",
+        "kicker": "谢谢聆听",
+        "titlePrefix": "请",
+        "titleAccentA": "提",
+        "titleMid": "问",
+        "titleAccentB": "与",
+        "titleSuffix": "指正",
+        "lead": "基于 Text2SQL 的电商智能数据分析 Agent —— 课程项目最终答辩",
+        "meta": [
+          "报告人：何钊新",
+          "数据科学与大数据技术",
+          "2026 年 9 月"
+        ],
+        "sourcesLabel": "数据来源",
+        "sources": [
+          {
+            "k": "Clean Baseline",
+            "v": "reports/eval/clean_baseline_v1_1"
+          },
+          {
+            "k": "E3 冻结",
+            "v": "reports/eval/E3_FINAL_FREEZE.md"
+          },
+          {
+            "k": "验收与缺口",
+            "v": "FINAL_ACCEPTANCE / GAP_CHECK"
+          }
+        ],
+        "notesLabel": "说明",
+        "notes": [
+          "真实 API Key 不出现于任何文档",
+          "E3 为机制验证·非全局增益",
+          "未实现能力已如实披露"
+        ],
+        "copy": {
+          "t001": "谢谢 · THANK YOU"
+        },
+        "noteCount": 3
+      }
+    }
+  ]
+}

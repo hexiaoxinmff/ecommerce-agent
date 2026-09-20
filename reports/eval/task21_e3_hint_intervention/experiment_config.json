@@ -1,0 +1,59 @@
+{
+  "experiment": "task21_e3_hint_intervention",
+  "task": "Task 21：FANOUT_RECHECK_HINT 正式 OFF vs ON 100 条对照实验",
+  "status": "DONE",
+  "locked_config": {
+    "benchmark": "ECO-SQL-Bench v1.1",
+    "dataset_sha256": "DBA277CC0BE7CC282DF67C86DD7EABFEA1337458612A86885F6DAEF0C6829F1A",
+    "prompt": "SQLGENERATOR_PROMPT_V1.3",
+    "prompt_sha256": "10583478b3a7d972865050501cd6e4b9062531503f1c3852cdd79cbf66f796d5",
+    "fewshot": "FEWSHOT_V3 (23)",
+    "fewshot_sha256": "EE12FCC994C6AFEC42A94F4E327109961AC2022466673BC4A37485638F7D4CEE",
+    "database": "dev-2026-09-14",
+    "db_sha256": "65E5D8B2727CFA064174F9A08AA7D4B08209E0EDD1EBA81F3155698F1A4491D9",
+    "model": "mimo-v2.5-pro",
+    "retriever": "当前正式（未修改）",
+    "detector": "Task17/18/19 验收版本（未修改）",
+    "sql_validator": "当前正式（未修改）"
+  },
+  "intervention": {
+    "name": "FANOUT_RECHECK_HINT",
+    "trigger_only_when": "detector fan_out_suspected == true",
+    "max_regeneration": 1,
+    "no_repair": true,
+    "no_ast_rewrite": true,
+    "no_second_agent": true,
+    "detector_false_prompt_identical_to_off": true
+  },
+  "smoke": {"e0086": "PASS（alarm→hint→1次regeneration→EX✓，无repair）"},
+  "runs": {
+    "off": {"file": "run_off/eval.json", "ex": 90.0, "bad_count": 10, "provider": 0, "timeout": 0, "exec_rate": 99.0},
+    "on": {"file": "run_on/eval.json", "ex": 93.0, "bad_count": 7, "provider": 0, "timeout": 0, "exec_rate": 100.0}
+  },
+  "delta_ex": 3.0,
+  "hint_metrics": {
+    "alarm_count_on": 1,
+    "hint_injected_count": 1,
+    "alarm_hint_consistent": true,
+    "regeneration": {"total": 1, "avg_per_item": 0.01},
+    "fanout_fixed": ["E-0086"],
+    "fanout_regressed": [],
+    "fanout_still_wrong": []
+  },
+  "e0086": {"alarm": true, "hint": true, "initial_ex": false, "final_ex": true, "regen_count": 1},
+  "cross_group_attribution": {
+    "E-0086": "Hint 直接修复（唯一 alarm 样本）",
+    "E-0099": "独立样本随机性（alarm=False，未注入 hint；OFF 因别名 bug 失败、ON 生成正确）",
+    "E-0100": "独立样本随机性（alarm=False，未注入 hint；金额口径波动）"
+  },
+  "conclusion": "KEEP（Hint 对 fan-out alarm 样本产生可观察修复收益（1修复/0误修/0回归），全局 EX 90→93 未下降，无 provider/timeout/延迟副作用；但 alarm 样本仅1条，属单案例证据，需更多 alarm 样本积累后再做更强结论）",
+  "artifacts": [
+    "run_off/eval.json, report.md, run_off.log",
+    "run_on/eval.json, interventions.json, report.md, run_on.log",
+    "comparison.json, comparison.md",
+    "smoke/e0086.json, e0086.md",
+    "experiment_config.json",
+    "scripts/run_eval_fanout_hint.py, scripts/task21_compare.py"
+  ],
+  "protected": ["Benchmark/Gold/Few-shot/Prompt/Retriever/Detector/SQL Validator/DB 均未修改"]
+}

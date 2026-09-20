@@ -1,0 +1,30 @@
+{
+  "case_id": "B-1093",
+  "eval_id": "E-0067",
+  "question": "最近90天（2026年6月14日至9月12日）各地区各类别的销售金额最高的8个组合是哪些？（请给出地区、分类与金额）",
+  "difficulty": "hard",
+  "scenario": "sales_analysis",
+  "operators": [
+    "multiple_join",
+    "join",
+    "where",
+    "date_filter",
+    "group_by",
+    "aggregate",
+    "multi_dimension_grouping",
+    "order_by",
+    "limit",
+    "top_n"
+  ],
+  "gold_sql": "SELECT o.region, c.name, ROUND(SUM(oi.subtotal), 2) AS revenue FROM orders o JOIN order_items oi ON oi.order_id = o.id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.order_date >= '2026-06-14' AND o.status != 'cancelled' GROUP BY o.region, c.name ORDER BY revenue DESC, o.region, c.name LIMIT 8",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

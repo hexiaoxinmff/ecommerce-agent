@@ -1,0 +1,27 @@
+{
+  "case_id": "B-1026",
+  "eval_id": "E-0076",
+  "question": "订单数量最多的5个收货地区是哪几个？它们各占订单总量的百分之几？（请给出地区、订单数与占比）",
+  "difficulty": "hard",
+  "scenario": "regional_analysis",
+  "operators": [
+    "group_by",
+    "aggregate",
+    "order_by",
+    "limit",
+    "top_n",
+    "ratio",
+    "subquery"
+  ],
+  "gold_sql": "SELECT region, COUNT(*) AS order_count, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM orders), 2) AS pct FROM orders GROUP BY region ORDER BY order_count DESC, region LIMIT 5",
+  "pred_sql": "SELECT region, COUNT(*) AS order_count, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM orders WHERE status != 'cancelled'), 2) AS percentage FROM orders WHERE status != 'cancelled' GROUP BY region ORDER BY order_count DESC LIMIT 5",
+  "initial_sql": "SELECT region, COUNT(*) AS order_count, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM orders WHERE status != 'cancelled'), 2) AS percentage FROM orders WHERE status != 'cancelled' GROUP BY region ORDER BY order_count DESC LIMIT 5",
+  "final_sql": "SELECT region, COUNT(*) AS order_count, ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM orders WHERE status != 'cancelled'), 2) AS percentage FROM orders WHERE status != 'cancelled' GROUP BY region ORDER BY order_count DESC LIMIT 5",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 9435.82,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

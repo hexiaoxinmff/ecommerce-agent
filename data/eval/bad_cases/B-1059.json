@@ -1,0 +1,32 @@
+{
+  "case_id": "B-1059",
+  "eval_id": "E-0088",
+  "question": "2025年销售金额最高的5款商品中，它们上半年与下半年的销售额分别是多少？（请给出商品名、上半年额、下半年额与全年额）",
+  "difficulty": "extra_hard",
+  "scenario": "product_analysis",
+  "operators": [
+    "conditional_aggregation",
+    "case_when",
+    "multiple_join",
+    "join",
+    "where",
+    "date_filter",
+    "group_by",
+    "aggregate",
+    "subquery",
+    "order_by",
+    "limit",
+    "top_n"
+  ],
+  "gold_sql": "WITH sales AS (SELECT p.name, SUM(CASE WHEN substr(o.order_date, 6, 2) <= '06' THEN oi.subtotal ELSE 0 END) AS h1, SUM(CASE WHEN substr(o.order_date, 6, 2) >= '07' THEN oi.subtotal ELSE 0 END) AS h2, SUM(oi.subtotal) AS total FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY p.id, p.name) SELECT name, ROUND(h1, 2) AS first_half, ROUND(h2, 2) AS second_half, ROUND(total, 2) AS total FROM sales ORDER BY total DESC, name LIMIT 5",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

@@ -1,0 +1,21 @@
+﻿case_id,detector_severity,human_fanout_label,judgement,aggregation,join_pattern,protection,reason
+E-0059,none,false,TN,SUM(oi.quantity) item-level,order_items→orders→products 直连,无（不需要：item 聚合）,聚合值为明细列 oi.quantity，属 item-level，orders 仅提供状态过滤，无 1:N 放大
+E-0061,none,false,TN,SUM(oi.subtotal) item-level + 两阶段 AVG,categories→products→order_items→orders 直连,category_sales 预聚合后 AVG,category_sales 内 SUM 明细值后两阶段平均；无订单级金额被明细行重复累计
+E-0062,none,false,TN,SUM(oi.subtotal) item-level,order_items→orders→products→categories 直连,无（item 聚合）,聚合明细销售，订单列仅过滤条件
+E-0067,none,false,TN,SUM(oi.subtotal) item-level,order_items→orders→products→categories 直连,无（item 聚合）,item 粒度聚合，region/category 分组，无订单级字段聚合
+E-0073,low,false,TN,SUM(oi.subtotal) item-level,order_items→orders→products→categories 直连,COUNT(DISTINCT o.order_date) 去重,SUM 为明细值；分母 COUNT(DISTINCT order_date) 去重不放大；SQLROUND 后 daily_avg 正确
+E-0074,none,false,TN,SUM(oi.quantity) item-level,order_items→orders→products→categories 直连,无（item 聚合）,明细件数聚合，非订单粒度
+E-0080,none,false,TN,SUM(oi.subtotal) item-level,order_items→orders→products 直连,无（item 聚合）,商品销售额 = 明细聚合
+E-0082,none,false,TN,SUM(CASE WHEN c.name=.. THEN oi.subtotal) / SUM(oi.subtotal) item-level,order_items→orders→products→categories 直连,无（item 聚合）,CASE 条件用 c.name（维度过滤），被 SUM 的值是 oi.subtotal（item），无订单级放大
+E-0083,none,false,TN,SUM(CASE WHEN c.name=.. THEN oi.subtotal) / SUM(oi.subtotal) item-level,order_items→orders→products→categories 直连,无（item 聚合）,同 E-0082：值分支明细、条件列维度过滤；不构成 fan-out
+E-0085,none,false,TN,SUM(oi.subtotal) item-level,order_items→orders→products→categories 直连,无（item 聚合）,category IN 过滤，指标为明细销售
+E-0087,none,false,TN,SUM(oi.quantity) item-level + 两阶段 AVG,order_items→orders→products 直连；product_sales CTE 预聚合,预聚合后按类目 AVG,先 product_sales 聚合明细件数，再 category_avg 两阶段；无订单级放大
+E-0088,none,false,TN,SUM(oi.subtotal) item-level（多 CTE）,order_items→orders→products 直连；yearly/half_year 预聚合,预聚合 + LEFT JOIN 聚合结果,各 CTE 先按商品聚合明细金额再外部联接，未对订单级字段在明细行上聚合
+E-0089,none,false,TN,SUM(oi.subtotal) item-level + 两阶段 AVG/占比,order_items→orders→products→categories 直连；CTE 预聚合,category_sales 预聚合,先按类目聚合明细，再 AVG/占比两阶段；无订单级金额重复累计
+E-0093,none,false,TN,SUM(oi.subtotal) item-level + ROW_NUMBER,order_items→orders→products→categories 直连,无（item 聚合）,明细销售额窗口排名；PARTITION 为 region，含 ROW_NUMBER 无订单字段聚合
+E-0095,none,false,TN,SUM(oi.subtotal) item-level + 两阶段 AVG,order_items→orders→products→categories 直连；region_category_sales 预聚合,预聚合,明细销售额 + region_avg 二次平均；失败原因为过滤基准（题目另案），非 fan-out
+E-0096,none,false,TN,SUM(oi.subtotal) item-level + LAG,orders→order_items 直连；monthly_sales 预聚合,预聚合,monthly 先聚合明细金额再 LAG；失败为金额口径案，非 fan-out
+E-0097,low,false,TN,SUM(oi.subtotal) + COUNT(DISTINCT o.id) item-level/去重,orders→order_items 直连；region_stats 预聚合,COUNT(DISTINCT o.id),SUM 明细值 + 订单数 COUNT DISTINCT o.id 去重保护；无订单级 SUM/AVG 未去重
+E-0098,none,false,TN,SUM(oi.quantity) item-level + ROW_NUMBER,order_items→orders→products 直连；两 CTE 预聚合,预聚合 + HAVING,product_sales 聚合明细销量，再窗口排名；无订单级聚合
+E-0099,none,false,TN,SUM(oi.subtotal) item-level（多 CTE）,order_items→orders→(products→categories) 直连；CTE 预聚合,预聚合,各 CTE 按地区/明细聚合，失败为别名引用 bug（另案）；无 fan-out
+E-0100,low,false,TN,SUM(CASE WHEN o.order_date.. THEN oi.subtotal) + COUNT(DISTINCT o.id) item-level/去重,orders→order_items 直连,COUNT(DISTINCT o.id),CASE 条件为 o.order_date（过滤键），值分支 oi.subtotal（item）→ 不放大；订单数 DISTINCT 去重；失败为金额口径案

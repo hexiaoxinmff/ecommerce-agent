@@ -1,0 +1,26 @@
+{
+  "case_id": "B-1187",
+  "eval_id": "E-0100",
+  "question": "2025年5月（传统促销月）与2月（淡季）相比：两个月的非取消订单销售额分别是多少，订单量分别是多少，5月销售额相当于2月的多少倍？",
+  "difficulty": "extra_hard",
+  "scenario": "comparison",
+  "operators": [
+    "where",
+    "date_filter",
+    "aggregate",
+    "subquery",
+    "nested_subquery",
+    "ratio"
+  ],
+  "gold_sql": "WITH may AS (SELECT COUNT(*) AS cnt, SUM(total_amount) AS rev FROM orders WHERE order_date >= '2025-05-01' AND order_date <= '2025-05-31' AND status != 'cancelled'), feb AS (SELECT COUNT(*) AS cnt, SUM(total_amount) AS rev FROM orders WHERE order_date >= '2025-02-01' AND order_date <= '2025-02-28' AND status != 'cancelled') SELECT ROUND(m.rev, 2) AS may_revenue, m.cnt AS may_orders, ROUND(f.rev, 2) AS feb_revenue, f.cnt AS feb_orders, ROUND(m.rev / f.rev, 2) AS may_to_feb_ratio FROM may m, feb f",
+  "pred_sql": "SELECT ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN oi.subtotal ELSE 0 END), 2) AS sales_may, ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN oi.subtotal ELSE 0 END), 2) AS sales_feb, COUNT(DISTINCT CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN o.id END) AS orders_may, COUNT(DISTINCT CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN o.id END) AS orders_feb, ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN oi.subtotal ELSE 0 END) * 1.0 / NULLIF(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN oi.subtotal ELSE 0 END), 0), 2) AS sales_ratio FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' AND strftime('%Y-%m', o.order_date) IN ('2025-05', '2025-02')",
+  "initial_sql": "SELECT ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN oi.subtotal ELSE 0 END), 2) AS sales_may, ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN oi.subtotal ELSE 0 END), 2) AS sales_feb, COUNT(DISTINCT CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN o.id END) AS orders_may, COUNT(DISTINCT CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN o.id END) AS orders_feb, ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN oi.subtotal ELSE 0 END) * 1.0 / NULLIF(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN oi.subtotal ELSE 0 END), 0), 2) AS sales_ratio FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' AND strftime('%Y-%m', o.order_date) IN ('2025-05', '2025-02')",
+  "final_sql": "SELECT ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN oi.subtotal ELSE 0 END), 2) AS sales_may, ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN oi.subtotal ELSE 0 END), 2) AS sales_feb, COUNT(DISTINCT CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN o.id END) AS orders_may, COUNT(DISTINCT CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN o.id END) AS orders_feb, ROUND(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-05' THEN oi.subtotal ELSE 0 END) * 1.0 / NULLIF(SUM(CASE WHEN strftime('%Y-%m', o.order_date) = '2025-02' THEN oi.subtotal ELSE 0 END), 0), 2) AS sales_ratio FROM orders o JOIN order_items oi ON o.id = oi.order_id WHERE o.status != 'cancelled' AND strftime('%Y-%m', o.order_date) IN ('2025-05', '2025-02')",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 13974.97,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

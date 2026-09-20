@@ -1,0 +1,29 @@
+[
+  {
+    "id": "cand_A1_multi_col_ratio",
+    "question": "各商品分类在非取消订单中的销售额及其占全部商品销售总额的比例分别是多少？请给出分类名称、销售额与占比。",
+    "scenario": "category_sales_share",
+    "tables": ["orders", "order_items", "products", "categories"],
+    "columns": [
+      "orders.status",
+      "order_items.subtotal",
+      "products.category_id",
+      "products.id",
+      "categories.id",
+      "categories.name"
+    ],
+    "sql": "WITH total_sales AS (SELECT SUM(oi.subtotal) AS t FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled') SELECT c.name AS category_name, ROUND(SUM(oi.subtotal), 2) AS category_sales, ROUND(SUM(oi.subtotal) * 100.0 / ts.t, 2) AS pct FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id CROSS JOIN total_sales ts WHERE o.status != 'cancelled' GROUP BY c.id ORDER BY category_sales DESC",
+    "explanation": "输出完整维度列（分类名称）+ 指标列（销售额、占比），占比分子分母同一口径，展示多列输出结构。",
+    "tags": ["分类", "销售额", "占比", "多列输出"]
+  },
+  {
+    "id": "cand_A2_dims_with_total",
+    "question": "2024年11月前各收货地区订单中，实付金额高于8000元的高金额订单数与8000元及以下的普通订单数分别是多少？请同时给出各地区的总订单数。",
+    "scenario": "regional_order_tier",
+    "tables": ["orders"],
+    "columns": ["orders.region", "orders.total_amount", "orders.order_date"],
+    "sql": "SELECT region, COUNT(CASE WHEN total_amount > 8000 THEN 1 END) AS high_cnt, COUNT(CASE WHEN total_amount <= 8000 THEN 1 END) AS normal_cnt, COUNT(*) AS total_cnt FROM orders WHERE order_date BETWEEN '2024-02-01' AND '2024-11-30' GROUP BY region ORDER BY total_cnt DESC",
+    "explanation": "结构统计同时输出分项计数与总计数（total_cnt），各列对应题目要求的每个字段。",
+    "tags": ["地区", "订单", "数量", "多列输出", "窗口过滤"]
+  }
+]

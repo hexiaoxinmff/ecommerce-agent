@@ -1,0 +1,136 @@
+[
+  {
+    "key": "Q1_simple",
+    "question": "哪个地区的用户最多？",
+    "success": true,
+    "generated_sql": "SELECT region, COUNT(*) AS user_count FROM users GROUP BY region ORDER BY user_count DESC LIMIT 1",
+    "repaired_sql": "",
+    "execute_count": 1,
+    "repair_count": 0,
+    "exec_error": "",
+    "result_rows": null,
+    "result_columns": [
+      "region",
+      "user_count"
+    ],
+    "result_row_count": 1,
+    "first_rows": [
+      [
+        "广东",
+        246
+      ]
+    ]
+  },
+  {
+    "key": "Q2_multi_jnotjoin",
+    "question": "哪个类目的销售额最高？",
+    "success": true,
+    "generated_sql": "SELECT c.name AS category_name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled' GROUP BY c.id ORDER BY total_sales DESC LIMIT 1",
+    "repaired_sql": "",
+    "execute_count": 1,
+    "repair_count": 0,
+    "exec_error": "",
+    "result_rows": null,
+    "result_columns": [
+      "category_name",
+      "total_sales"
+    ],
+    "result_row_count": 1,
+    "first_rows": [
+      [
+        "家用电器",
+        8290243.71
+      ]
+    ]
+  },
+  {
+    "key": "Q3_trend",
+    "question": "2025年每月销售额是多少？",
+    "success": true,
+    "generated_sql": "SELECT strftime('%Y-%m', order_date) AS ym, ROUND(SUM(total_amount), 2) AS total_sales FROM orders WHERE status != 'cancelled' AND strftime('%Y', order_date) = '2025' GROUP BY ym ORDER BY ym",
+    "repaired_sql": "",
+    "execute_count": 1,
+    "repair_count": 0,
+    "exec_error": "",
+    "result_rows": null,
+    "result_columns": [
+      "ym",
+      "total_sales"
+    ],
+    "result_row_count": 12,
+    "first_rows": [
+      [
+        "2025-01",
+        725433.47
+      ],
+      [
+        "2025-02",
+        775493.74
+      ],
+      [
+        "2025-03",
+        839199.21
+      ]
+    ]
+  },
+  {
+    "key": "Q4_topn",
+    "question": "近30天销量最高的商品 Top 5 是哪些？",
+    "success": true,
+    "generated_sql": "SELECT p.name AS product_name, SUM(oi.quantity) AS total_sold FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.order_date >= date('now', '-30 day') AND o.status != 'cancelled' GROUP BY p.id ORDER BY total_sold DESC LIMIT 5",
+    "repaired_sql": "",
+    "execute_count": 1,
+    "repair_count": 0,
+    "exec_error": "",
+    "result_rows": null,
+    "result_columns": [
+      "product_name",
+      "total_sold"
+    ],
+    "result_row_count": 5,
+    "first_rows": [
+      [
+        "完美日记钢笔X2",
+        20
+      ],
+      [
+        "苏泊尔粉底液青春版",
+        18
+      ],
+      [
+        "李宁男士衬衫Air",
+        18
+      ]
+    ]
+  },
+  {
+    "key": "Q5_multi_turn",
+    "question": "那这些商品分别属于哪个类目？",
+    "success": true,
+    "generated_sql": "SELECT p.name AS product_name, c.name AS category_name FROM products p JOIN categories c ON p.category_id = c.id",
+    "repaired_sql": "",
+    "execute_count": 1,
+    "repair_count": 0,
+    "exec_error": "",
+    "result_rows": null,
+    "result_columns": [
+      "product_name",
+      "category_name"
+    ],
+    "result_row_count": 500,
+    "first_rows": [
+      [
+        "小米智能手机Air",
+        "手机通讯"
+      ],
+      [
+        "帮宝适智能手机旗舰款",
+        "手机通讯"
+      ],
+      [
+        "良品铺子智能手机Air",
+        "手机通讯"
+      ]
+    ]
+  }
+]

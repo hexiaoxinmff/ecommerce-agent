@@ -1,0 +1,30 @@
+{
+  "case_id": "B-1137",
+  "eval_id": "E-0097",
+  "question": "2025年中，商品销售金额高于全国地区平均销售金额、且订单笔数也高于全国地区平均订单笔数的区域有哪些？（请给出地区、销售额与订单数）",
+  "difficulty": "extra_hard",
+  "scenario": "regional_analysis",
+  "operators": [
+    "join",
+    "where",
+    "date_filter",
+    "group_by",
+    "having",
+    "aggregate",
+    "subquery",
+    "nested_subquery",
+    "comparison_to_average",
+    "order_by"
+  ],
+  "gold_sql": "SELECT o.region, ROUND(SUM(oi.subtotal), 2) AS revenue, COUNT(DISTINCT o.id) AS orders FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.order_date >= '2025-01-01' AND o.order_date <= '2025-12-31' AND o.status != 'cancelled' GROUP BY o.region HAVING SUM(oi.subtotal) > (SELECT AVG(v.revenue) FROM (SELECT region, SUM(oi2.subtotal) AS revenue FROM orders o2 JOIN order_items oi2 ON oi2.order_id = o2.id WHERE o2.order_date >= '2025-01-01' AND o2.order_date <= '2025-12-31' AND o2.status != 'cancelled' GROUP BY o2.region) v) AND COUNT(DISTINCT o.id) > (SELECT AVG(w.orders) FROM (SELECT COUNT(DISTINCT o3.id) AS orders FROM orders o3 JOIN order_items oi3 ON oi3.order_id = o3.id WHERE o3.order_date >= '2025-01-01' AND o3.order_date <= '2025-12-31' AND o3.status != 'cancelled' GROUP BY o3.region) w) ORDER BY revenue DESC, o.region",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "timeout",
+  "latency_ms": 60000.0,
+  "repair_count": 0,
+  "trace": "timeout",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

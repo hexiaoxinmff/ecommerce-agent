@@ -1,0 +1,1 @@
+"""SQL Generator / Text2SQL 基础能力：question + Schema Linking + Few-shot -> SQL。"""

@@ -1,0 +1,477 @@
+{
+  "meta": {
+    "run_id": "20260915_33763",
+    "timestamp": "2026-09-15T09:22:43Z",
+    "dataset_version": "1.0",
+    "database_version": "dev-2026-09-14",
+    "schema_version": "1.0",
+    "seed": 20260914,
+    "model": "mimo-v2.5-pro",
+    "provider": "mimo",
+    "base_url": "(default)",
+    "prompt_version": "",
+    "randomness": "provider API controlled randomness unavailable",
+    "mode": "subset",
+    "per_item_timeout_s": 60.0,
+    "total_items": 5
+  },
+  "summary": {
+    "run_id": "20260915_33763",
+    "timestamp": "2026-09-15T09:22:43Z",
+    "total": 5,
+    "valid_model_runs": 0,
+    "provider_failures": 5,
+    "timeouts": 0,
+    "exec_rate": 0.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "final_ex": 0.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "avg_latency_ms": 10.49,
+    "p50_latency_ms": 9.92,
+    "p95_latency_ms": 13.19
+  },
+  "results": [
+    {
+      "eval_id": "E-0001",
+      "question": "平台上一共有多少用户？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT COUNT(*) AS user_count FROM users",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMApiKeyNotConfiguredError",
+      "latency_ms": 13.19,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 6.438899999920977,
+          "message": "Mimo API key is not configured",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0012999989849049598,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0012",
+      "question": "平台上一共有多少订单？",
+      "difficulty": "easy",
+      "scenario": "order_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT COUNT(*) AS order_count FROM orders",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMApiKeyNotConfiguredError",
+      "latency_ms": 9.74,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 6.070000003091991,
+          "message": "Mimo API key is not configured",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0015000005078036338,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0026",
+      "question": "2024年及以后注册的用户数量按注册年份分布是怎样的？",
+      "difficulty": "medium",
+      "scenario": "user_analysis",
+      "operators": [
+        "where",
+        "group_by",
+        "date_group",
+        "aggregate",
+        "date_filter"
+      ],
+      "gold_sql": "SELECT strftime('%Y', register_date) AS reg_year, COUNT(*) AS user_count FROM users WHERE register_date >= '2024-01-01' GROUP BY reg_year ORDER BY reg_year",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMApiKeyNotConfiguredError",
+      "latency_ms": 9.52,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 6.174800000735559,
+          "message": "Mimo API key is not configured",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0011000010999850929,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0056",
+      "question": "累计消费金额超过全平台用户平均累计消费3倍的用户有哪些？（请给出用户名与累计非取消实付金额）",
+      "difficulty": "hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "join",
+        "where",
+        "group_by",
+        "having",
+        "aggregate",
+        "subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "gold_sql": "WITH user_spent AS (SELECT o.user_id AS uid, SUM(o.total_amount) AS spent FROM orders o WHERE o.status != 'cancelled' GROUP BY o.user_id) SELECT u.username, ROUND(us.spent, 2) AS total_spent FROM user_spent us JOIN users u ON u.id = us.uid GROUP BY u.id, u.username, us.spent HAVING us.spent > 3 * (SELECT AVG(spent) FROM user_spent) ORDER BY total_spent DESC, u.id",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMApiKeyNotConfiguredError",
+      "latency_ms": 9.92,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 6.6556999991007615,
+          "message": "Mimo API key is not configured",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0008999995770864189,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0086",
+      "question": "累计消费金额超过全平台用户平均累计消费2倍、且累计下单超过8笔的用户有哪些？（请给出用户名、累计金额、订单数与购买商品种数）",
+      "difficulty": "extra_hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "multiple_join",
+        "join",
+        "where",
+        "group_by",
+        "aggregate",
+        "subquery",
+        "nested_subquery",
+        "comparison_to_average",
+        "order_by"
+      ],
+      "gold_sql": "WITH user_stats AS (SELECT o.user_id AS uid, SUM(o.total_amount) AS spent, COUNT(DISTINCT o.id) AS orders, COUNT(DISTINCT oi.product_id) AS sku_cnt FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY o.user_id) SELECT u.username, ROUND(us.spent, 2) AS total_spent, us.orders, us.sku_cnt FROM user_stats us JOIN users u ON u.id = us.uid WHERE us.spent > 2 * (SELECT AVG(spent) FROM (SELECT SUM(total_amount) AS spent FROM orders WHERE status != 'cancelled' GROUP BY user_id) t) AND us.orders > 8 ORDER BY us.spent DESC, u.id",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMApiKeyNotConfiguredError",
+      "latency_ms": 10.09,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 6.513500000437489,
+          "message": "Mimo API key is not configured",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0015000005078036338,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    }
+  ]
+}

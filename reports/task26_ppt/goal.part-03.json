@@ -1,0 +1,34 @@
+{
+  "title": "基于Text2SQL的电商智能数据分析Agent",
+  "goal": "课程项目最终答辩PPT：自然语言到可执行SQL的电商分析Agent，含架构、Agent流程、数据库、前端、评测90%EX、Bad Case、E3 Fan-out检测创新、Demo4问、局限与未来工作",
+  "themePack": "theme03",
+  "pageCount": 15,
+  "part": {
+    "index": 3,
+    "total": 3,
+    "startSlide": 11,
+    "endSlide": 15
+  },
+  "slides": [
+    {
+      "layout": "theme03_page057",
+      "props": {}
+    },
+    {
+      "layout": "theme03_page015",
+      "props": {}
+    },
+    {
+      "layout": "theme03_page034",
+      "props": {}
+    },
+    {
+      "layout": "theme03_page055",
+      "props": {}
+    },
+    {
+      "layout": "theme03_page018",
+      "props": {}
+    }
+  ]
+}

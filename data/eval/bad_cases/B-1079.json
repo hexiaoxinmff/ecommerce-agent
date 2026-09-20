@@ -1,0 +1,29 @@
+{
+  "case_id": "B-1079",
+  "eval_id": "E-0098",
+  "question": "每个商品分类中，销量最高的3款商品分别是哪些？（请给出分类、商品名与销量；仅统计销量超过50的商品）",
+  "difficulty": "extra_hard",
+  "scenario": "ranking",
+  "operators": [
+    "multiple_join",
+    "join",
+    "where",
+    "group_by",
+    "aggregate",
+    "having",
+    "subquery",
+    "order_by",
+    "top_n"
+  ],
+  "gold_sql": "WITH cat_prod AS (SELECT c.name AS cat_name, p.name AS prod_name, SUM(oi.quantity) AS sold FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY c.id, p.id, p.name HAVING SUM(oi.quantity) > 50), ranked AS (SELECT cat_name, prod_name, sold, ROW_NUMBER() OVER (PARTITION BY cat_name ORDER BY sold DESC) AS rk FROM cat_prod) SELECT cat_name, prod_name, sold AS sold_qty FROM ranked WHERE rk <= 3 ORDER BY cat_name, rk",
+  "pred_sql": "WITH product_sales AS (SELECT c.name AS category_name, p.name AS product_name, SUM(oi.quantity) AS total_sold, ROW_NUMBER() OVER (PARTITION BY c.id ORDER BY SUM(oi.quantity) DESC) AS rn FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY c.id, p.id HAVING SUM(oi.quantity) > 50) SELECT category_name, product_name, total_sold FROM product_sales WHERE rn <= 3 ORDER BY category_name, total_sold DESC",
+  "initial_sql": "WITH product_sales AS (SELECT c.name AS category_name, p.name AS product_name, SUM(oi.quantity) AS total_sold, ROW_NUMBER() OVER (PARTITION BY c.id ORDER BY SUM(oi.quantity) DESC) AS rn FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY c.id, p.id HAVING SUM(oi.quantity) > 50) SELECT category_name, product_name, total_sold FROM product_sales WHERE rn <= 3 ORDER BY category_name, total_sold DESC",
+  "final_sql": "WITH product_sales AS (SELECT c.name AS category_name, p.name AS product_name, SUM(oi.quantity) AS total_sold, ROW_NUMBER() OVER (PARTITION BY c.id ORDER BY SUM(oi.quantity) DESC) AS rn FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY c.id, p.id HAVING SUM(oi.quantity) > 50) SELECT category_name, product_name, total_sold FROM product_sales WHERE rn <= 3 ORDER BY category_name, total_sold DESC",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 10147.79,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

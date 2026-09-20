@@ -1,0 +1,24 @@
+{
+  "case_id": "B-1143",
+  "eval_id": "E-0057",
+  "question": "按用户累计下单次数将用户分为三档（1-3单、4-10单、11单及以上），各档分别有多少用户？",
+  "difficulty": "hard",
+  "scenario": "user_analysis",
+  "operators": [
+    "subquery",
+    "case_when",
+    "group_by",
+    "aggregate"
+  ],
+  "gold_sql": "SELECT CASE WHEN cnt <= 3 THEN '1-3单' WHEN cnt <= 10 THEN '4-10单' ELSE '11单及以上' END AS tier, COUNT(*) AS user_count FROM (SELECT o.user_id AS uid, COUNT(*) AS cnt FROM orders o GROUP BY o.user_id) AS u GROUP BY tier ORDER BY tier",
+  "pred_sql": "SELECT CASE WHEN order_count BETWEEN 1 AND 3 THEN '1-3单' WHEN order_count BETWEEN 4 AND 10 THEN '4-10单' ELSE '11单及以上' END AS user_tier, COUNT(*) AS user_count FROM (SELECT u.id, COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id = u.id GROUP BY u.id) AS user_orders GROUP BY user_tier",
+  "initial_sql": "SELECT CASE WHEN order_count BETWEEN 1 AND 3 THEN '1-3单' WHEN order_count BETWEEN 4 AND 10 THEN '4-10单' ELSE '11单及以上' END AS user_tier, COUNT(*) AS user_count FROM (SELECT u.id, COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id = u.id GROUP BY u.id) AS user_orders GROUP BY user_tier",
+  "final_sql": "SELECT CASE WHEN order_count BETWEEN 1 AND 3 THEN '1-3单' WHEN order_count BETWEEN 4 AND 10 THEN '4-10单' ELSE '11单及以上' END AS user_tier, COUNT(*) AS user_count FROM (SELECT u.id, COUNT(o.id) AS order_count FROM users u LEFT JOIN orders o ON o.user_id = u.id GROUP BY u.id) AS user_orders GROUP BY user_tier",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 20014.4,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

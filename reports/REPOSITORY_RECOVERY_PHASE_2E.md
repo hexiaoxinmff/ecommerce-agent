@@ -202,32 +202,45 @@ No experimental production components present.
 ## 8. Branch Equality
 
 ```
-master                        = 681415360f08b905cb607947ead5bc9a3767165d
-candidateA_promotion_20260920 = 681415360f08b905cb607947ead5bc9a3767165d
+master                        = 7286d114b6628550451aa076c7b8e76fb6ad727e
+candidateA_promotion_20260920 = 7286d114b6628550451aa076c7b8e76fb6ad727e
 ```
 
-**`master == candidateA_promotion_20260920 == 6814153…` — confirmed.**
+**`master == candidateA_promotion_20260920` — confirmed.**
+
+### Sequence note
+
+The promotion point is `6814153`, and immediately after §4's CAS both `master` and `candidateA_promotion_20260920` read `6814153…`, satisfying the original §12 assertion exactly. This report was then written and committed as a **separate documentation commit** (`7286d11`) on `master`, as §17 permits. That advanced `master` by one commit and would have left the two branches unequal, so `candidateA_promotion_20260920` was advanced to `7286d11` with a second atomic CAS:
+
+```
+git update-ref refs/heads/candidateA_promotion_20260920 7286d11 6814153
+→ rc=0 (CAS SUCCESS)
+```
+
+The invariant `master == candidateA_promotion_20260920` therefore holds at the final state, at `7286d11`. Both branches contain `6814153` as an ancestor, so the promotion content is fully preserved.
 
 Merge-commit audit (parent count per commit):
 
 | Commit | Parents | Assessment |
 |---|---|---|
-| `6814153` | 1 | non-merge |
-| `019b18a` | 1 | non-merge |
-| `518cd896` | 0 | reconstructed baseline root |
+| `7286d11` (Phase 2E report) | 1 | non-merge |
+| `6814153` (Phase 2C docs) | 1 | non-merge |
+| `019b18a` (Candidate A) | 1 | non-merge |
+| `518cd896` (recovered baseline) | 0 | reconstructed root |
 
 **No merge commit exists anywhere in the promoted history.**
 
 `git log --oneline --decorate --graph -5 --all`:
 
 ```
-* 6814153 (HEAD -> master, candidateA_promotion_20260920) docs: Phase 2C recovery report + Candidate A promotion manifest
+* 7286d11 (HEAD -> master, candidateA_promotion_20260920) docs: Phase 2E final promotion report
+* 6814153 docs: Phase 2C recovery report + Candidate A promotion manifest
 * 019b18a perf: promote Candidate A runtime reuse
 * 518cd89 (recovery_master_20260920) recovery: reconstruct master baseline 2026-09-20
 * 80a09b5 (workbuddy/master-e516219f, workbuddy/master-de8ad9a1, workbuddy/master-b947f329) chore: 首次提交 —— 建立版本基线
 ```
 
-The structure matches the target exactly: documentation on top of the perf commit on top of the recovered baseline.
+The structure matches the target: documentation on top of the perf commit on top of the recovered baseline, entirely linear.
 
 ---
 
@@ -261,10 +274,11 @@ The historical statements in `REPOSITORY_RECOVERY_PHASE_2C.md` and `REPOSITORY_R
 
 ```
 master:
-  681415360f08b905cb607947ead5bc9a3767165d
+  7286d114b6628550451aa076c7b8e76fb6ad727e
+  (promotion point 6814153 + Phase 2E report commit)
 
 candidateA_promotion_20260920:
-  681415360f08b905cb607947ead5bc9a3767165d
+  7286d114b6628550451aa076c7b8e76fb6ad727e
 
 recovery_master_20260920:
   518cd8964fc438aa82151f60b415cb4d9ce17a37
@@ -272,6 +286,8 @@ recovery_master_20260920:
 HEAD:
   master
 ```
+
+The **promotion point** — the commit that carries Candidate A into master — is `6814153`, and it is an ancestor of the current `master` tip (verified with `git merge-base --is-ancestor 6814153 master` → YES). The current tip `7286d11` adds only the Phase 2E report.
 
 ### Working tree
 

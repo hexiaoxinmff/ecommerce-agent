@@ -1,0 +1,127 @@
+{
+  "meta": {
+    "task": "Task 36 — E2E Benchmark",
+    "script": "scripts/task36_e2e_benchmark.py",
+    "generated_at": "2026-09-20T06:29:47.910683+00:00",
+    "frozen_dataset": "data/eval/ecommerce_eval_v1.json",
+    "item_count": 3,
+    "item_ids": [
+      "E-0001",
+      "E-0002",
+      "E-0003"
+    ],
+    "fixed_config": {
+      "model": "mimo-v2.5-pro",
+      "configured_model": "mimo-v2.5-pro",
+      "temperature": 0.0,
+      "timeout_s": 60.0,
+      "sdk_max_retries": 0,
+      "provider": "mimo",
+      "endpoint_identifier": "https://api.xiaomimimo.com",
+      "api_key_recorded": false
+    },
+    "latency_definitions": {
+      "provider_latency_ms": "LLMProvider.generate 累计墙钟耗时（可能含多次调用）",
+      "agent_non_llm_latency_ms": "total_latency_ms - provider_latency_ms",
+      "total_e2e_latency_ms": "run_agent() 端到端墙钟耗时（不含进程/图编译预热）"
+    }
+  },
+  "mode": "UNAVAILABLE",
+  "classification": {
+    "mode": "UNAVAILABLE",
+    "reason": "provider returned HTTP 402 Insufficient account balance",
+    "provider_unavailable": true,
+    "headline": "E2E measurement unavailable due to provider 402"
+  },
+  "rows": [
+    {
+      "eval_id": "E-0001",
+      "start_time": "2026-09-20T06:29:49.630904+00:00",
+      "end_time": "2026-09-20T06:29:54.953930+00:00",
+      "total_latency_ms": 5322.45,
+      "provider_latency_ms": 5281.69,
+      "success": false,
+      "exception_class": "LLMInsufficientBalanceError",
+      "http_status": 402,
+      "upstream_http_status": 402,
+      "sql_success": false,
+      "repair_triggered": false,
+      "error_type": "LLMInsufficientBalanceError",
+      "final_error": "Mimo insufficient account balance",
+      "provider_calls": 1,
+      "agent_non_llm_latency_ms": 40.76
+    },
+    {
+      "eval_id": "E-0002",
+      "start_time": "2026-09-20T06:29:54.953930+00:00",
+      "end_time": "2026-09-20T06:29:55.559030+00:00",
+      "total_latency_ms": 604.76,
+      "provider_latency_ms": 595.42,
+      "success": false,
+      "exception_class": "LLMInsufficientBalanceError",
+      "http_status": 402,
+      "upstream_http_status": 402,
+      "sql_success": false,
+      "repair_triggered": false,
+      "error_type": "LLMInsufficientBalanceError",
+      "final_error": "Mimo insufficient account balance",
+      "provider_calls": 1,
+      "agent_non_llm_latency_ms": 9.34
+    },
+    {
+      "eval_id": "E-0003",
+      "start_time": "2026-09-20T06:29:55.559030+00:00",
+      "end_time": "2026-09-20T06:29:56.231808+00:00",
+      "total_latency_ms": 672.76,
+      "provider_latency_ms": 663.72,
+      "success": false,
+      "exception_class": "LLMInsufficientBalanceError",
+      "http_status": 402,
+      "upstream_http_status": 402,
+      "sql_success": false,
+      "repair_triggered": false,
+      "error_type": "LLMInsufficientBalanceError",
+      "final_error": "Mimo insufficient account balance",
+      "provider_calls": 1,
+      "agent_non_llm_latency_ms": 9.03
+    }
+  ],
+  "summary": {
+    "total_e2e_latency_ms": {
+      "count": 3,
+      "mean": 2199.99,
+      "median": 672.76,
+      "p50": 672.76,
+      "p95": 5322.45,
+      "min": 604.76,
+      "max": 5322.45
+    },
+    "provider_latency_ms": {
+      "count": 0,
+      "mean": null,
+      "median": null,
+      "p50": null,
+      "p95": null,
+      "min": null,
+      "max": null
+    },
+    "agent_non_llm_latency_ms": {
+      "count": 0,
+      "mean": null,
+      "median": null,
+      "p50": null,
+      "p95": null,
+      "min": null,
+      "max": null
+    },
+    "success_count": 0,
+    "failure_count": 3,
+    "provider_calls_total": 3,
+    "classification": {
+      "mode": "UNAVAILABLE",
+      "reason": "provider returned HTTP 402 Insufficient account balance",
+      "provider_unavailable": true,
+      "headline": "E2E measurement unavailable due to provider 402"
+    }
+  }
+}

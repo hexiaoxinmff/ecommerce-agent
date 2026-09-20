@@ -4,15 +4,18 @@ OpenAI SDK 只允许出现在本 Provider 层；上层一律通过 LLMProvider �
 
 错误映射（异常消息仅用于日志，客户端文案由 API 路由按类型固定映射）：
 - HTTP 401 / 403 -> LLMAuthenticationError
+- HTTP 402       -> LLMInsufficientBalanceError（账户余额不足，与 5xx 严格区分）
 - HTTP 429       -> LLMRateLimitError
 - HTTP 5xx       -> LLMServiceUnavailableError
 - 超时           -> LLMTimeoutError
 - 其他网络错误   -> LLMNetworkError
 - 其余未分类错误 -> LLMServiceUnavailableError（固定文案，不泄漏底层信息）
 
+可分类的异常统一携带 http_status（上游 HTTP 状态码），供诊断与 Benchmark 使用。
+
 本阶段规则：SDK 层 max_retries=0；仅对网络类错误在 Provider 层做
 一次有限重试（官方端点偶发单连接断开，见 generate() 说明），
-认证/限流/超时/5xx 等错误一次失败即明确失败。不做指数退避/熔断。
+认证/限流/超时/5xx/余额不足等错误一次失败即明确失败。不做指数退避/熔断。
 """
 
 import time
@@ -24,6 +27,7 @@ from app.llm.provider import (
     LLMApiKeyNotConfiguredError,
     LLMAuthenticationError,
     LLMError,
+    LLMInsufficientBalanceError,
     LLMNetworkError,
     LLMProviderNotConfiguredError,
     LLMRateLimitError,
@@ -132,12 +136,35 @@ class MimoProvider:
 
     @staticmethod
     def _map_status_error(exc: openai.APIStatusError) -> LLMError:
-        """把上游 HTTP 状态错误映射为统一 LLMError。"""
+        """把上游 HTTP 状态错误映射为统一 LLMError。
+
+        分类（互相独立，不可合并）：
+        - 401 / 403 -> LLMAuthenticationError
+        - 402       -> LLMInsufficientBalanceError（账户余额不足，重试无意义）
+        - 429       -> LLMRateLimitError
+        - >= 500    -> LLMServiceUnavailableError
+        - 其他 4xx  -> LLMServiceUnavailableError（保持既有兜底语义）
+
+        所有分支都把上游 status_code 写入异常的 http_status 字段，
+        便于诊断与 Benchmark 记录（不泄漏下游 URL/Secret）。
+        """
         status_code = exc.status_code
         if status_code in (401, 403):
-            return LLMAuthenticationError("Mimo authentication failed")
+            return LLMAuthenticationError(
+                "Mimo authentication failed", http_status=status_code
+            )
+        if status_code == 402:
+            return LLMInsufficientBalanceError(
+                "Mimo insufficient account balance", http_status=status_code
+            )
         if status_code == 429:
-            return LLMRateLimitError("Mimo rate limited")
+            return LLMRateLimitError(
+                "Mimo rate limited", http_status=status_code
+            )
         if status_code >= 500:
-            return LLMServiceUnavailableError("Mimo service unavailable")
-        return LLMServiceUnavailableError("Mimo request failed")
+            return LLMServiceUnavailableError(
+                "Mimo service unavailable", http_status=status_code
+            )
+        return LLMServiceUnavailableError(
+            "Mimo request failed", http_status=status_code
+        )

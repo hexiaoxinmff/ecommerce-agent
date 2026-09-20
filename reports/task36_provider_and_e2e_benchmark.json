@@ -1,0 +1,325 @@
+{
+  "report_id": "task36_provider_and_e2e_benchmark",
+  "task": "Task 36 — Provider Failure Classification + E2E Benchmark",
+  "date": "2026-09-20",
+  "generated_at": "2026-09-20T14:31:00+08:00",
+  "human_readable": "reports/task36_provider_and_e2e_benchmark.md",
+  "status": "COMPLETE",
+  "baseline_commit": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+
+  "1_objective": {
+    "problem": "Candidate A is in master, but real end-to-end performance has not been re-verified; Mimo provider returns HTTP 402 Insufficient account balance, and existing code mapped it to LLMServiceUnavailableError, making the failure cause indistinguishable.",
+    "part_a": "Provider Error Classification",
+    "part_b": "E2E Benchmark Harness (fixed, repeatable, no code change needed once provider recovers)"
+  },
+
+  "2_current_provider_failure_behavior_before": {
+    "chain": [
+      "openai.APITimeoutError -> LLMTimeoutError",
+      "openai.APIConnectionError -> LLMNetworkError",
+      "openai.APIStatusError -> _map_status_error(exc) -> 401/403 LLMAuthenticationError | 429 LLMRateLimitError | >=500 LLMServiceUnavailableError | other (incl. 402) LLMServiceUnavailableError",
+      "LLMError -> re-raise",
+      "unexpected Exception -> LLMServiceUnavailableError"
+    ],
+    "defect_location": "backend/app/llm/mimo.py, final line of _map_status_error (pre-change)",
+    "defect_code_pre_change": "return LLMServiceUnavailableError(\"Mimo request failed\")",
+    "downstream_before": {
+      "api_route": "backend/app/api/routes/llm.py -> 503 \"Mimo service unavailable\"",
+      "agent_node": "backend/app/agent/nodes.py -> http_status=503, error_type=LLMServiceUnavailableError",
+      "eval_attribution": "evaluation/runner.py -> correctly counted as provider failure (already correct)"
+    },
+    "consequence": "Clients and operators cannot distinguish upstream service failure from insufficient account balance."
+  },
+
+  "3_error_classification_design": {
+    "new_exception": "LLMInsufficientBalanceError",
+    "base_class": "LLMError",
+    "inherits_service_unavailable": false,
+    "rationale": "If it inherited LLMServiceUnavailableError, isinstance(exc, LLMServiceUnavailableError) would remain True and the 402-vs-5xx strict separation requirement could not be asserted. They are different fault domains.",
+    "new_optional_field": {
+      "name": "http_status",
+      "on": "LLMError.__init__",
+      "default": null,
+      "backward_compatible": true,
+      "purpose": "Carry the upstream HTTP status for diagnostics and benchmark recording."
+    },
+    "classification_table": [
+      {"http": "401/403", "exception": "LLMAuthenticationError", "retried": false, "http_status_field": "401/403"},
+      {"http": "402", "exception": "LLMInsufficientBalanceError", "retried": false, "http_status_field": 402},
+      {"http": "429", "exception": "LLMRateLimitError", "retried": false, "http_status_field": 429},
+      {"http": "500/502/503", "exception": "LLMServiceUnavailableError", "retried": false, "http_status_field": "500/502/503"},
+      {"http": "other 4xx", "exception": "LLMServiceUnavailableError", "retried": false, "http_status_field": "original", "note": "existing fallback preserved"},
+      {"http": "timeout", "exception": "LLMTimeoutError", "retried": false, "http_status_field": null},
+      {"http": "network", "exception": "LLMNetworkError", "retried": true, "retry_count": 2, "http_status_field": null}
+    ]
+  },
+
+  "4_http_402_handling": {
+    "result": "DISTINCT",
+    "mapping": "HTTP 402 -> LLMInsufficientBalanceError",
+    "no_longer": "HTTP 402 -> LLMServiceUnavailableError",
+    "api_message": {
+      "insufficient_balance": "Mimo insufficient account balance",
+      "service_unavailable": "Mimo service unavailable",
+      "messages_differ": true
+    },
+    "provider_message_402": "Mimo insufficient account balance",
+    "eval_attribution_updated": "evaluation/runner.py PROVIDER_ERROR_NAMES now includes LLMInsufficientBalanceError",
+    "eval_attribution_rationale": "Otherwise 402 would be misclassified as a non-provider failure and pollute the model-capability denominator.",
+    "semantics_preserved": {
+      "401_403": "UNCHANGED",
+      "429": "UNCHANGED",
+      "5xx": "UNCHANGED",
+      "timeout": "UNCHANGED",
+      "network": "UNCHANGED",
+      "max_retries": "0 (unchanged)",
+      "network_retry_policy": "(2.0s, 5.0s) (unchanged, not widened)"
+    }
+  },
+
+  "5_regression_tests": {
+    "new_file": "backend/tests/test_task36_provider_errors.py",
+    "new_test_count": 38,
+    "result": "PASS",
+    "matrix": {
+      "status_codes": [401, 403, 402, 429, 500, 502, 503],
+      "non_status_errors": ["timeout", "network error"],
+      "asserted": [
+        "exception class (exact type equality)",
+        "http_status",
+        "message",
+        "retry behavior"
+      ],
+      "separation_tests": [
+        "test_402_is_not_service_unavailable",
+        "test_5xx_is_not_insufficient_balance",
+        "test_402_and_5xx_are_disjoint_classes"
+      ],
+      "message_tests": [
+        "402 message contains 'balance' and not 'unavailable'",
+        "402 message differs from 5xx message"
+      ],
+      "leak_protection": "402 response body containing a secret is not leaked into the exception message",
+      "retry_tests": [
+        "status errors (incl. 402) are never retried",
+        "402 retry policy matches 5xx (both 1 attempt)",
+        "timeout is not retried",
+        "network error retried exactly 3 total attempts"
+      ],
+      "eval_attribution_tests": [
+        "402 counted as provider failure",
+        "PROVIDER_ERROR_NAMES contains LLMInsufficientBalanceError",
+        "non-provider failure semantics unchanged"
+      ]
+    },
+    "full_suite": {
+      "command": "python -m pytest backend/tests",
+      "passed": 437,
+      "failed": 0,
+      "errors": 0,
+      "warnings": 1,
+      "duration_s": 25.74,
+      "before_this_task": 399,
+      "delta": 38,
+      "result": "PASS"
+    }
+  },
+
+  "6_e2e_benchmark_design": {
+    "script": "scripts/task36_e2e_benchmark.py",
+    "frozen_dataset": "data/eval/ecommerce_eval_v1.json",
+    "new_benchmark_created": false,
+    "fixed_model": "mimo-v2.5-pro",
+    "fixed_config": {
+      "model": "mimo-v2.5-pro",
+      "temperature": 0.0,
+      "timeout_s": 60.0,
+      "sdk_max_retries": 0,
+      "provider": "mimo",
+      "endpoint_identifier": "https://api.xiaomimimo.com",
+      "api_key_recorded": false
+    },
+    "per_item_output_fields": [
+      "eval_id",
+      "start_time",
+      "end_time",
+      "total_latency_ms",
+      "provider_latency_ms",
+      "success",
+      "exception_class",
+      "http_status",
+      "sql_success",
+      "repair_triggered"
+    ],
+    "extra_output_fields": [
+      "upstream_http_status",
+      "provider_calls",
+      "agent_non_llm_latency_ms",
+      "error_type",
+      "final_error"
+    ],
+    "provider_latency_collection": "In-process timing decorator wrapping LLMProvider.generate; no Agent/Provider production code changed.",
+    "usage": [
+      "python scripts/task36_e2e_benchmark.py",
+      "python scripts/task36_e2e_benchmark.py --limit 100",
+      "python scripts/task36_e2e_benchmark.py --dry-run",
+      "python scripts/task36_e2e_benchmark.py --out reports/e2e/run.json"
+    ],
+    "not_run_by_pytest": "File is under scripts/, not backend/tests/, so pytest backend/tests never executes it (no Mimo calls consumed)."
+  },
+
+  "7_latency_metrics": {
+    "three_latencies_distinguished": true,
+    "definitions": {
+      "provider_latency_ms": "cumulative wall-clock of LLMProvider.generate (may span multiple calls)",
+      "agent_non_llm_latency_ms": "total_latency_ms - provider_latency_ms (clamped >= 0)",
+      "total_e2e_latency_ms": "run_agent() end-to-end wall clock"
+    },
+    "reported_stats": ["mean", "median", "p50", "p95", "min", "max"],
+    "quantile_convention": "sorted[n*q//100] (non-interpolated, matches project frozen standard)",
+    "note": "provider_latency and agent_non_llm stats are computed over successful items only; when all items fail they report count=0 rather than a misleading 0."
+  },
+
+  "8_provider_unavailable_behavior": {
+    "gate_d": "PASS",
+    "real_run": {
+      "command": "python scripts/task36_e2e_benchmark.py --limit 3 --out reports/e2e/task36_e2e_run_20260920.json",
+      "exit_code": 0,
+      "mode": "UNAVAILABLE",
+      "reason": "provider returned HTTP 402 Insufficient account balance",
+      "success_count": 0,
+      "failure_count": 3,
+      "provider_calls": 3,
+      "per_item": [
+        {"eval_id": "E-0001", "total_latency_ms": 5322.45, "provider_latency_ms": 5281.69, "agent_non_llm_latency_ms": 40.76, "success": false, "exception_class": "LLMInsufficientBalanceError", "http_status": 402, "upstream_http_status": 402},
+        {"eval_id": "E-0002", "total_latency_ms": 604.76, "provider_latency_ms": 595.42, "agent_non_llm_latency_ms": 9.34, "success": false, "exception_class": "LLMInsufficientBalanceError", "http_status": 402, "upstream_http_status": 402},
+        {"eval_id": "E-0003", "total_latency_ms": 672.76, "provider_latency_ms": 663.72, "agent_non_llm_latency_ms": 9.03, "success": false, "exception_class": "LLMInsufficientBalanceError", "http_status": 402, "upstream_http_status": 402}
+      ],
+      "total_e2e_latency_stats": {"count": 3, "mean": 2199.99, "median": 672.76, "p50": 672.76, "p95": 5322.45, "min": 604.76, "max": 5322.45},
+      "not_treated_as_timeout": true
+    },
+    "defect_found_and_fixed_during_run": {
+      "issue": "Initial version read http_status from AgentResult.http_status, which is the client-mapped status (402 -> 503) and masked the upstream 402.",
+      "fix": "Now reads the upstream status captured at the Provider layer; upstream_http_status retained as its own field.",
+      "verified": "Output now shows upstream_http=402"
+    },
+    "gate_e": {
+      "status": "PASS",
+      "method": "Proven with a stubbed provider simulating balance restoration (no real calls consumed).",
+      "observed": "Same script flows off UNAVAILABLE; provider_latency_ms and provider_calls populate normally; classification computed over successful items.",
+      "code_change_required_when_provider_recovers": false
+    }
+  },
+
+  "9_candidate_a_interaction": {
+    "gate_f": "PASS",
+    "candidate_a_production_behavior_changed": false,
+    "five_source_hash_comparison": [
+      {"file": "backend/app/agent/graph.py", "before": "9d09cbae3de49521cef242e106e967b8065aa368c9a6dcc0183b16503d14a25b", "after": "9d09cbae3de49521cef242e106e967b8065aa368c9a6dcc0183b16503d14a25b", "changed": false},
+      {"file": "backend/app/schema/metadata.py", "before": "6aa9b571229d17ad6d9f066c911886f35b046b48a39911280d3a1989293e2de8", "after": "6aa9b571229d17ad6d9f066c911886f35b046b48a39911280d3a1989293e2de8", "changed": false},
+      {"file": "backend/app/llm/mimo.py", "before": "2eddd623bf8db37a91cf9462783eba6f462944c08363c977540999750e2be403", "after": "c228e119b3525bbca8e90e647cff97ff14f0e6763316894375841509d2ac7e09", "changed": true, "reason": "error classification only"},
+      {"file": "backend/app/sqlgen/safety.py", "before": "c9cd072471381036b9e32c675225dafa30a7992e096ee2fbbb0f42fa03bb85b1", "after": "c9cd072471381036b9e32c675225dafa30a7992e096ee2fbbb0f42fa03bb85b1", "changed": false},
+      {"file": "backend/app/sqlgen/validator.py", "before": "1c0e9a2c395adabcf1528ced1f90f844e1e2b9d6f5f76a2138570ff05f384e59", "after": "1c0e9a2c395adabcf1528ced1f90f844e1e2b9d6f5f76a2138570ff05f384e59", "changed": false}
+    ],
+    "optimization_markers_intact": {
+      "graph_cache": "graph.py _DEFAULT_GRAPH_CACHE / clear_default_graph_cache — intact",
+      "catalog_cache": "metadata.py _CATALOG_CACHE / get_cached / clear_cache — intact",
+      "client_reuse": "mimo.py _get_client() / self._client — intact",
+      "sdk_max_retries_zero": "mimo.py max_retries=0 — intact",
+      "single_sqlglot_parse": "safety.py _parse_single_readonly / check_sql_safety_with_tables — intact",
+      "validator_uses_new_api": "validator.py uses check_sql_safety_with_tables — intact"
+    },
+    "diff_size": {"insertions": 54, "deletions": 6, "files": 4}
+  },
+
+  "10_current_measurement_status": {
+    "current_real_e2e": "NOT_MEASURED",
+    "reason": "Mimo HTTP 402 Insufficient account balance",
+    "prohibited_claims_not_made": [
+      "E2E latency improved",
+      "<=8s achieved",
+      "Candidate A reduced E2E by X%"
+    ],
+    "historical_evidence_retained_not_substituted": {
+      "local_deterministic": {"before_ms": 29.074, "after_ms": 1.955, "delta_percent": -93.3},
+      "historical_provider_backed": {"value_ms_per_call": 836},
+      "note": "These CANNOT substitute for a new real E2E benchmark. Three evidence layers must never be mixed."
+    }
+  },
+
+  "11_known_limitations": [
+    {"id": "L1", "detail": "Real E2E still NOT measured due to provider 402. Script is ready; running it once the balance is restored requires no code change."},
+    {"id": "L2", "detail": "API response layer still maps 402 to client status 503. The upstream 402 is preserved on the exception's http_status field and as benchmark upstream_http_status; external API status semantics were deliberately left unchanged to avoid breaking the existing contract."},
+    {"id": "L3", "detail": "provider latency is collected via an in-process timing decorator, not native Agent instrumentation. It does not modify production code; only monkeypatches in the benchmark process."},
+    {"id": "L4", "detail": "agent_non_llm_latency_ms is a difference, bundling graph scheduling, SQL parsing, and DB execution — not a single component."},
+    {"id": "L5", "detail": "Benchmark defaults to --limit 5 (smoke). Full 100 items requires explicit --limit 100 and consumes 100+ real provider calls."},
+    {"id": "L6", "detail": "Single run with no repeated trials; P95 equals max when n is small, limiting quantile interpretability."},
+    {"id": "L7", "detail": "Script executes serially with no provider-side concurrency or rate limiting."}
+  ],
+
+  "12_production_readiness": {
+    "provider_error_classification": "PRODUCTION_READY",
+    "http_402": "DISTINCT",
+    "non_402_behavior": "UNCHANGED",
+    "e2e_benchmark": "READY",
+    "candidate_a_production_code": "UNCHANGED",
+    "production_updated": true,
+    "production_updated_scope": "error classification path only; Agent / Schema Linking / SQL generation / execution / Candidate A optimizations unchanged"
+  },
+
+  "13_frozen_baseline": {
+    "prompt_v1_3": {"sha256": "2af938be9866a62a97fdc3f1b0c7dc43b0785a7ff75ad420109b1d18ed39dc4c", "result": "MATCH"},
+    "fewshot_v3": {"sha256": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee", "result": "MATCH"},
+    "dataset": {"sha256": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a", "result": "MATCH"},
+    "db": {"sha256": "65e5d8b2727cfa064174f9a08aa7d4b08209e0edd1eba81f3155698f1a4491d9", "result": "MATCH"},
+    "clean_baseline": {"sha256": "39404fedef84b338cc7b48ed2972db98c7c574cd8cfca196ca02f7843e42f66e", "result": "MATCH"},
+    "overall": "MATCH",
+    "git_baseline_untouched": {
+      "master": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+      "head": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+      "release_baseline_20260920": "35a9ad61a9616619c1324fda68de69b6ae19996c"
+    }
+  },
+
+  "deliverables": {
+    "modified": [
+      {"file": "backend/app/llm/provider.py", "sha256": "9b743f2a29567bc970956f668631f0d073af9293493d954be71c54912b6f9b2d", "change": "add LLMInsufficientBalanceError + LLMError.http_status"},
+      {"file": "backend/app/llm/mimo.py", "sha256": "c228e119b3525bbca8e90e647cff97ff14f0e6763316894375841509d2ac7e09", "change": "separate 402 classification; record http_status on all branches"},
+      {"file": "backend/app/api/routes/llm.py", "sha256": "85317d4a02b4e327df2d63f58fde98e4bcb978a25692e391bf1add2d8b0b45ee", "change": "distinct client message for 402"},
+      {"file": "evaluation/runner.py", "sha256": "9a30a3813e7499394cf9b7bc7888484296e53e58febf188b4afaa5b90dc28815", "change": "402 counted as provider failure"}
+    ],
+    "added": [
+      {"file": "backend/tests/test_task36_provider_errors.py", "sha256": "1c136aac2d372fa2f19da8066dfd6433442346374a0ac88b396d96554cf090c0"},
+      {"file": "scripts/task36_e2e_benchmark.py", "sha256": "64777e0f006688ee18f256e56c7a2f8d31026e0534d148964b65e0a6bf10e6e1"},
+      {"file": "reports/task36_provider_failure_audit.md"},
+      {"file": "reports/task36_provider_and_e2e_benchmark.md"},
+      {"file": "reports/task36_provider_and_e2e_benchmark.json"},
+      {"file": "reports/e2e/task36_e2e_run_20260920.json"}
+    ]
+  },
+
+  "acceptance_criteria": {
+    "gate_a_full_suite_passes": {"result": "PASS", "detail": "437 passed, 0 failed"},
+    "gate_b_402_distinct_from_5xx_429_timeout": {"result": "PASS", "detail": "distinct exception class; disjoint inheritance; distinct message"},
+    "gate_c_non_402_behavior_unchanged": {"result": "PASS", "detail": "401/403/429/5xx/timeout/network mapping and retry policies byte-for-byte preserved in tests"},
+    "gate_d_benchmark_runs_when_provider_unavailable": {"result": "PASS", "detail": "real run exit code 0 with mode=UNAVAILABLE and full stats"},
+    "gate_e_no_script_change_needed_after_recovery": {"result": "PASS", "detail": "proven with stubbed provider"},
+    "gate_f_candidate_a_production_behavior_unchanged": {"result": "PASS", "detail": "4/5 sources byte-identical; mimo.py changed only on error path; all optimization markers intact"}
+  },
+
+  "final_output": {
+    "task_36": "COMPLETE",
+    "provider_error_classification": "PASS",
+    "http_402": "DISTINCT",
+    "regression": "PASS",
+    "e2e_benchmark": "READY",
+    "current_real_e2e": "NOT_MEASURED",
+    "reason": "Mimo HTTP 402 Insufficient account balance",
+    "candidate_a": "UNCHANGED",
+    "frozen_assets": "MATCH",
+    "tests": "437 passed",
+    "production": "UPDATED",
+    "status": "STOPPED",
+    "task_37_entered": false
+  }
+}

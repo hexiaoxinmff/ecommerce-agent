@@ -47,6 +47,7 @@ PROVIDER_ERROR_NAMES = frozenset(
         "LLMError",
         "LLMApiKeyNotConfiguredError",
         "LLMAuthenticationError",
+        "LLMInsufficientBalanceError",
         "LLMRateLimitError",
         "LLMServiceUnavailableError",
         "LLMTimeoutError",

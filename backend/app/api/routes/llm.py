@@ -8,6 +8,7 @@ POST /api/llm/test
 - LLMApiKeyNotConfiguredError（Key 未配置）          -> 503
 - LLMProviderNotConfiguredError（Provider 配置有误） -> 503
 - LLMAuthenticationError（上游 401/403）             -> 502
+- LLMInsufficientBalanceError（上游 402 余额不足）    -> 503
 - LLMRateLimitError（上游 429）                      -> 503
 - LLMServiceUnavailableError（上游 5xx 等）          -> 503
 - LLMTimeoutError（超时）                            -> 503
@@ -15,6 +16,7 @@ POST /api/llm/test
 - 其他未预期异常                                     -> 503（固定文案）
 
 客户端文案全部为固定映射，绝不回显底层异常文本（防 Secret/路径泄漏）。
+402 文案与 5xx 文案必须不同：前者是账户额度问题，后者是上游服务故障。
 """
 
 from fastapi import APIRouter, Response
@@ -24,6 +26,7 @@ from app.llm.provider import (
     LLMApiKeyNotConfiguredError,
     LLMAuthenticationError,
     LLMError,
+    LLMInsufficientBalanceError,
     LLMNetworkError,
     LLMProviderNotConfiguredError,
     LLMRateLimitError,
@@ -47,6 +50,7 @@ _LLM_FAILURES: dict[type[LLMError], tuple[int, str]] = {
     LLMApiKeyNotConfiguredError: (503, "Mimo API key is not configured"),
     LLMProviderNotConfiguredError: (503, "LLM provider is not configured"),
     LLMAuthenticationError: (502, "Mimo authentication failed"),
+    LLMInsufficientBalanceError: (503, "Mimo insufficient account balance"),
     LLMRateLimitError: (503, "Mimo rate limited"),
     LLMServiceUnavailableError: (503, "Mimo service unavailable"),
     LLMTimeoutError: (503, "Mimo request timeout"),

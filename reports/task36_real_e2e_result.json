@@ -1,0 +1,372 @@
+{
+  "report_id": "task36_real_e2e_result",
+  "task": "Task 36-B — Real Mimo E2E Benchmark",
+  "date": "2026-09-20",
+  "generated_at": "2026-09-20T15:30:00+08:00",
+  "human_readable": "reports/task36_real_e2e_result.md",
+  "status": "COMPLETE",
+
+  "1_objective": {
+    "goal": "Use the real Mimo mimo-v2.5-pro to run the frozen 100-question Benchmark and measure post-Candidate-A real end-to-end performance.",
+    "questions": [
+      "SQL Execution Accuracy",
+      "EX",
+      "Exec",
+      "Average E2E latency",
+      "P50",
+      "P95",
+      "Provider latency",
+      "Non-LLM latency"
+    ],
+    "threshold_checked": "task specification average E2E <= 8s"
+  },
+
+  "2_runtime_configuration": {
+    "provider": "mimo",
+    "model": "mimo-v2.5-pro",
+    "endpoint_identifier": "https://api.xiaomimimo.com",
+    "temperature": 0.0,
+    "timeout_s": 60.0,
+    "sdk_max_retries": 0,
+    "api_key_source": "process environment variable MIMO_API_KEY only",
+    "api_key_written_to_file": false,
+    "api_key_recorded": false,
+    "python": "3.12.10",
+    "venv": ".venv",
+    "git_baseline": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+    "dotenv_modified": false
+  },
+
+  "3_provider_availability": {
+    "status": "AVAILABLE",
+    "smoke_1": {"ids": ["E-0001"], "mode": "MEASURED", "success": "1/1", "provider_calls": 2, "total_ms": 15296.32},
+    "smoke_2": {"ids": ["E-0002", "E-0003", "E-0004"], "mode": "MEASURED", "success": "3/3", "provider_calls": 6},
+    "full_run": {"mode": "MEASURED", "success": "100/100", "provider_calls": 200, "provider_failures": 0, "timeouts": 0},
+    "checks": {
+      "http_status_success": true,
+      "model_is_mimo_v2_5_pro": true,
+      "api_key_accepted": true,
+      "provider_available": true
+    },
+    "incidental_finding": {
+      "issue": "The OLD key still present in .env still returns 402 (LLMInsufficientBalanceError / upstream_http=402).",
+      "action_taken": "None. .env was NOT modified. This run used the new key injected via environment variable.",
+      "implication": "Re-running the script as-is will still hit 402 until the user updates the key."
+    }
+  },
+
+  "4_benchmark_dataset": {
+    "path": "data/eval/ecommerce_eval_v1.json",
+    "same_as_frozen_baseline": true,
+    "item_count": 100,
+    "items_modified": false,
+    "items_excluded": false,
+    "gold_modified": false,
+    "regenerated": false,
+    "difficulty_distribution": {"easy": 25, "medium": 30, "hard": 30, "extra_hard": 15},
+    "judge": "frozen scripts/run_eval.py + evaluation/runner.py + evaluation/normalization.py (not reimplemented)",
+    "db_sha256": "65e5d8b2727cfa064174f9a08aa7d4b08209e0edd1eba81f3155698f1a4491d9",
+    "dataset_sha256": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a",
+    "database_unmodified_check": "PASS"
+  },
+
+  "5_per_query_results": {
+    "output_files": [
+      "reports/eval/task36_real_e2e/eval_20260920_26671.json",
+      "reports/eval/task36_real_e2e/eval_20260920_26671.md",
+      "reports/eval/task36_real_e2e/task36_real_e2e_100.json"
+    ],
+    "per_item_fields_present": [
+      "eval_id", "success", "exception_class", "upstream_http_status",
+      "provider_latency_ms", "agent_non_llm_latency_ms", "total_e2e_latency_ms",
+      "sql_success", "repair_triggered"
+    ],
+    "api_key_in_any_field": false
+  },
+
+  "6_execution_accuracy": {
+    "ex_percent": 91.0,
+    "exec_rate_percent": 100.0,
+    "conditional_ex_percent": 91.0,
+    "pass_at_1_percent": 91.0,
+    "final_ex_percent": 91.0,
+    "valid_model_runs": 100,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "repair_trigger_rate_percent": 0.0,
+    "repair_success_rate_percent": 0.0,
+    "correct": 91,
+    "incorrect": 9
+  },
+
+  "7_e2e_latency": {
+    "authoritative_source": "frozen driver scripts/run_eval.py (matches clean baseline methodology)",
+    "frozen_driver_all_attempts": {
+      "n": 100,
+      "mean_e2e_ms": 9720.06,
+      "median_e2e_ms": 8734.92,
+      "p50_e2e_ms": 8771.57,
+      "p95_e2e_ms": 15712.12,
+      "min_e2e_ms": 6323.49,
+      "max_e2e_ms": 18544.01
+    },
+    "task36_harness_all_attempts": {
+      "n": 100,
+      "mean_e2e_ms": 10288.58,
+      "median_e2e_ms": 9437.71,
+      "p50_e2e_ms": 9443.45,
+      "p95_e2e_ms": 13426.80,
+      "min_e2e_ms": 4563.67,
+      "max_e2e_ms": 69294.27,
+      "max_note": "first-item cold start (process/graph compile/connection warm-up)"
+    },
+    "task36_harness_excluding_cold_start": {
+      "n": 99,
+      "mean_e2e_ms": 9692.56,
+      "median_e2e_ms": 9431.97,
+      "p50_e2e_ms": 9431.97,
+      "p95_e2e_ms": 13420.79,
+      "min_e2e_ms": 4563.67,
+      "max_e2e_ms": 14518.16
+    },
+    "caliber_note": "Difference between harnesses is entirely the first-item cold-start outlier (69.3 s). Frozen driver is authoritative.",
+    "distribution_total_ms": {
+      "lt_5s": 1,
+      "5_to_8s": 13,
+      "8_to_10s": 49,
+      "10_to_12s": 23,
+      "12_to_15s": 13,
+      "gte_15s": 1
+    },
+    "within_8s_count": 14
+  },
+
+  "8_provider_latency": {
+    "source": "Task 36 harness in-process timing decorator",
+    "provider_latency_ms": {
+      "mean": 10264.16,
+      "median": 9415.99,
+      "p50": 9418.43,
+      "p95": 13385.99,
+      "min": 4543.91,
+      "max": 69239.76
+    },
+    "agent_non_llm_latency_ms": {
+      "mean": 24.43,
+      "median": 21.09,
+      "p50": 21.19,
+      "p95": 42.22,
+      "min": 16.34,
+      "max": 99.85
+    },
+    "provider_share_percent": 99.76,
+    "non_llm_share_percent": 0.24,
+    "provider_calls_per_item": {"2": 100},
+    "repair_triggered_count": 0,
+    "schema_link_node_mean_ms": 4769.06
+  },
+
+  "9_failure_analysis": {
+    "total_failures": 9,
+    "uniform_signature": {
+      "exec_success": true,
+      "failure_stage": "result",
+      "error_type": "result_mismatch",
+      "repair_triggered": false
+    },
+    "categories": {
+      "provider_auth": 0,
+      "provider_balance": 0,
+      "rate_limit": 0,
+      "timeout": 0,
+      "network": 0,
+      "llm_output_semantic": 9,
+      "sql_generation": 0,
+      "sql_safety": 0,
+      "sql_execution": 0,
+      "repair": 0
+    },
+    "by_difficulty": {"hard": 4, "extra_hard": 5},
+    "note": "All failures are hard / extra_hard; easy and medium are 100% correct.",
+    "items": [
+      {"eval_id": "E-0057", "difficulty": "hard", "question": "按用户累计下单次数将用户分为三档（1-3单、4-10单、11单及以上），各档分别有多少用户？", "error_nature": "CASE boundary (BETWEEN 1 AND 3 vs cnt<=3)", "total_latency_ms": 9093.31},
+      {"eval_id": "E-0077", "difficulty": "hard", "question": "2025年各收货地区的非取消订单销售额中，高于各地区平均销售额的地区有哪些？（请给出地区名称与销售额）", "error_nature": "used orders.total_amount instead of SUM(oi.subtotal); missing order_items join", "total_latency_ms": 10629.41},
+      {"eval_id": "E-0082", "difficulty": "hard", "question": "休闲零食类别在全部非取消订单明细中的销售金额占全平台商品销售总额的比例是多少？（百分比，保留两位小数）", "error_nature": "denominator scope differs (non-cancelled filter)", "total_latency_ms": 15753.79},
+      {"eval_id": "E-0083", "difficulty": "hard", "question": "2025年第四季度中，家用电器类目销售金额占该季度全部商品销售金额的比例是多少？（百分比，保留两位小数）", "error_nature": "denominator not filtered by quarter", "total_latency_ms": 16305.76},
+      {"eval_id": "E-0086", "difficulty": "extra_hard", "question": "累计消费金额超过全平台用户平均累计消费2倍、且累计下单超过8笔的用户有哪些？（请给出用户名、累计金额、订单数与购买商品种数）", "error_nature": "aggregation scope and status!='cancelled' handling differ", "total_latency_ms": 14860.31},
+      {"eval_id": "E-0090", "difficulty": "extra_hard", "question": "2025年各订单状态下，实付金额高于5000元的高金额订单数与5000元及以下的普通订单数分别是多少？（含取消订单的结构统计）", "error_nature": "cancelled-order structure handling differs", "total_latency_ms": 10926.76},
+      {"eval_id": "E-0095", "difficulty": "extra_hard", "question": "最近30天（2026年8月14日至9月12日）中，有哪些地区-分类组合的销售金额高于30000元、且高于该地区各组合的平均销售金额？（请给出地区、分类与销售额，取前10）", "error_nature": "per-region average denominator differs", "total_latency_ms": 15712.12},
+      {"eval_id": "E-0096", "difficulty": "extra_hard", "question": "2025年环比增速最快的3个月份是哪几个？（请给出月份、当月销售额与环比增速百分比）", "error_nature": "revenue basis SUM(oi.subtotal) vs SUM(total_amount)", "total_latency_ms": 12127.69},
+      {"eval_id": "E-0098", "difficulty": "extra_hard", "question": "每个商品分类中，销量最高的3款商品分别是哪些？（请给出分类、商品名与销量；仅统计销量超过50的商品）", "error_nature": "tie ranking handling differs", "total_latency_ms": 11367.00}
+    ],
+    "root_cause_note": "At least 3 failures are primarily the total_amount vs SUM(oi.subtotal) revenue-basis choice. This is a model semantic-selection issue and outside this task's change scope (Prompt / Few-shot / SQL generation were not modified)."
+  },
+
+  "10_402_error_classification_regression": {
+    "observed_during_main_run": false,
+    "status": "NOT_OBSERVED",
+    "provider_failures": 0,
+    "smoke_triggered_real_402_with_old_env_key": {
+      "exception_class": "LLMInsufficientBalanceError",
+      "upstream_http_status": 402,
+      "verdict": "PASS"
+    },
+    "forbidden_outcomes_absent": [
+      "LLMServiceUnavailableError",
+      "upstream_http_status = 503"
+    ],
+    "conclusion": "Task 36 core regression confirmed against a real HTTP 402."
+  },
+
+  "11_baseline_comparison": {
+    "frozen_baseline": {
+      "run_id": "20260916_09876",
+      "ex_percent": 90.0,
+      "exec_percent": 99.0,
+      "avg_e2e_ms": 10876.08,
+      "p50_ms": 10488.92,
+      "p95_ms": 15440.79
+    },
+    "this_run": {
+      "run_id": "20260920_26671",
+      "ex_percent": 91.0,
+      "exec_percent": 100.0,
+      "avg_e2e_ms": 9720.06,
+      "p50_ms": 8771.57,
+      "p95_ms": 15712.12
+    },
+    "observed_difference": {
+      "ex_pp": 1.0,
+      "exec_pp": 1.0,
+      "avg_e2e_ms": -1156.02,
+      "avg_e2e_percent": -10.63,
+      "p50_ms": -1717.35,
+      "p50_percent": -16.37,
+      "p95_ms": 271.33,
+      "p95_percent": 1.76
+    },
+    "attribution_discipline": {
+      "attributed_to_candidate_a": false,
+      "reason": "Cross-run comparison: different provider state, environment, time, and query warm-up. No paired experiment.",
+      "prohibited_claim_not_made": "Candidate A improved E2E by X%"
+    }
+  },
+
+  "12_eight_second_target": {
+    "threshold_ms": 8000,
+    "mean_e2e_ms": 9720.06,
+    "verdict": "FAIL",
+    "by_caliber": [
+      {"caliber": "frozen driver (all attempts, n=100)", "mean_ms": 9720.06, "verdict": "FAIL"},
+      {"caliber": "task36 harness (n=100, incl cold start)", "mean_ms": 10288.58, "verdict": "FAIL"},
+      {"caliber": "task36 harness (excl cold start, n=99)", "mean_ms": 9692.56, "verdict": "FAIL"}
+    ],
+    "all_attempts_vs_successful_only": {
+      "all_attempts_mean_ms": 9720.06,
+      "successful_only_mean_ms": 9720.06,
+      "identical": true,
+      "reason": "All 100 items were valid model runs with successful execution, so the two sets coincide.",
+      "failed_items_counted_as_zero": false
+    },
+    "root_cause": "Provider latency accounts for 99.76% of total. Meeting an 8s threshold requires reducing LLM latency, not local overhead."
+  },
+
+  "13_candidate_a_interpretation": {
+    "what_candidate_a_eliminates": "Per-request repeated construction: graph compilation, SchemaCatalog's 12 SQLite connections, OpenAI client rebuild, duplicate sqlglot parse.",
+    "measured_local_overhead_ms": 24.43,
+    "local_share_of_total_percent": 0.24,
+    "counterfactual": {
+      "scenario": "Even if local overhead were reduced to 0 ms",
+      "resulting_mean_e2e_ms": 9695.63,
+      "delta_ms": -24.43,
+      "delta_percent": -0.25,
+      "still_above_8s": true
+    },
+    "conclusions": [
+      "Candidate A is genuinely effective: local deterministic overhead went from 29.074 ms to 1.955 ms (Task 29/35, local caliber).",
+      "Candidate A cannot bring E2E under 8s: its theoretical maximum contribution is about 0.25% of total latency.",
+      "The observed -10.63% average latency difference CANNOT be attributed to Candidate A (no paired experiment; provider-side variance far exceeds 24 ms)."
+    ],
+    "required_for_8s": [
+      "model / inference tier selection",
+      "streaming first-byte",
+      "prompt compression",
+      "call consolidation (currently 2 calls per question)",
+      "provider-side caching"
+    ],
+    "required_for_8s_status": "None implemented. Stated as conclusion only. No gains claimed without a paired experiment."
+  },
+
+  "14_limitations": [
+    {"id": "L1", "detail": "8s threshold FAIL (9720.06 ms). Reported as measured, without embellishment."},
+    {"id": "L2", "detail": "Baseline comparison is cross-run; provider and environment differ. Only Observed difference is reported, with no attribution."},
+    {"id": "L3", "detail": "Warm-up handling differs between the two harnesses (69.3 s cold start in harness, absent in frozen driver), producing about 570 ms mean discrepancy. Frozen driver is authoritative."},
+    {"id": "L4", "detail": "Single run, no repeated trials; P95 is affected by single-run variance."},
+    {"id": "L5", "detail": "repair_trigger_rate = 0.0%; no repair samples were produced, so repair-path performance could not be assessed."},
+    {"id": "L6", "detail": "Provider latency is 99.76% of total and its variance comes from upstream inference load, which is not locally controllable."},
+    {"id": "L7", "detail": "All 9 failures are semantic (result_mismatch), attributable to model SQL semantic choices. This task did not modify Prompt/Few-shot/generation logic and made no correction attempt."},
+    {"id": "L8", "detail": "The OLD key in .env still returns 402; this run injected the new key via environment variable only and did not modify .env. Reproduction requires the user to update the key."},
+    {"id": "L9", "detail": "Task 36 harness repair_triggered is always False (field mismatch with AgentResult). Frozen driver's Repair Trigger Rate (also 0.0%) is authoritative."}
+  ],
+
+  "15_frozen_assets": {
+    "prompt_v1_3": {"sha256": "2af938be9866a62a97fdc3f1b0c7dc43b0785a7ff75ad420109b1d18ed39dc4c", "result": "MATCH"},
+    "fewshot_v3": {"sha256": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee", "result": "MATCH"},
+    "dataset": {"sha256": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a", "result": "MATCH"},
+    "db": {"sha256": "65e5d8b2727cfa064174f9a08aa7d4b08209e0edd1eba81f3155698f1a4491d9", "result": "MATCH"},
+    "clean_baseline": {"sha256": "39404fedef84b338cc7b48ed2972db98c7c574cd8cfca196ca02f7843e42f66e", "result": "MATCH"},
+    "overall": "MATCH",
+    "candidate_a_five_sources": {
+      "backend/app/agent/graph.py": "9d09cbae3de49521cef242e106e967b8065aa368c9a6dcc0183b16503d14a25b",
+      "backend/app/schema/metadata.py": "6aa9b571229d17ad6d9f066c911886f35b046b48a39911280d3a1989293e2de8",
+      "backend/app/llm/mimo.py": "c228e119b3525bbca8e90e647cff97ff14f0e6763316894375841509d2ac7e09",
+      "backend/app/sqlgen/safety.py": "c9cd072471381036b9e32c675225dafa30a7992e096ee2fbbb0f42fa03bb85b1",
+      "backend/app/sqlgen/validator.py": "1c0e9a2c395adabcf1528ced1f90f844e1e2b9d6f5f76a2138570ff05f384e59"
+    },
+    "candidate_a_five_sources_unchanged": true,
+    "api_key_security": {
+      "full_scan_of_new_artifacts": "0 hits for sk-<long token>",
+      "git_content_scan": "0 hits",
+      "dotenv_modified": false,
+      "git_status_key_driven_changes": false,
+      "leakage": "NONE"
+    },
+    "three_evidence_layers_kept_separate": {
+      "historical_task29": "client reuse ~836 ms/call",
+      "local_deterministic_task29_35": "29.074 ms -> 1.955 ms",
+      "this_task_real_e2e": "mean 9720.06 ms / P50 8771.57 ms / P95 15712.12 ms",
+      "merged_into_single_percent": false
+    }
+  },
+
+  "acceptance_and_tests": {
+    "full_test_suite": {
+      "command": "python -m pytest backend/tests",
+      "passed": 437,
+      "failed": 0,
+      "duration_s": 25.73,
+      "result": "PASS"
+    }
+  },
+
+  "final_output": {
+    "task_36b": "COMPLETE",
+    "provider": "AVAILABLE",
+    "successful": "100/100",
+    "sql_execution_accuracy_percent": 100.0,
+    "ex_percent": 91.0,
+    "exec_percent": 100.0,
+    "average_e2e_ms": 9720.06,
+    "p50_ms": 8771.57,
+    "p95_ms": 15712.12,
+    "eight_second_target": "FAIL",
+    "402_classification": "NOT_OBSERVED",
+    "402_regression_verdict": "PASS",
+    "candidate_a": "ACTIVE",
+    "frozen_assets": "MATCH",
+    "tests": "437 passed",
+    "api_key_leakage": "NONE",
+    "status": "STOPPED",
+    "task_37_entered": false
+  }
+}

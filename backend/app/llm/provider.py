@@ -40,7 +40,14 @@ class LLMError(Exception):
     约定：异常消息仅用于服务端日志定位；面向 API 客户端的文案由
     API 路由按异常类型映射为固定内容，绝不包含 Secret / URL /
     traceback / 文件路径。
+
+    http_status：可选的「上游 HTTP 状态」。仅在能从上游响应明确判定时填写，
+    供诊断与 Benchmark 记录使用；默认 None，不改变任何现有子类的行为。
     """
+
+    def __init__(self, message: str = "", *, http_status: int | None = None) -> None:
+        super().__init__(message)
+        self.http_status = http_status
 
 
 class LLMProviderNotConfiguredError(LLMError):
@@ -53,6 +60,15 @@ class LLMApiKeyNotConfiguredError(LLMProviderNotConfiguredError):
 
 class LLMAuthenticationError(LLMError):
     """上游认证失败（HTTP 401 / 403）。"""
+
+
+class LLMInsufficientBalanceError(LLMError):
+    """上游账户余额不足（HTTP 402）。
+
+    与 LLMServiceUnavailableError 严格区分：402 表示「请求方账户额度问题」，
+    重试不会改善；5xx 表示「上游服务端故障」，属不同故障域。
+    因此本类直接继承 LLMError，而非 LLMServiceUnavailableError。
+    """
 
 
 class LLMRateLimitError(LLMError):

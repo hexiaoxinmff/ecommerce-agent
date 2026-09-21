@@ -1,17 +1,13 @@
 import { useState } from "react";
-import { IconDatabase, IconHistory, IconSettings } from "./components/Icons";
+import { IconHistory, IconSettings } from "./components/Icons";
 import { MainLayout } from "./components/MainLayout";
 import { type PageKey } from "./components/Sidebar";
 import { AnalysisPage } from "./pages/AnalysisPage";
+import { DatasetsPage } from "./pages/DatasetsPage";
 import { HomePage } from "./pages/HomePage";
 import { PlaceholderPage } from "./components/PlaceholderPage";
 
-const PLACEHOLDERS: Record<"datasets" | "history" | "settings", { title: string; desc: string; icon: React.ReactNode }> = {
-  datasets: {
-    title: "数据集管理",
-    desc: "展示 ecommerce.db · SQLite · 已连接，以及 5 张表、Schema 与数据规模概览（P1）。",
-    icon: <IconDatabase />,
-  },
+const PLACEHOLDERS: Record<"history" | "settings", { title: string; desc: string; icon: React.ReactNode }> = {
   history: {
     title: "历史记录",
     desc: "展示历史问题、执行状态、SQL 摘要与结果摘要（P1）。",
@@ -33,6 +29,8 @@ export default function App() {
         <HomePage />
       ) : page === "analysis" ? (
         <AnalysisPage />
+      ) : page === "datasets" ? (
+        <DatasetsPage />
       ) : (
         <PlaceholderPage
           title={PLACEHOLDERS[page].title}

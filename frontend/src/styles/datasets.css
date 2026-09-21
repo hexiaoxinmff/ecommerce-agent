@@ -1,0 +1,220 @@
+/* =========================================================
+   数据集管理页样式（Task 40 Phase 2-B）
+   仅使用 tokens.css 设计变量；不覆盖任何既有类。
+   表格复用 analysis.css 的 .result-table* 类。
+   ========================================================= */
+
+/* ---------- 页面标题行 ---------- */
+.ds-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-16);
+  margin-bottom: var(--layout-section-gap);
+}
+
+.ds-page-title {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-title);
+  margin-bottom: var(--space-4);
+}
+
+/* ---------- 数据库卡片 ---------- */
+.ds-db {
+  padding: var(--space-20);
+  margin-bottom: var(--layout-card-gap);
+}
+
+.ds-db__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+
+.ds-db__file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.ds-db__type {
+  padding: 2px 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-aux);
+  color: var(--color-text-secondary);
+}
+
+.ds-db__sub {
+  display: block;
+  margin-top: var(--space-4);
+}
+
+/* ---------- 数据概览 ---------- */
+.ds-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--layout-card-gap);
+  margin-bottom: var(--layout-section-gap);
+}
+
+.ds-stat {
+  padding: var(--space-16) var(--space-20);
+}
+
+.ds-stat__label {
+  display: block;
+  font-size: var(--font-size-aux);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ds-stat__value {
+  display: block;
+  margin-top: var(--space-8);
+  font-size: var(--font-size-kpi-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  line-height: 1.1;
+}
+
+.ds-stat__unit {
+  display: block;
+  margin-top: var(--space-4);
+  font-size: var(--font-size-aux);
+  color: var(--color-text-secondary);
+}
+
+/* ---------- 按表分组 Tabs ---------- */
+.ds-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  padding: var(--space-16) var(--space-20) 0;
+}
+
+.ds-tab {
+  padding: 6px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-body);
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-aux);
+  cursor: pointer;
+}
+
+.ds-tab:hover {
+  border-color: var(--color-border-strong);
+}
+
+.ds-tab--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary-text);
+}
+
+/* ---------- Schema 表头摘要 ---------- */
+.ds-schema-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-16);
+  padding: var(--space-16) var(--space-20);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ds-schema-body {
+  padding: var(--space-16) var(--space-20) var(--space-20);
+}
+
+/* ---------- 当前表摘要 ---------- */
+.ds-table-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-16);
+  margin-bottom: var(--space-12);
+}
+
+.ds-table-name {
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.ds-table-desc {
+  font-size: var(--font-size-aux);
+  color: var(--color-text-secondary);
+}
+
+/* ---------- Schema 单元格 ---------- */
+.ds-field,
+.ds-type,
+.ds-fk {
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-aux);
+}
+
+.ds-field {
+  color: var(--color-text-primary);
+}
+
+.ds-type {
+  color: var(--color-text-secondary);
+}
+
+.ds-fk {
+  color: var(--color-info);
+}
+
+.ds-pk {
+  color: var(--color-success);
+  font-weight: var(--font-weight-medium);
+}
+
+.ds-none {
+  color: var(--color-text-disabled);
+}
+
+/* ---------- 加载 / 错误 / 空态 ---------- */
+.ds-state {
+  padding: var(--space-40) var(--space-20);
+  text-align: center;
+}
+
+.ds-state p {
+  margin-top: var(--space-12);
+  font-size: var(--font-size-aux);
+  color: var(--color-text-secondary);
+}
+
+.ds-state .ds-state__title {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.ds-state__actions {
+  margin-top: var(--space-20);
+  display: flex;
+  justify-content: center;
+  gap: var(--space-12);
+}
+
+/* ---------- 只读说明 ---------- */
+.ds-note {
+  padding: var(--space-12) var(--space-20);
+  font-size: var(--font-size-aux);
+  color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-border);
+}

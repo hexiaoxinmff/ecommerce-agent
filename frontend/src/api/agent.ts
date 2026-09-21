@@ -62,8 +62,8 @@ export class AgentApiError extends Error {
   }
 }
 
-/** 后端 Base URL：优先 VITE_API_BASE_URL，默认本地开发地址（集中管理） */
-const API_BASE_URL: string =
+/** 后端 Base URL：优先 VITE_API_BASE_URL，默认本地开发地址（集中管理，跨 API 模块共用） */
+export const API_BASE_URL: string =
   (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/+$/, "") ??
   "http://127.0.0.1:8000";
 

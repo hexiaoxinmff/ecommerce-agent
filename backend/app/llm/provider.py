@@ -7,7 +7,11 @@
 当前实现：
     LLMProvider（抽象）
          ↑
-    MimoProvider（默认实现，OpenAI-compatible）
+    ├── MimoProvider（默认实现，OpenAI-compatible）
+    └── BailianProvider（阿里云百炼，OpenAI-compatible，低消费优先）
+
+Provider 分派唯一入口是本模块的 get_llm_provider()；
+上层不得出现 `if provider == "xxx"` 之类业务分支。
 """
 
 from typing import Protocol
@@ -88,7 +92,7 @@ class LLMNetworkError(LLMError):
 
 
 def get_llm_provider() -> LLMProvider:
-    """根据 LLM_PROVIDER 配置返回 Provider 实例（当前仅 mimo 有实现）。
+    """根据 LLM_PROVIDER 配置返回 Provider 实例（当前支持 mimo / bailian）。
 
     Raises:
         LLMProviderNotConfiguredError: 配置了尚未支持的 Provider。
@@ -98,6 +102,10 @@ def get_llm_provider() -> LLMProvider:
         from app.llm.mimo import MimoProvider  # 延迟导入，避免模块循环依赖
 
         return MimoProvider()
+    if provider_name == "bailian":
+        from app.llm.bailian import BailianProvider  # 延迟导入，同上
+
+        return BailianProvider()
     raise LLMProviderNotConfiguredError(
         f"Unsupported LLM provider: {provider_name}"
     )

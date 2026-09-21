@@ -9,10 +9,15 @@
 2. 未设置时使用项目默认路径 db/ecommerce.db（相对项目根目录，
    由本文件位置向上推导，不依赖进程工作目录）。
 
-LLM Provider 配置（本阶段仅 mimo 有实现）：
+LLM Provider 配置（mimo / bailian 两种实现）：
 - LLM_PROVIDER：Provider 名称，默认 mimo；
 - MIMO_API_KEY：只从环境变量读取，绝不写死在代码中；
-- MIMO_BASE_URL / MIMO_MODEL / MIMO_TIMEOUT：均可配置。
+- MIMO_BASE_URL / MIMO_MODEL / MIMO_TIMEOUT：均可配置；
+- DASHSCOPE_API_KEY：百炼（Bailian）唯一 Key 来源，同样只从环境变量读取，
+  不引入 BAILIAN_API_KEY（避免双 Key 来源）；
+- BAILIAN_API_BASE / BAILIAN_MODEL / BAILIAN_TIMEOUT：百炼配置，均有默认值
+  （默认模型 qwen3.7-flash-2026-07-15）。
+  注意：**没有** thinking 开关 —— thinking 在 BailianProvider 里物理锁死为 False。
 
 CORS 允许来源可通过环境变量 CORS_ORIGINS（逗号分隔）覆盖，
 默认仅允许前端本地开发地址 http://localhost:5173。
@@ -71,6 +76,28 @@ def _env_positive_float(name: str, default: float) -> float:
 
 # 超时必设：默认 30 秒，不允许 None（由 _env_positive_float 保证）
 MIMO_TIMEOUT = _env_positive_float("MIMO_TIMEOUT", 30.0)
+
+# ---------- Alibaba Cloud Bailian（DashScope OpenAI 兼容模式）----------
+
+# API Key 唯一来源：DASHSCOPE_API_KEY（刻意不提供 BAILIAN_API_KEY 别名，
+# 避免同一个 Secret 出现两条读取路径）。
+DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY", "").strip()
+
+# base_url / model 给真实默认值（与 Mimo 的「空则 None」不同）：
+# 百炼端点与低消费默认模型是稳定常量，未配置时应可直接可用。
+BAILIAN_BASE_URL = (
+    os.getenv("BAILIAN_API_BASE", "").strip()
+    or "https://dashscope.aliyuncs.com/compatible-mode/v1"
+)
+BAILIAN_MODEL = (
+    os.getenv("BAILIAN_MODEL", "").strip() or "qwen3.7-flash-2026-07-15"
+)
+
+# 刻意没有 BAILIAN_ENABLE_THINKING：thinking 在
+# BailianProvider._call_model() 里物理锁死为 False（字面量，非配置），
+# 不留任何可被环境变量覆盖的旋钮 —— 低消费是本项目的硬约束。
+
+BAILIAN_TIMEOUT = _env_positive_float("BAILIAN_TIMEOUT", 30.0)
 
 # ---------- Few-shot Dataset ----------
 

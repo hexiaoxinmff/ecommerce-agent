@@ -3,8 +3,11 @@
  *
  * 类型与后端 backend/app/schemas/health.py、app/schemas/system.py 一一对应。
  *
- * 说明：数据库行数已由 GET /api/system/schema 逐表返回，因此这里**不再封装**
- * GET /api/system/database，避免同一页面重复查询同一份数据。
+ * 说明：两个只读接口职责不同，各自封装，互不替代：
+ * - GET /api/system/schema：供「数据集管理」页使用，逐表返回字段 / 类型 /
+ *   主键 / 外键 / 行数；
+ * - GET /api/system/database：供首页 DbStatus 使用，返回数据库名与 6 项规模统计。
+ * 首页只需规模汇总，不必为此拉取整份 Schema。
  *
  * 本模块只访问只读元数据接口，不接触任何 LLM / Agent 接口。
  */
@@ -23,6 +26,17 @@ export interface HealthResponseDto {
   status: "ok" | "degraded";
   service: string;
   database: DatabaseHealthDto;
+}
+
+/** GET /api/system/database 响应（后端 DatabaseInfo）：数据库名 + 6 项规模统计 */
+export interface DatabaseInfoDto {
+  database: string;
+  tables: number;
+  users: number;
+  categories: number;
+  products: number;
+  orders: number;
+  order_items: number;
 }
 
 /** 单个字段（后端 SchemaColumn） */
@@ -100,6 +114,11 @@ async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
 /** 服务与数据库连接状态（后端真实执行 SELECT 1 探活） */
 export function fetchHealth(signal?: AbortSignal): Promise<HealthResponseDto> {
   return getJson<HealthResponseDto>("/api/health", signal);
+}
+
+/** 数据库名称与各业务表真实行数（供首页 DbStatus 展示规模） */
+export function fetchDatabaseInfo(signal?: AbortSignal): Promise<DatabaseInfoDto> {
+  return getJson<DatabaseInfoDto>("/api/system/database", signal);
 }
 
 /** 各业务表真实字段结构、行数、外键与业务口径注释 */

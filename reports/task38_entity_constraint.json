@@ -1,0 +1,485 @@
+{
+  "task": "Task 38",
+  "title": "E-0057 统计实体 / 驱动表约束实验",
+  "status": "TASK_38_COMPLETE",
+  "target": {
+    "eval_id": "E-0057",
+    "question": "按用户累计下单次数将用户分为三档（1-3单、4-10单、11单及以上），各档分别有多少用户？",
+    "difficulty": "hard",
+    "scenario": "user_analysis",
+    "baseline_error_type": "result_mismatch",
+    "gold_driver": "orders GROUP BY user_id",
+    "pred_driver_off": "users LEFT JOIN orders GROUP BY u.id"
+  },
+  "single_variable": {
+    "name": "SQLGEN_EXTRA_RULES=E8",
+    "desc": "条件性统计实体 / 驱动表约束",
+    "default_state": "OFF（关闭时 Prompt 与冻结基线逐字节一致）",
+    "baseline_prompt_bytes_identical_off": true,
+    "off_on_diff_verified": "100/100 题逐一比对，0 mismatch"
+  },
+  "defect_mechanism": {
+    "chain": [
+      "1. users LEFT JOIN orders 把锚点表 users 当作统计实体 → 驱动集合变成全部 2000 用户",
+      "2. 零单用户 COUNT(o.id)=0",
+      "3. CASE 的 ELSE 是兜底分支，0 既不满足 BETWEEN 1 AND 3 也不满足 BETWEEN 4 AND 10 → 全部落进「11单及以上」"
+    ],
+    "root_cause": "统计口径错误（锚点表 vs 行为表），非语法错误；ELSE 兜底分支不校验下界",
+    "not_detectable_by_executor": true,
+    "fewshot_negative_factor": {
+      "retrieved": [
+        "ex_010",
+        "ex_016",
+        "ex_007"
+      ],
+      "note": "ex_016 演示 users LEFT JOIN orders 保留零单用户；检索器只有词面相似度，无统计实体意识，此处为负向"
+    }
+  },
+  "data_level_quantification": {
+    "db": "db/ecommerce.db",
+    "users": 2000,
+    "orders": 10000,
+    "users_with_orders": 1983,
+    "zero_order_users": 17,
+    "gold": {
+      "1-3单": 490,
+      "4-10单": 1474,
+      "11单及以上": 19,
+      "_total": 1983
+    },
+    "off": {
+      "1-3单": 490,
+      "4-10单": 1474,
+      "11单及以上": 36,
+      "_total": 2000
+    },
+    "on": {
+      "1-3单": 490,
+      "4-10单": 1474,
+      "11单及以上": 19,
+      "_total": 1983
+    },
+    "misclassified": {
+      "count": 17,
+      "where": "全部 17 个零单用户落入「11单及以上」最高档",
+      "other_tiers_diff": 0
+    },
+    "note": "整体计数 1983 虚增到 2000，增量 100% 堆在业务最敏感的高价值档位"
+  },
+  "design_decision": {
+    "key": "判别器必须是「统计实体是否应有活动」而非 JOIN 类型",
+    "evidence": {
+      "E-0036_gold": "categories c LEFT JOIN products p ... HAVING COUNT(p.id)=0",
+      "why_left_join_legal": "问「哪些分类下没有任何商品」，必须保留完整分类宇宙",
+      "E-0057": "问「按发生次数给实体分档」，零活动实体不属于任何档，必须排除",
+      "conclusion": "结构相同（均 LEFT JOIN）、语义相反；任何「禁用 LEFT JOIN」规则会同时打死 E-0036"
+    },
+    "discriminator_field": "include_zero_activity_entities"
+  },
+  "implementation": {
+    "new_module": "backend/app/sqlgen/entity_constraint.py",
+    "new_module_lines": 173,
+    "new_module_sha256": "bb691a95c54a3bdc6289bfb52532bf995b12d19b87ac369b93a1cca5b6749d63",
+    "modified": "backend/app/sqlgen/prompt.py",
+    "modified_sha256": "193d37cd08e893bc7626ffa250a6360677cf1d7d1dae14f3a9148e0622ee22ad",
+    "diff_stat": "+30 / -0（纯新增）",
+    "new_node_added": false,
+    "new_node_rationale": "约束是 question -> str | None 的纯函数，无 I/O、无状态、无 LLM，放进已有 prompt 组装阶段零成本",
+    "switch_mechanism": "复用既有 SQLGEN_EXTRA_RULES env（E4/E5/E6/E7 已在用），新增 E8 flag",
+    "fields": {
+      "analysis_entity": "users_with_orders",
+      "driver_table": "orders",
+      "aggregation_grain": "user_id",
+      "include_zero_activity_entities": false,
+      "entity_table": "users"
+    },
+    "gates": [
+      "1. 实体词存在（用户/会员/分类/类目/商品）",
+      "2. _COUNT_ENTITY_PATTERN 命中",
+      "3. 行为词 + 粒度词同时出现",
+      "4. _INCLUDE_ZERO_PATTERNS 全部不命中"
+    ],
+    "pattern_fix": {
+      "bug": "初版 (多少|几个|几档|数量) 被 E-0082「比例是多少」误命中 → 触发域 2/100",
+      "fix": "(多少|几)\\s*(个|位|名|档|类|种|件)?\\s*(用户|会员|分类|类目|商品|人)",
+      "principle": "「多少个 X」与「X 的比例是多少」是两种问法，正则必须咬住量词与实体词的邻接关系",
+      "after": "触发域 1/100"
+    }
+  },
+  "verification": {
+    "zero_llm_trigger_check": {
+      "script": "scripts/task38_trigger_check.py",
+      "script_sha256": "30e8228b850e240b645a5cdbd33584e8a8f8a84e855771028ce1c02970319849",
+      "off_prompt_len": 2040,
+      "on_prompt_len": 2524,
+      "delta_chars": 484,
+      "on_e0057_injected": true,
+      "on_e0036_injected": false,
+      "on_e0077_injected": false,
+      "trigger_count_100q": 1,
+      "trigger_set": [
+        "E-0057"
+      ],
+      "off_vs_git_head_mismatch": "0/100"
+    },
+    "phase1": {
+      "desc": "E-0057 单例 OFF/ON 真实 Mimo 对照",
+      "evidence": [
+        "reports/eval/task38_phase1/e0057_off_on.json",
+        "reports/eval/task38_phase1/e0057_off_rerun.json"
+      ],
+      "note_first_off_arm_discarded": {
+        "error": "LLMNetworkError",
+        "provider_calls": 0,
+        "schema_link_ms": 22672.97,
+        "valid_model_run": false,
+        "action": "作废并重跑；未从无效臂报告任何结论"
+      },
+      "OFF": {
+        "execution_accuracy": false,
+        "error_type": "result_mismatch",
+        "exec_success": true,
+        "repair_count": 0,
+        "provider_calls": 2,
+        "latency_ms": 10900.76,
+        "wall_ms": 10940.46,
+        "link_tables": [
+          "users",
+          "orders"
+        ],
+        "fewshot": [
+          "ex_010",
+          "ex_016",
+          "ex_007"
+        ],
+        "sql_driver": "users u LEFT JOIN orders o ON o.user_id = u.id GROUP BY u.id"
+      },
+      "ON": {
+        "execution_accuracy": true,
+        "error_type": null,
+        "exec_success": true,
+        "repair_count": 0,
+        "provider_calls": 2,
+        "latency_ms": 10519.64,
+        "wall_ms": 10523.94,
+        "link_tables": [
+          "users",
+          "orders"
+        ],
+        "sql_driver": "orders GROUP BY user_id",
+        "pred_sql": "SELECT CASE WHEN order_count BETWEEN 1 AND 3 THEN '1-3单' WHEN order_count BETWEEN 4 AND 10 THEN '4-10单' ELSE '11单及以上' END AS order_tier, COUNT(*) AS user_count FROM (SELECT user_id, COUNT(*) AS order_count FROM orders GROUP BY user_id) AS user_orders GROUP BY order_tier"
+      },
+      "provider_call_delta": 0,
+      "schema_link_output_identical": true
+    },
+    "phase2": {
+      "desc": "冻结 100 题正式回归（真实 Mimo）",
+      "on_run": "reports/eval/task38_phase2_on/eval_20260920_34113.json",
+      "compare": "reports/eval/task38_phase2/compare.json",
+      "OFF": {
+        "n": 100,
+        "overall_ex": 90.0,
+        "exec_rate": 99.0,
+        "provider_failures": 0,
+        "timeouts": 0,
+        "latency_mean": 10876.08,
+        "latency_p50": 10488.92,
+        "latency_p95": 15440.79,
+        "bad_cases": 10,
+        "source": "reports/eval/clean_baseline_v1_1/eval_clean_baseline_v1_1.json（冻结）"
+      },
+      "ON": {
+        "n": 100,
+        "overall_ex": 93.0,
+        "conditional_ex": 93.0,
+        "pass_at_1": 93.0,
+        "final_ex": 93.0,
+        "exec_rate": 100.0,
+        "valid_model_runs": 100,
+        "provider_failures": 0,
+        "timeouts": 0,
+        "repair_trigger_rate": 0.0,
+        "repair_success_rate": 0.0,
+        "latency_mean": 7296.5,
+        "latency_p50": 6348.87,
+        "latency_p95": 14280.91,
+        "wall_total_s": 730.8,
+        "bad_cases": 7,
+        "failure_distribution": {
+          "none": 93,
+          "result_mismatch": 7
+        }
+      },
+      "delta": {
+        "overall_ex_pp": 3.0,
+        "exec_rate_pp": 1.0,
+        "provider_failures": 0,
+        "regressions": 0,
+        "latency_mean_ms": -3579.58,
+        "latency_p50_ms": -4140.05,
+        "latency_p95_ms": -1159.88,
+        "latency_delta_attribution": "NOT_ATTRIBUTED_TO_E8（provider 端负载波动；E8 为纯字符串拼接，不可能带来秒级收益）"
+      },
+      "new_fixes": [
+        "E-0057",
+        "E-0099",
+        "E-0100"
+      ],
+      "regressions": []
+    },
+    "attribution_audit": {
+      "purpose": "3 题同翻看着像 E8 战绩，但 E8 只在 E-0057 触发；必须逐题判是否可能受影响",
+      "e8_trigger_set_100q": [
+        "E-0057"
+      ],
+      "attributable_to_e8": {
+        "E-0057": {
+          "e8_triggered": true,
+          "flip": "EX False -> True",
+          "evidence": "ON 的 SQL 驱动结构由 users LEFT JOIN orders 变为 FROM orders GROUP BY user_id（两次运行均实测），属口径级变化；非 CASE 侥幸"
+        }
+      },
+      "NOT_attributable_to_e8": {
+        "E-0099": {
+          "e8_triggered": false,
+          "baseline_error": "SQL 执行失败: no such column: r.region",
+          "on_error": null,
+          "pred_changed": true,
+          "reason": "E8 不触发；属跨轮生成波动 / 工作树其他变更（Task 37 Scope 校验器所在缺陷类）"
+        },
+        "E-0100": {
+          "e8_triggered": false,
+          "baseline_error": "result_mismatch",
+          "on_error": null,
+          "pred_changed": true,
+          "pred_diff": "oi.subtotal -> total_amount；o.order_date -> order_date",
+          "reason": "E8 不触发；金额口径漂移，属 LLM 采样波动"
+        }
+      },
+      "honest_conclusion": "Overall EX +3.0pp 中只有 1/3（E-0057）可归因于 E8。E8 的可归因收益 = E-0057 单题 +1.0pp（90.0% -> 91.0%），代价 0 次额外 LLM 调用、0 处回归。E-0099/E-0100 不得记为约束收益。",
+      "why_it_matters": "E-0100 的 oi.subtotal -> total_amount 是金额口径漂移，下一轮完全可能自行漂回；若记为 E8 功劳，届时「约束失效」的结论将是错的",
+      "other_pred_changes_not_attributed": {
+        "E-0029": {
+          "e8_triggered": false,
+          "ex": "True -> True",
+          "pred_diff": "去掉 ORDER BY price_range",
+          "reason": "E8 不触发此题；归一化后结果集相同故 EX 未变，属采样抖动"
+        },
+        "E-0044": {
+          "e8_triggered": false,
+          "ex": "True -> True",
+          "pred_diff": "无（两臂完全一致）"
+        }
+      }
+    },
+    "success_criteria": [
+      {
+        "id": 1,
+        "desc": "E-0057 EX 从 FAIL -> PASS",
+        "pass": true,
+        "evidence": "单例与 100 题两轮均实测 False -> True"
+      },
+      {
+        "id": 2,
+        "desc": "非 E-0057 不出现新增回归",
+        "pass": true,
+        "evidence": "regressions = []（判据字面成立）"
+      },
+      {
+        "id": 3,
+        "desc": "Exec 不下降",
+        "pass": true,
+        "evidence": "99.0% -> 100.0%"
+      },
+      {
+        "id": 4,
+        "desc": "provider call 增量 = 0",
+        "pass": true,
+        "evidence": "单例 2 -> 2；机制上为纯本地字符串处理"
+      },
+      {
+        "id": 5,
+        "desc": "约束仅在目标场景触发，不影响「包含 0 单用户」的题",
+        "pass": true,
+        "evidence": "触发域 1/100 = 仅 E-0057；E-0036（合法 LEFT JOIN）未触发"
+      }
+    ],
+    "success_criteria_all_pass": true,
+    "structural_census_100q": {
+      "purpose": "补做（首版遗漏）：'按X分档各档有多少Y' 结构在 Benchmark 中共 3 题，验证 E-0057 是否为唯一跨表例",
+      "same_structure_questions": [
+        {
+          "eval_id": "E-0029",
+          "question": "按售价将商品划分为四档…各档分别有多少款商品？",
+          "subject": "商品售价",
+          "gold_tables": [
+            "products"
+          ],
+          "gold_table_count": 1,
+          "e8_triggered": false,
+          "baseline_ex": true
+        },
+        {
+          "eval_id": "E-0044",
+          "question": "按实付金额将非取消订单划分为三档…各档分别有多少笔订单？",
+          "subject": "订单金额",
+          "gold_tables": [
+            "orders"
+          ],
+          "gold_table_count": 1,
+          "e8_triggered": false,
+          "baseline_ex": true
+        },
+        {
+          "eval_id": "E-0057",
+          "question": "按用户累计下单次数将用户分为三档…各档分别有多少用户？",
+          "subject": "用户下单次数",
+          "gold_tables": [
+            "orders"
+          ],
+          "gold_table_count": 1,
+          "e8_triggered": true,
+          "baseline_ex": false
+        }
+      ],
+      "finding": "三题 gold 全部只引用 1 张表。E-0057 的正确答案只需要 orders（FROM orders GROUP BY user_id），是模型自己的 pred 多引入了一张 users（users LEFT JOIN orders）才捅出这个洞。因此 E8 的作用是『阻止模型多拉一张表』，不是『帮它补一张缺的表』——与 schema linking 漏表是完全相反方向的问题。E-0029/E-0044 的统计对象与数据源同表，无 JOIN 第二张表的动机，歧义空间为零，基线本来就对。",
+      "judgement_correction": "首版脚本用『gold 里有没有 LEFT JOIN』判跨表 —— 错误判据。E-0057 的 gold 是子查询形式，不含 LEFT JOIN 字样，被误判为单表。已改用 sqlglot 抽取 gold 实际引用的表名。结论随之修正：三题 gold 均为单表，E-0057 的差异在于『模型多引入了表』而非『gold 需要跨表』。"
+    },
+    "driver_structure_cross_check": {
+      "purpose": "补做（首版遗漏）：首版只对比最终结果集，未验证驱动结构。零 LLM 直接对 DB 跑 2x2 全交叉。",
+      "matrix": [
+        {
+          "driver": "A users LEFT JOIN orders (基线)",
+          "case": "ELSE '11单及以上'",
+          "result": {
+            "1-3单": 490,
+            "4-10单": 1474,
+            "11单及以上": 36
+          },
+          "ex": false,
+          "note": "基线缺陷"
+        },
+        {
+          "driver": "A users LEFT JOIN orders (基线)",
+          "case": "WHEN order_count >= 11",
+          "result": {
+            "1-3单": 490,
+            "4-10单": 1474,
+            "11单及以上": 19
+          },
+          "ex": true,
+          "note": "⚠️ 假阳性：17 个零单用户落隐式 NULL 档被 GROUP BY 丢弃，结果碰巧等于真值；统计口径仍错误"
+        },
+        {
+          "driver": "B FROM orders GROUP BY user_id",
+          "case": "ELSE '11单及以上'",
+          "result": {
+            "1-3单": 490,
+            "4-10单": 1474,
+            "11单及以上": 19
+          },
+          "ex": true,
+          "note": "口径正确"
+        },
+        {
+          "driver": "B FROM orders GROUP BY user_id",
+          "case": "WHEN order_count >= 11",
+          "result": {
+            "1-3单": 490,
+            "4-10单": 1474,
+            "11单及以上": 19
+          },
+          "ex": true,
+          "note": "口径正确"
+        }
+      ],
+      "null_bucket_measurement": {
+        "A_plus_w2_ge11_count": 19,
+        "true_value": 19,
+        "A_plus_w2_null_dropped": 17,
+        "null_are_all_zero_order_users": true,
+        "explanation": "A+w2 数的是「全部 2000 用户里 >=11 的」（=19，因零单用户不满足 >=11），而非「下单用户里 >=11 的」（也=19）。两集合在当前数据恰好重合，答案对但口径错。"
+      },
+      "e0057_actual_path": {
+        "phase1_on": {
+          "driver": "FROM orders GROUP BY user_id",
+          "case_tail": "ELSE '11单及以上'",
+          "verdict": "B + w1 = 真修好"
+        },
+        "phase2_on": {
+          "driver": "FROM orders GROUP BY user_id",
+          "case_tail": "WHEN order_count >= 11",
+          "verdict": "B + w2 = 真修好"
+        },
+        "conclusion": "两次运行驱动表均修正到 orders，属口径正确那一格，非 CASE 侥幸字母。",
+        "caveat": "E8 作用不精确：同时扰动了 CASE 措辞（ELSE vs WHEN >= 11）"
+      },
+      "critical_warning": "存在独立假阳性通道：错误驱动 + 显式 WHEN 下界 ⇒ EX 显示 True 而口径仍错。后续任何基于 E8 的验证不能只看 EX，必须检查驱动表是否为行为表。"
+    }
+  },
+  "change_boundary": {
+    "allowed_changed": {
+      "new": [
+        "backend/app/sqlgen/entity_constraint.py",
+        "backend/tests/test_task38_entity_constraint.py"
+      ],
+      "modified": [
+        "backend/app/sqlgen/prompt.py"
+      ],
+      "git_diff_stat": "backend/app/sqlgen/prompt.py | 30 ++++++++++++++++++++++++++++++  1 file changed, 30 insertions(+)"
+    },
+    "forbidden_untouched": [
+      "Benchmark Gold / Question",
+      "评测 normalization / metrics",
+      "Schema Linking（两臂 tables 输出完全相同）",
+      "Few-shot 数据集 / Retriever（ex_016 原样保留）",
+      "Repair Prompt / Validator",
+      "SQL Scope Validator（Task 37）",
+      "Database / Provider / Model / API Key",
+      "latency 配置 / 其他 Prompt 规则",
+      "顺带优化 E-0090 / E-0095 / E-0077"
+    ],
+    "compliant": true
+  },
+  "deliverables": {
+    "backend/app/sqlgen/entity_constraint.py": "bb691a95c54a3bdc6289bfb52532bf995b12d19b87ac369b93a1cca5b6749d63",
+    "backend/app/sqlgen/prompt.py": "193d37cd08e893bc7626ffa250a6360677cf1d7d1dae14f3a9148e0622ee22ad",
+    "backend/tests/test_task38_entity_constraint.py": "9ce9d544b0707ca1550e640390a648990468650343b933da21a0f777adeac46a",
+    "scripts/task38_trigger_check.py": "30e8228b850e240b645a5cdbd33584e8a8f8a84e855771028ce1c02970319849",
+    "scripts/task38_phase1_off_on.py": "e4a6c7f8b7361c66614f9d1875f86a11080ea17a8fa2a114fe360d967f644101",
+    "scripts/task38_phase2_compare.py": "dbfb50af4390452c96cf9596d4489529370f4c14533915c723f897b419ac0b6e"
+  },
+  "tests": {
+    "new": "backend/tests/test_task38_entity_constraint.py (20 tests)",
+    "full_suite": "490 passed / 0 failed（从仓库根目录执行）",
+    "prev_suite_after_task37": 470,
+    "cwd_note": "从 backend/ 目录执行会有 1 个既有失败（test_eval_runner.py 相对路径 data/eval/ecommerce_eval_v1.json 在 backend/ 下不存在），与 Task 38 无关"
+  },
+  "conclusions": [
+    "约束有效，但收益是 1 题、+1.0pp，不是 3 题、+3.0pp。E-0099/E-0100 的翻转不可归因 E8。",
+    "缺陷本质是统计口径而非语法：17 个零单用户全落最高档，整体计数 1983 虚增至 2000；执行期任何机制都拦不住（语法合法、执行成功）。Task 37 治「跑不起来」，Task 38 治「跑得起来但答非所问」，二者互补。",
+    "判别器必须是 include_zero_activity_entities 而非 JOIN 类型：E-0036 与 E-0057 结构相同、语义相反。",
+    "条件性生效是必要条件而非美化：触发域锁死 1/100，OFF 分支 Prompt 与冻结基线逐字节一致（100/100 验证）。",
+    "成本为零：provider call 增量 0（约束为 question -> str 纯函数），本地延迟增量 ≈ 0，Prompt +484 字符。",
+    "⚠️ EX ✓ 不等价于口径正确（补做审计的核心发现）。驱动结构级 2x2 交叉验证证明存在假阳性通道：错误驱动 users LEFT JOIN orders 只要把 CASE 兜底换成显式 WHEN cnt >= 11，零单用户就落 NULL 档被丢弃，结果碰巧等于真值。本次两次运行实测都走正确路径（驱动表均为 orders），但任何后续验证都不能只看 EX，必须检查驱动表。",
+    "⚠️ EX ✓ 不等价于口径正确（补做审计的核心发现）。驱动结构级 2x2 交叉验证证明存在假阳性通道：错误驱动 users LEFT JOIN orders 只要把 CASE 兜底换成显式 WHEN cnt >= 11，零单用户就落 NULL 档被丢弃，结果碰巧等于真值。本次两次运行实测都走正确路径（驱动表均为 orders），但任何后续验证都不能只看 EX，必须检查驱动表。",
+    "E-0057 是「统计实体 × 行为记录」这一类里唯一的样本。E-0029/E-0044 同构但统计对象与数据源同表、无 JOIN 动机，基线本来就对。E8 适用面是「存在锚点表 vs 行为表选择」的一类题。",
+    "易错表述更正：E-0057 的 gold 只引用 1 张表（orders）——正确答案并不需要 users。E8 的作用是阻止模型多拉一张表，不是帮它补一张缺的表，与 schema linking 漏表方向相反。",
+    "E-0057 是「统计实体 × 行为记录」这一类里唯一的样本。E-0029/E-0044 同构但统计对象与数据源同表、无 JOIN 动机，基线本来就对。E8 适用面是「存在锚点表 vs 行为表选择」的一类题。",
+    "易错表述更正：E-0057 的 gold 只引用 1 张表（orders）——正确答案并不需要 users。E8 的作用是阻止模型多拉一张表，不是帮它补一张缺的表，与 schema linking 漏表方向相反。"
+  ],
+  "follow_ups": [
+    "SQLGEN_EXTRA_RULES=E8 默认关闭；本次未改变生产默认行为，转正需人工决策。",
+    "未做泛化验证：Benchmark 内仅 1 个正样本（E-0029/E-0044 同构但不跨表、天然不触发），无法判断跨表变体上是否有效。转正需独立撰写的 holdout（参考 Task 31 教训）。",
+    "⚠️ 假阳性修复通道：错误驱动 + 显式 WHEN 下界 ⇒ EX ✓ 而口径错。后续验证不能只看 EX，必须检查驱动表。",
+    "E8 作用不精确：两次运行均正确修正驱动表，但 CASE 写法出现 ELSE / WHEN >= 11 两种输出。若需收紧，可在约束文本中显式规定 CASE 分支写法以减少自由度。",
+    "关联遗留（Task 37 已披露，未修）：sqlrepair/validator.py::_check_spelled_columns 把 CTE 别名当真实表名查 catalog.has_column，导致任何带 CTE 别名的 SQL 被 Repair 拒绝。与 Task 38 无关。"
+  ],
+  "stopped_per_instruction": true,
+  "stop_note": "按用户指令「实验结束后停止，不进入下一项优化」停止。",
+  "final_output": {
+    "task": "Task 38",
+    "status": "TASK_38_COMPLETE"
+  },
+  "revision_note": "2026-09-20 补做审计：新增 §4.3.1 同构题普查、§4.3.2 驱动结构级验证。首版结论（E8 可归因收益 +1.0pp）不变并被加强——两次 ON 运行驱动表均正确；新增三条实质性发现：①假阳性修复通道；②E8 作用不精确（CASE 措辞被扰动）；③更正「跨表」表述——三题 gold 均单表，E8 是阻止多拉表而非补表。"
+}

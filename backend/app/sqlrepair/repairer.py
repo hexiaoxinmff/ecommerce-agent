@@ -5,6 +5,8 @@
 - 只依赖 LLMProvider 抽象（当前 MimoProvider），禁止 openai 直连。
 """
 
+from typing import TYPE_CHECKING
+
 from app.fewshot.models import FewShotQuery
 from app.fewshot.retriever import FewShotRetriever
 from app.llm.provider import LLMError, LLMProvider, get_llm_provider
@@ -33,6 +35,9 @@ from app.sqlexec.errors import (
 )
 from app.sqlexec.executor import execute as execute_sql
 
+if TYPE_CHECKING:  # 仅类型标注；运行时由调用方注入，避免反向依赖
+    from app.dbprofile.adapter import DatabaseAdapter
+
 _REPAIR_FEWSHOT_TOP_K = 2
 
 
@@ -43,9 +48,16 @@ class SQLRepairer:
         self,
         provider: LLMProvider | None = None,
         fewshot_retriever: FewShotRetriever | None = None,
+        adapter: "DatabaseAdapter | None" = None,
+        appendix_rules: str = "",
     ) -> None:
         self._provider = provider or get_llm_provider()
         self._fewshot_retriever = fewshot_retriever or FewShotRetriever()
+        # Phase 13：注入 DatabaseAdapter 后，Schema 目录与业务口径来自 Profile；
+        # 缺省 None = 原全局行为（默认业务库 + 本模块常量）。
+        self._adapter = adapter
+        # Phase 15（P0-1）：运行时附录（数据时效契约）；空串 = 不追加。
+        self._appendix_rules = appendix_rules
 
     def repair(self, request: SQLRepairRequest) -> SQLRepairResult:
         """修复一条执行失败的 SQL，返回修复后的 SQL 与理由（不执行）。
@@ -55,7 +67,14 @@ class SQLRepairer:
             SQLRepairSchemaError：Repair 输出校验失败；
             LLMError：Provider 调用失败（原样透传）。
         """
-        catalog = SchemaCatalog.from_database()
+        if self._adapter is not None:
+            catalog = self._adapter.get_cached_catalog()
+            business_rules = self._adapter.profile.business_rules.repair_rules
+            appendix = self._adapter.prompt_appendix()
+        else:
+            catalog = SchemaCatalog.from_database()
+            business_rules = None
+            appendix = self._appendix_rules
 
         # Few-shot 参考（本地检索，仅作上下文增强；失败不阻断修复）
         fewshot_text = "（无匹配 Few-shot 示例）"
@@ -80,6 +99,8 @@ class SQLRepairer:
             columns=request.columns,
             catalog=catalog,
             fewshot_text=fewshot_text,
+            business_rules=business_rules,
+            appendix_rules=appendix or None,
         )
         raw = self._provider.generate(
             [

@@ -1,0 +1,158 @@
+{
+  "task": "Task 44",
+  "title": "SQLGEN 语义规则定向修复",
+  "phase1_audit": {
+    "script": "F:/task44_sqlgen_semantic_rules/phase1_audit.py",
+    "existing_rule_mapping": {
+      "output_column_contract": "E4 OUTPUT_CONTRACT_RULES（已有，仅增强 wording）",
+      "global_scope": "无 → 新增 E9",
+      "ratio_direction": "无（BUSINESS_RULES 仅一句口径一致性） → 新增 E10",
+      "top_n_deterministic_order": "无 → 新增 E11",
+      "undefined_alias": "既有安全层：sqlcheck/scope_validator + sqlexec/executor（早于 DB 连接）"
+    },
+    "e0088_responsible_layer": "execution/scope 层（不新增生成层规则；未削弱任何安全边界）",
+    "default_state": "E4~E11 全部默认关闭；关闭时 Prompt 与冻结基线逐字节相同",
+    "business_rules_sha256_prefix": "10583478"
+  },
+  "rules_changed": {
+    "production_files": [
+      "backend/app/sqlgen/semantic_contracts.py (new)",
+      "backend/app/sqlgen/prompt.py (E9/E10/E11 注入 + E4 wording 增强)"
+    ],
+    "flags_added": [
+      "E9",
+      "E10",
+      "E11"
+    ],
+    "flags_enhanced": [
+      "E4"
+    ],
+    "not_touched": [
+      "graph",
+      "provider",
+      "schema_link",
+      "db",
+      ".env",
+      "benchmark gold",
+      "fewshot",
+      "executor",
+      "sqlrepair",
+      "evaluation"
+    ]
+  },
+  "trigger_surface_100q": {
+    "E9": [
+      "E-0065"
+    ],
+    "E10": [
+      "E-0064",
+      "E-0075",
+      "E-0076",
+      "E-0081",
+      "E-0082",
+      "E-0083",
+      "E-0089",
+      "E-0092",
+      "E-0094",
+      "E-0096",
+      "E-0099",
+      "E-0100"
+    ],
+    "E10_direction_extracted": [
+      "E-0075",
+      "E-0081",
+      "E-0082",
+      "E-0083",
+      "E-0092",
+      "E-0094",
+      "E-0096",
+      "E-0099",
+      "E-0100"
+    ],
+    "E11": [
+      "E-0017",
+      "E-0031",
+      "E-0034",
+      "E-0037",
+      "E-0042",
+      "E-0045",
+      "E-0048",
+      "E-0053",
+      "E-0054",
+      "E-0055",
+      "E-0058",
+      "E-0059",
+      "E-0062",
+      "E-0067",
+      "E-0073",
+      "E-0074",
+      "E-0076",
+      "E-0080",
+      "E-0087",
+      "E-0088",
+      "E-0092",
+      "E-0093",
+      "E-0095",
+      "E-0096",
+      "E-0098"
+    ]
+  },
+  "tests_added": {
+    "file": "backend/tests/test_task44_semantic_rules.py",
+    "count": 43,
+    "modified_existing": [
+      "backend/tests/test_sqlgen_prompt_rules.py: test_unknown_flag_ignored E9 -> E999"
+    ]
+  },
+  "targeted_tests": "71 passed, 1 warning in 0.76s",
+  "full_pytest": "694 passed / 0 failed（backend/tests；不含 T44 文件为 651 ⇒ T44 净增 43）",
+  "identity_replay": {
+    "E-0065": "PASS (1 row)",
+    "E-0075": "PASS (1 row)",
+    "E-0082": "PASS (1 row)",
+    "E-0088": "PASS (5 rows)",
+    "E-0098": "PASS (66 rows)",
+    "method": "gold_sql 重放两次 + 与冻结 gold_result_hash 比对"
+  },
+  "boundary_proof": {
+    "tracked_files_hashed": 824,
+    "tracked_changed": [
+      "backend/app/sqlgen/prompt.py",
+      "backend/tests/test_sqlgen_prompt_rules.py"
+    ],
+    "frozen": {
+      ".env": "dce981d984dd759c502e1306784c80c2319a49c79c156e4fdfa96fb89b34a624",
+      "data/eval/ecommerce_eval_v1.json": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a",
+      "data/fewshot/ecommerce_examples.json": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee",
+      "db/ecommerce.db": "65e5d8b2727cfa064174f9a08aa7d4b08209e0edd1eba81f3155698f1a4491d9"
+    },
+    "frozen_expected": {
+      ".env": "dce981d984dd759c502e1306784c80c2319a49c79c156e4fdfa96fb89b34a624",
+      "data/eval/ecommerce_eval_v1.json": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a",
+      "data/fewshot/ecommerce_examples.json": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee",
+      "db/ecommerce.db": "65e5d8b2727cfa064174f9a08aa7d4b08209e0edd1eba81f3155698f1a4491d9"
+    }
+  },
+  "sql_artifact": {
+    "path": "F:/task44_sqlgen_semantic_rules/task44_evidence.json",
+    "truncated_any_sql": false,
+    "min_gold_sql_len": 172,
+    "min_pred_sql_len": 236
+  },
+  "honest_findings": {
+    "e0098_tiebreak_hypothesis": "未被复现：去掉 prod_id 破平键后 gold 仍 66 行且集合相等，名次位移行数 = 0，Top-3 成员差异行数 = 0。并列边界客观存在（3 个分类 rk3.sold == rk4.sold）。E11 定位为防御性确定性约束，不是已复现失败的修复。",
+    "e0088_pred_sql_truncation": "Task 43 harness 写盘时 rec['pred_sql'] = sql[:400]，原始 pred SQL 尾部永久丢失；已保留 400 字前缀并补全为可执行完整 SQL（1020 字），执行错误与运行期记录逐字一致。"
+  },
+  "side_effect_risks": {
+    "E9": "低（触发面 1 题；已显式写入『与同一时间窗绑定时必须保留过滤』的例外）",
+    "E10": "低（抽取不干净时只给通用契约，不给题面级方向）",
+    "E11": "中低（真实风险是模型把破平键写进 SELECT，已显式禁止；且收益尚未证实）",
+    "E4": "低（第 6 条反例例外保护 E-0081 类标量比值题）"
+  },
+  "commit": "none",
+  "db_changed": false,
+  "env_changed": false,
+  "gold_changed": false,
+  "fewshot_changed": false,
+  "frontend_changed": false
+}

@@ -1,0 +1,282 @@
+{
+  "task": "Task 39",
+  "title": "Real E2E Performance Gate",
+  "status": "PERFORMANCE_GATE_CLOSED",
+  "outcome": "PROVIDER_UNAVAILABLE_HTTP_402",
+  "generated_at": "2026-09-20T19:05:00+08:00",
+  "benchmark_100_run": false,
+  "benchmark_100_reason": "任务书 §五：smoke test 出现 provider 故障即停止，不进入 100 题",
+
+  "measured_tree": {
+    "head": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+    "master": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+    "head_equals_master": true,
+    "commit_subject": "docs: finalize Phase 2E report tip",
+    "release_tag": "release_baseline_20260920",
+    "content_clean": true,
+    "content_clean_evidence": "git diff HEAD --stat 为空；8 文件 vs HEAD blob content=True",
+    "crlf_ghost_files": ["backend/app/llm/mimo.py", "evaluation/runner.py"],
+    "crlf_ghost_note": "core.autocrlf=true 导致 bytes=False 但 content=True，零内容差异"
+  },
+
+  "not_measured": [
+    "Task 36 uncommitted changes",
+    "Task 37 uncommitted changes",
+    "Task 38 uncommitted changes"
+  ],
+
+  "task_36_37_38_absent": {
+    "Task36 LLMInsufficientBalanceError in provider.py": 0,
+    "Task36 402 in mimo.py": 0,
+    "Task36 PROVIDER_ERROR_NAMES in evaluation/runner.py": 0,
+    "Task37 check_sql_scope in sqlexec/executor.py": 0,
+    "Task37 check_sql_scope in sqlrepair/validator.py": 0,
+    "Task37 SQLExecutionScopeError in sqlexec/errors.py": 0,
+    "Task38 entity_constraint in sqlgen/prompt.py": 0,
+    "all_absent": true
+  },
+
+  "worktree_restore": {
+    "method": "git restore --source=HEAD -- <8 files>",
+    "forbidden_used": [],
+    "forbidden_not_used": ["git clean", "git reset --hard", "git checkout <branch>", "git stash"],
+    "backup_dir": "%TEMP%\\task39_worktree_patch_backup\\",
+    "backup_contents": [
+      "patch.diff", "status_before.txt", "head_before.txt", "hashes_before.txt",
+      "files/ (8 modified file copies)", "untracked_modules/ (2 copies)", "untracked_tests/ (3 copies)"
+    ],
+    "backup_integrity": "VERIFIED",
+    "restore_verified": true,
+    "restore_sha256_all_match": true,
+    "status_tracked_identical": true,
+    "only_new_entry": "?? reports/eval/task39/",
+    "final_state": "RESTORED_TO_PRETEST_STATE"
+  },
+
+  "runtime_configuration": {
+    "modified": false,
+    "interpreter": ".venv/Scripts/python.exe",
+    "python_version": "3.12.10",
+    "interpreter_matches_frozen_baseline": true,
+    "model": "mimo-v2.5-pro",
+    "provider": "mimo",
+    "base_url": "https://api.xiaomimimo.com/v1",
+    "SQLGEN_EXTRA_RULES": null,
+    "E8": "OFF",
+    "LINKER_MODE": null,
+    "linker_resolved": "llm",
+    "temperature": 0.0,
+    "per_item_timeout_s": 60.0,
+    "sdk_max_retries": 0,
+    "api_key_recorded": false
+  },
+
+  "benchmark_dataset": {
+    "path": "data/eval/ecommerce_eval_v1.json",
+    "name": "ECO-SQL-Bench v1.1",
+    "count": 100,
+    "sha256": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a",
+    "frozen_match": true,
+    "questions_modified": false,
+    "gold_modified": false,
+    "hard_questions_excluded": false,
+    "manual_rerun_override": false,
+    "retry_until_success": false
+  },
+
+  "provider_availability": {
+    "status": "UNAVAILABLE",
+    "smoke_test": {
+      "command": ".venv/Scripts/python.exe scripts/task36_e2e_benchmark.py --limit 3",
+      "items": 3,
+      "success": 0,
+      "mode": "PARTIAL",
+      "provider_calls": 3,
+      "model": "mimo-v2.5-pro",
+      "per_item": [
+        {"eval_id": "E-0001", "success": false, "exception_class": "LLMServiceUnavailableError", "total_latency_ms": 5900.02, "provider_latency_ms": 5846.78},
+        {"eval_id": "E-0002", "success": false, "exception_class": "LLMServiceUnavailableError", "total_latency_ms": 637.60, "provider_latency_ms": 629.52},
+        {"eval_id": "E-0003", "success": false, "exception_class": "LLMServiceUnavailableError", "total_latency_ms": 547.46, "provider_latency_ms": 539.62}
+      ],
+      "output": "reports/eval/task39/smoke3.json"
+    },
+    "direct_probe": {
+      "method": "只读直连上游，取真实 HTTP 状态码；未修改任何代码",
+      "endpoint": "https://api.xiaomimimo.com/v1",
+      "api_key_len": 51,
+      "exception_class": "APIStatusError",
+      "status_code": 402,
+      "body": {"code": "402", "message": "Insufficient account balance", "type": "insufficient_balance"},
+      "conclusion": "HTTP 402 — 账户余额不足"
+    }
+  },
+
+  "section_9_master_actual_behavior": {
+    "requirement": "任务书 §九：记录 master 当前实际行为，不修改代码修复",
+    "master_mapping_code": {
+      "401/403": "LLMAuthenticationError",
+      "429": "LLMRateLimitError",
+      ">=500": "LLMServiceUnavailableError('Mimo service unavailable')",
+      "other": "LLMServiceUnavailableError('Mimo request failed')"
+    },
+    "observed_final_error": "Mimo request failed",
+    "observed_is_last_branch": true,
+    "meaning": "final_error 为最后分支文案 ⇒ status_code 非 401/403、非 429、非 >=500 ⇒ 即 402",
+    "classification_result": {
+      "upstream_http_status": 402,
+      "master_maps_to": "LLMServiceUnavailableError('Mimo request failed')",
+      "exception_class": "LLMServiceUnavailableError",
+      "http_status_attribute": null,
+      "verdict": "402 被掩盖为「服务不可用」"
+    },
+    "task_36_status": "NOT_IN_CURRENT_MASTER",
+    "task_39_402_regression": "NOT_APPLICABLE",
+    "code_modified_to_accommodate_task36": false
+  },
+
+  "metrics": {
+    "ex": "NOT_MEASURED",
+    "exec": "NOT_MEASURED",
+    "sql_execution_accuracy": "NOT_MEASURED",
+    "mean_e2e_ms": "NOT_MEASURED",
+    "p50_e2e_ms": "NOT_MEASURED",
+    "p95_e2e_ms": "NOT_MEASURED",
+    "min_e2e_ms": "NOT_MEASURED",
+    "max_e2e_ms": "NOT_MEASURED",
+    "mean_provider_ms": "NOT_MEASURED",
+    "mean_non_llm_ms": "NOT_MEASURED",
+    "provider_failures": "NOT_MEASURED",
+    "repair_count": "NOT_MEASURED",
+    "eight_second_target": "NOT_MEASURED"
+  },
+
+  "failure_analysis": {
+    "total_failures": 3,
+    "all_from_smoke_test": true,
+    "rows": [
+      {"eval_id": "E-0001", "stage": "provider", "exception_class": "LLMServiceUnavailableError", "upstream_http_status": 402, "upstream_http_status_note": "被掩盖，经独立探测确认", "provider_latency_ms": 5846.78, "total_e2e_latency_ms": 5900.02, "sql_success": false, "repair_triggered": false},
+      {"eval_id": "E-0002", "stage": "provider", "exception_class": "LLMServiceUnavailableError", "upstream_http_status": 402, "upstream_http_status_note": "被掩盖，经独立探测确认", "provider_latency_ms": 629.52, "total_e2e_latency_ms": 637.60, "sql_success": false, "repair_triggered": false},
+      {"eval_id": "E-0003", "stage": "provider", "exception_class": "LLMServiceUnavailableError", "upstream_http_status": 402, "upstream_http_status_note": "被掩盖，经独立探测确认", "provider_latency_ms": 539.62, "total_e2e_latency_ms": 547.46, "sql_success": false, "repair_triggered": false}
+    ],
+    "classification": {
+      "provider": 3, "balance": 3, "authentication": 0, "rate_limit": 0,
+      "timeout": 0, "network": 0, "llm_generation": 0, "schema_linking": 0,
+      "sql_generation": 0, "sql_safety": 0, "sql_execution": 0, "repair": 0
+    },
+    "note": "balance 在 master 上无法与 provider 区分：402 被映射为 LLMServiceUnavailableError 且异常不带 http_status 属性，harness 读到 None。经独立直接 HTTP 探测才确认。这本身即 Task 36 修复价值的直接证据。"
+  },
+
+  "frozen_baseline_comparison": {
+    "comparison_performed": false,
+    "reason": "本次无测量结果",
+    "historical_context_only": {
+      "run_id": "20260916_09876",
+      "mode": "full",
+      "ex": 90.0,
+      "exec": 99.0,
+      "avg_latency_ms": 10876.08,
+      "p50_latency_ms": 10488.92,
+      "p95_latency_ms": 15440.79,
+      "repair_trigger_rate": 1.0,
+      "provider_failures": 0,
+      "valid_model_runs": 100
+    },
+    "causal_claims_made": false,
+    "explicitly_not_claimed": ["Candidate A caused X% improvement", "E8 improved latency"]
+  },
+
+  "candidate_a_interpretation": {
+    "status": "ACTIVE",
+    "in_master": true,
+    "attribution": "NONE",
+    "reason": "本次未获得任何可归因的性能数据"
+  },
+
+  "reproducibility": {
+    "tested_tree": "master @ 35a9ad61a9616619c1324fda68de69b6ae19996c",
+    "interpreter": ".venv/Scripts/python.exe (3.12.10)",
+    "harness": "scripts/task36_e2e_benchmark.py",
+    "smoke_command": ".venv/Scripts/python.exe scripts/task36_e2e_benchmark.py --limit 3",
+    "hundred_command": "NOT RUN",
+    "output": "reports/eval/task39/smoke3.json",
+    "temperature": 0.0,
+    "provider_randomness": "provider API controlled randomness unavailable"
+  },
+
+  "frozen_asset_verification": {
+    "all_match": true,
+    "assets": [
+      {"label": "Prompt V1.3", "path": "data/prompts/sql_generator_v1.3.txt", "sha256_prefix": "2af938be", "size": 3372, "match": true},
+      {"label": "FEWSHOT_V3", "path": "data/fewshot/ecommerce_examples.json", "sha256_prefix": "ee12fcc9", "size": 13556, "match": true},
+      {"label": "ECO-SQL-Bench", "path": "data/eval/ecommerce_eval_v1.json", "sha256_prefix": "dba277cc", "size": 101778, "match": true},
+      {"label": "DB", "path": "db/ecommerce.db", "sha256_prefix": "65e5d8b2", "size": 2912256, "match": true},
+      {"label": "Clean Baseline", "path": "reports/eval/clean_baseline_v1_1/eval_clean_baseline_v1_1.json", "sha256_prefix": "39404fed", "size": 418828, "match": true}
+    ],
+    "frozen_files_modified": false
+  },
+
+  "tests": {
+    "command": ".venv/Scripts/python.exe -m pytest backend/tests --ignore=<3 untracked task36/37/38 test files>",
+    "interpreter": ".venv/Scripts/python.exe",
+    "passed": 399,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 1,
+    "duration_s": 26.02,
+    "user_expectation": 367,
+    "expectation_correction": {
+      "expected": 367,
+      "measured": 399,
+      "delta": 32,
+      "explanation": "backend/tests/test_task29_runtime_reuse.py 恰有 32 个用例，且该文件在 master 中（Candidate A 已入 master）。399 - 32 = 367 ⇒ 367 是 Candidate A 入 master 之前的用例数。",
+      "corroboration": "reports/RELEASE_BASELINE_MANIFEST.json (Phase 2F 冻结) 同样记录 passed: 399，与本次实测一致。",
+      "conclusion": "master @ 35a9ad6 的正确基线是 399，不是 367。"
+    }
+  },
+
+  "api_key_leakage_scan": {
+    "scope": ["reports/task39_real_e2e_performance_gate.md", "reports/task39_real_e2e_performance_gate.json", "reports/eval/task39/smoke3.json"],
+    "real_key_verbatim_match": 0,
+    "result": "NONE"
+  },
+
+  "actions_not_taken": [
+    "未执行 100 题 benchmark（§五 门禁）",
+    "未产生任何性能数字",
+    "未修改任何代码、配置、冻结资产",
+    "未执行 git add / commit / stash / checkout <branch> / clean / reset --hard",
+    "未用重试掩盖失败",
+    "未手工重跑失败题"
+  ],
+
+  "follow_ups": [
+    "Task 36 → 独立 promotion（仅记录，不执行）",
+    "Task 37 → 独立确认（仅记录，不执行）",
+    "Task 38 → 独立确认（仅记录，不执行）",
+    "进入 master 后重新建立新的正式 benchmark baseline；不要把多个任务混成一个 benchmark。",
+    "本次再次验证 402 误映射在 master 上真实存在且可观测：LLMServiceUnavailableError('Mimo request failed') 完全掩盖上游 402，导致无法区分「服务故障」与「余额不足」。这是 Task 36 promotion 的额外论据。"
+  ],
+
+  "final_output": {
+    "task": "Task 39",
+    "measured_tree": "master @ 35a9ad6",
+    "task_36": "NOT_IN_MASTER",
+    "task_37": "NOT_IN_MASTER",
+    "task_38": "NOT_IN_MASTER",
+    "e8": "OFF",
+    "benchmark": "100 questions — NOT RUN",
+    "provider": "UNAVAILABLE",
+    "ex": "NOT_MEASURED",
+    "exec": "NOT_MEASURED",
+    "mean_e2e_ms": "NOT_MEASURED",
+    "p50_ms": "NOT_MEASURED",
+    "p95_ms": "NOT_MEASURED",
+    "eight_second_target": "NOT_MEASURED",
+    "candidate_a": "ACTIVE",
+    "frozen_assets": "MATCH",
+    "tests": "399 passed",
+    "working_tree": "RESTORED_TO_PRETEST_STATE",
+    "master": "UNCHANGED",
+    "status": "PERFORMANCE_GATE_CLOSED"
+  }
+}

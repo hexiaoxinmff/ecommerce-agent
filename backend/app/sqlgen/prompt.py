@@ -9,18 +9,51 @@
     E5  Metric Semantics （金额/销售口径）
     E6  Nested Aggregation（分层聚合）
     E7  CASE Boundary     （分段边界）
+
+Task 38（E8）：条件性统计实体 / 驱动表约束。
+默认**关闭** —— 关闭时 Prompt 与冻结基线逐字节相同。
+启用后，仅当题目被识别为「按行为分档统计实体」时才追加约束段；
+其余题目即使 E8 开启也不注入（条件性局部生效）。
+
+Task 44（E9/E10/E11）：条件性语义契约（修复 Task 43 已确证的生成层失败机制）。
+同样默认**关闭**，且同样是**条件性**注入 —— 只有题目被确定性识别为对应
+场景时才追加，其余题目即使 flag 打开也不注入：
+
+    E9  Global Scope      （全局口径不得继承外层时间过滤）  —— E-0065
+    E10 Ratio Direction   （ratio 分子/分母方向必须先确定） —— E-0075
+    E11 Ranking Tiebreak  （Top-N 必须含确定性破平键）      —— E-0098
+
+E4（Output Contract）在 Task 44 中**增强 wording**（新增「实体维度契约」条款），
+flag 与注入时机不变。
 """
 
 import os
 
 from app.fewshot.models import FewShotResult
 from app.schemas.schema_link import SchemaLinkResult
+from app.sqlgen.date_window import detect_date_window
+from app.sqlgen.entity_constraint import detect_analysis_entity_constraint
+from app.sqlgen.semantic_contracts import (
+    detect_global_scope,
+    detect_ranking_tiebreak,
+    detect_ratio_direction,
+)
 
 SYSTEM_PROMPT = (
     "你是电商智能数据分析 Agent 的 SQL Generator。"
     "任务：根据用户问题、Schema Linking 结果与 Few-shot Examples，"
     "生成一条只读的 SQLite SQL。只生成 SQL，不执行 SQL。"
 )
+
+
+def system_prompt_for(domain: str = "电商") -> str:
+    """按 Profile 领域词生成 System Prompt（Phase 13）。
+
+    domain 为 "电商"（或未指定）时返回值与 SYSTEM_PROMPT 逐字节相同。
+    """
+    if not domain or domain == "电商":
+        return SYSTEM_PROMPT
+    return SYSTEM_PROMPT.replace("电商", domain, 1)
 
 # 业务语义（与 docs/database-schema.md 保持一致）
 # 版本：SQLGENERATOR_PROMPT_V1.3（Task 14.3：枚举分表 + 金额口径统一；相对 V1.1 无功能回退）
@@ -67,12 +100,21 @@ BUSINESS_RULES = (
 # ---------------- Task 14.2 专项规则（各自独立，按环境变量选择性启用） ----------------
 
 # E4: Output Contract（专项 A：E-0082/E-0083/E-0090）
+# Task 44 增强：新增第 5 条「实体维度契约」（靶题 E-0082：数值正确但丢了分类名列）。
+# 该条款刻意带**反例例外**，避免把「同表列直接限定的标量比值」也强行加列
+# （反例 E-0081「广东省的用户占全部用户的比例」gold 只有 1 列）。
 OUTPUT_CONTRACT_RULES = (
     "【输出列契约】（重要）\n"
     "1. 生成 SQL 前先枚举问题要求返回的所有信息，SELECT 的每一列都必须对应用户问题中要求给的一项字段；\n"
     "2. 数量占比/比例题：若问题要求「给出分类与占比」，必须同时输出「分类名称」与「占比」两列；\n"
     "3. 结构统计题若问题注明「含取消订单的结构统计 / 总订单数」，必须额外输出总计数列（如 COUNT(*) AS total_cnt）；\n"
     "4. SELECT 列数必须与问题要求完全匹配，禁止遗漏列（列数缺失会导致结果无法对齐判错）。\n"
+    "5. 实体维度契约：当题目要求的比例/指标针对某个**需要 JOIN 维度表才能限定**的实体时"
+    "（如「某类别」的名称来自 categories、「某商品」来自 products、「某用户」来自 users），"
+    "SELECT 必须同时输出该实体的标识列（名称或 ID）与指标列；"
+    "不得用 SUM(CASE WHEN 维度列 = '常量' THEN …) 把维度折叠掉、只返回一个标量；\n"
+    "6. 第 5 条的反例（不适用）：实体由**同一张表的列**直接限定、且题目只要求一个标量比值时"
+    "（如 users.region = '广东' 的占比），不要凭空增加实体列 —— 多输出一列同样会判错。\n"
 )
 
 # E5: Metric Semantics（专项 B：E-0077/E-0097）
@@ -145,6 +187,91 @@ _CONSTRAINTS = (
 )
 
 
+def entity_constraint_block(question: str) -> str:
+    """Task 38：按题目条件产出统计实体约束段。
+
+    仅当 SQLGEN_EXTRA_RULES 含 "E8" **且** 题目被识别为
+    「按行为分档统计实体」时返回约束文本；否则返回空串。
+
+    默认（未设置 E8）恒返回空串 —— 保证 Prompt 与冻结基线逐字节一致。
+    """
+    raw = os.getenv("SQLGEN_EXTRA_RULES", "").strip()
+    if not raw:
+        return ""
+    flags = {p.strip().upper() for p in raw.split(",") if p.strip()}
+    if "E8" not in flags:
+        return ""
+    constraint = detect_analysis_entity_constraint(question)
+    if constraint is None:
+        return ""
+    return constraint.to_prompt_block()
+
+
+# ---------------- Task 44：条件性语义契约（E9 / E10 / E11） ----------------
+
+
+def _enabled_flags() -> set[str]:
+    """解析当前 SQLGEN_EXTRA_RULES 的 flag 集合（空集 = 全部关闭）。"""
+    raw = os.getenv("SQLGEN_EXTRA_RULES", "").strip()
+    if not raw:
+        return set()
+    return {p.strip().upper() for p in raw.split(",") if p.strip()}
+
+
+def global_scope_block(question: str) -> str:
+    """E9：全局口径 / 参照基准约束段（默认关闭，条件性注入）。"""
+    if "E9" not in _enabled_flags():
+        return ""
+    contract = detect_global_scope(question)
+    return "" if contract is None else contract.to_prompt_block()
+
+
+def ratio_direction_block(question: str) -> str:
+    """E10：比值方向契约段（默认关闭，条件性注入）。"""
+    if "E10" not in _enabled_flags():
+        return ""
+    contract = detect_ratio_direction(question)
+    return "" if contract is None else contract.to_prompt_block()
+
+
+def ranking_tiebreak_block(question: str) -> str:
+    """E11：Top-N 确定性排序契约段（默认关闭，条件性注入）。"""
+    if "E11" not in _enabled_flags():
+        return ""
+    contract = detect_ranking_tiebreak(question)
+    return "" if contract is None else contract.to_prompt_block()
+
+
+def semantic_contract_block(question: str) -> str:
+    """按 E9 -> E10 -> E11 固定顺序拼接已启用且已命中的语义契约段。
+
+    全部未启用或全部未命中时返回空串 ⇒ build_prompt 与基线逐字节相同。
+    """
+    blocks = [
+        global_scope_block(question),
+        ratio_direction_block(question),
+        ranking_tiebreak_block(question),
+    ]
+    return "\n".join(b for b in blocks if b)
+
+
+# ---------------- Task 60：E12 时间窗口语义保持（条件性注入，默认关闭） ----------------
+
+def date_window_block(question: str) -> str:
+    """E12：时间窗口语义保持契约段（默认关闭，条件性注入）。
+
+    仅当 `SQLGEN_EXTRA_RULES` 含 `E12` **且**题目被确定性识别为
+    「已给出时间范围」时返回约束文本；否则返回空串。
+
+    未开启 E12 时恒返回空串 ⇒ `build_prompt` 与冻结基线逐字节相同。
+    本函数与 E9/E10/E11 完全独立，不修改任何既有语义契约。
+    """
+    if "E12" not in _enabled_flags():
+        return ""
+    contract = detect_date_window(question)
+    return "" if contract is None else contract.to_prompt_block()
+
+
 def format_schema_linking(link_result: SchemaLinkResult) -> str:
     lines = [f"相关表：\n{chr(10).join('  - ' + t for t in link_result.tables)}"]
     if link_result.columns:
@@ -169,16 +296,46 @@ def format_fewshot(fs_result: FewShotResult) -> str:
 
 
 def build_prompt(
-    question: str, link_result: SchemaLinkResult, fs_result: FewShotResult
+    question: str,
+    link_result: SchemaLinkResult,
+    fs_result: FewShotResult,
+    *,
+    business_rules: str | None = None,
+    appendix_rules: str | None = None,
 ) -> str:
+    """构建 SQL 生成 Prompt。
+
+    Phase 13（跨数据库适配）：business_rules 允许由 Database Profile 注入
+    当前数据库的业务口径文本；缺省 None = 使用本模块 BUSINESS_RULES
+    （冻结基线逐字节不变）。
+
+    Phase 15（P0-1/P0-2）：appendix_rules 为运行时附录（KPI 口径定义 +
+    数据时效契约），渲染在业务口径之后；缺省 None = 不追加（冻结基线
+    逐字节不变）。
+    """
+    rules = business_rules if business_rules is not None else BUSINESS_RULES
+    appendix = f"{appendix_rules}\n" if appendix_rules else ""
     extra = enabled_extra_rules()
     extra_block = f"{extra}\n\n" if extra else ""
+    # Task 38：条件性统计实体约束（默认关闭，仅 E8 开启且命中目标场景时非空）
+    entity_block = entity_constraint_block(question)
+    entity_text = f"{entity_block}\n" if entity_block else ""
+    # Task 44：条件性语义契约（默认关闭，仅对应 flag 开启且命中目标场景时非空）
+    semantic_block = semantic_contract_block(question)
+    semantic_text = f"{semantic_block}\n" if semantic_block else ""
+    # Task 60：条件性时间窗口契约（默认关闭，仅 E12 开启且题目已给出时间范围时非空）
+    date_block = date_window_block(question)
+    date_text = f"{date_block}\n" if date_block else ""
     return (
         f"【用户问题】{question}\n\n"
         f"【Schema Linking 结果】\n{format_schema_linking(link_result)}\n\n"
         f"【Few-shot Examples】\n{format_fewshot(fs_result)}\n\n"
-        f"{BUSINESS_RULES}\n"
+        f"{rules}\n"
+        f"{appendix}"
         f"{extra_block}"
+        f"{entity_text}"
+        f"{semantic_text}"
+        f"{date_text}"
         f"{_CONSTRAINTS}\n"
         f"{_OUTPUT_RULES}\n"
         f"【请生成】针对用户问题生成唯一一条只读 SQLite SQL。\n"

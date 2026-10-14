@@ -1,0 +1,150 @@
+{
+  "question_id": "E-0057",
+  "question": "按用户累计下单次数将用户分为三档（1-3单、4-10单、11单及以上），各档分别有多少用户？",
+  "gold_sql": "SELECT CASE WHEN cnt <= 3 THEN '1-3单' WHEN cnt <= 10 THEN '4-10单' ELSE '11单及以上' END AS tier, COUNT(*) AS user_count FROM (SELECT o.user_id AS uid, COUNT(*) AS cnt FROM orders o GROUP BY o.user_id) AS u GROUP BY tier ORDER BY tier",
+  "single_variable": "SQLGEN_EXTRA_RULES=E8 (条件性统计实体/驱动表约束)",
+  "arms": {
+    "OFF": {
+      "eval_id": "E-0057",
+      "question": "按用户累计下单次数将用户分为三档（1-3单、4-10单、11单及以上），各档分别有多少用户？",
+      "difficulty": "hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "subquery",
+        "case_when",
+        "group_by",
+        "aggregate"
+      ],
+      "gold_sql": "SELECT CASE WHEN cnt <= 3 THEN '1-3单' WHEN cnt <= 10 THEN '4-10单' ELSE '11单及以上' END AS tier, COUNT(*) AS user_count FROM (SELECT o.user_id AS uid, COUNT(*) AS cnt FROM orders o GROUP BY o.user_id) AS u GROUP BY tier ORDER BY tier",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMNetworkError",
+      "latency_ms": 22679.22,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "_wall_ms": 22718.11,
+      "_provider_calls": 0,
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 22672.969600000215
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0012000018614344299
+        }
+      ]
+    },
+    "ON": {
+      "eval_id": "E-0057",
+      "question": "按用户累计下单次数将用户分为三档（1-3单、4-10单、11单及以上），各档分别有多少用户？",
+      "difficulty": "hard",
+      "scenario": "user_analysis",
+      "operators": [
+        "subquery",
+        "case_when",
+        "group_by",
+        "aggregate"
+      ],
+      "gold_sql": "SELECT CASE WHEN cnt <= 3 THEN '1-3单' WHEN cnt <= 10 THEN '4-10单' ELSE '11单及以上' END AS tier, COUNT(*) AS user_count FROM (SELECT o.user_id AS uid, COUNT(*) AS cnt FROM orders o GROUP BY o.user_id) AS u GROUP BY tier ORDER BY tier",
+      "pred_sql": "SELECT CASE WHEN order_count BETWEEN 1 AND 3 THEN '1-3单' WHEN order_count BETWEEN 4 AND 10 THEN '4-10单' ELSE '11单及以上' END AS order_tier, COUNT(*) AS user_count FROM (SELECT user_id, COUNT(*) AS order_count FROM orders GROUP BY user_id) AS user_orders GROUP BY order_tier",
+      "initial_sql": "SELECT CASE WHEN order_count BETWEEN 1 AND 3 THEN '1-3单' WHEN order_count BETWEEN 4 AND 10 THEN '4-10单' ELSE '11单及以上' END AS order_tier, COUNT(*) AS user_count FROM (SELECT user_id, COUNT(*) AS order_count FROM orders GROUP BY user_id) AS user_orders GROUP BY order_tier",
+      "final_sql": "SELECT CASE WHEN order_count BETWEEN 1 AND 3 THEN '1-3单' WHEN order_count BETWEEN 4 AND 10 THEN '4-10单' ELSE '11单及以上' END AS order_tier, COUNT(*) AS user_count FROM (SELECT user_id, COUNT(*) AS order_count FROM orders GROUP BY user_id) AS user_orders GROUP BY order_tier",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 10519.64,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "_wall_ms": 10523.94,
+      "_provider_calls": 2,
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 6098.611100002017
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.23670000155107118
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 4412.99330000038
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.7285000028787181
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 3.8386999985959847
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0005999972927384079
+        }
+      ]
+    }
+  }
+}

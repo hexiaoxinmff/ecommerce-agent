@@ -19,8 +19,11 @@
     - 上层模块不得直接 import app.llm.bailian
     - app.llm.provider 对 bailian 保持 lazy import
 
-§十一 真实 API 冒烟：仅当本机已配置 DASHSCOPE_API_KEY 时才执行，
-否则 SKIPPED。任何测试都不要求把真实 Key 写进源码或聊天消息。
+§十一 真实 API 冒烟：**默认一律 SKIPPED**。只有显式设置
+RUN_REAL_LLM_SMOKE=1 **且** 本机已配置 DASHSCOPE_API_KEY 时才执行。
+（Task 70 起生效：此前"`.env` 里有 key 就自动联网"的语义已废弃，
+ 判定表见 `tests/real_llm_smoke_gate.py`。）
+任何测试都不要求把真实 Key 写进源码或聊天消息。
 """
 
 from __future__ import annotations
@@ -49,11 +52,13 @@ from app.llm.provider import (
     LLMInsufficientBalanceError,
     LLMNetworkError,
     LLMProviderNotConfiguredError,
+    LLMQuotaError,
     LLMRateLimitError,
     LLMServiceUnavailableError,
     LLMTimeoutError,
     get_llm_provider,
 )
+from tests.real_llm_smoke_gate import evaluate as _real_llm_smoke_gate
 
 FAKE_KEY = "test-secret"
 DEFAULT_MODEL = "qwen3.7-flash-2026-07-15"
@@ -559,6 +564,74 @@ def test_401_403_are_authentication_errors(provider, monkeypatch) -> None:
 
 
 # ===========================================================================
+# H+. 403 + AllocationQuota.* -> LLMQuotaError（Phase 4 错误分类修正）
+# ===========================================================================
+
+
+def test_403_free_tier_only_maps_to_quota_error(provider, monkeypatch) -> None:
+    """403 + AllocationQuota.FreeTierOnly：配额耗尽，绝不能误报认证失败。"""
+    body = (
+        '{"error":{"code":"AllocationQuota.FreeTierOnly",'
+        '"message":"Free tier quota exhausted"}}'
+    )
+    _fake_call(monkeypatch, error=_status_error(403, body=body))
+    with pytest.raises(LLMQuotaError) as excinfo:
+        provider.generate(MESSAGES)
+
+    exc = excinfo.value
+    assert type(exc) is LLMQuotaError
+    assert not isinstance(exc, LLMAuthenticationError)
+    assert exc.http_status == 403
+    # 原始结构化错误码必须保留（不吞掉上游错误信息）
+    assert exc.provider_error_code == "AllocationQuota.FreeTierOnly"
+    # 文案是「配额耗尽」语义，不含 "authentication"
+    assert "quota" in str(exc).lower()
+    assert "authentication" not in str(exc).lower()
+
+
+def test_403_other_quota_family_code_maps_to_quota_error(provider, monkeypatch) -> None:
+    """403 + AllocationQuota.* 族内其他码：同样归为配额类。"""
+    body = '{"code":"AllocationQuota.PurchasedQuotaExhausted"}'
+    _fake_call(monkeypatch, error=_status_error(403, body=body))
+    with pytest.raises(LLMQuotaError) as excinfo:
+        provider.generate(MESSAGES)
+    assert excinfo.value.provider_error_code == "AllocationQuota.PurchasedQuotaExhausted"
+
+
+def test_403_endpoint_access_denied_stays_authentication(provider, monkeypatch) -> None:
+    """403 + Endpoint.AccessDenied（endpoint 不可用）：保持既有认证分类不变。"""
+    body = '{"error":{"code":"Endpoint.AccessDenied"}}'
+    _fake_call(monkeypatch, error=_status_error(403, body=body))
+    with pytest.raises(LLMAuthenticationError) as excinfo:
+        provider.generate(MESSAGES)
+    assert type(excinfo.value) is LLMAuthenticationError
+    assert excinfo.value.provider_error_code == "Endpoint.AccessDenied"
+
+
+def test_401_with_quota_code_stays_authentication(provider, monkeypatch) -> None:
+    """401 即使携带配额形态的错误码：仍是认证失败（配额改判仅限 403）。"""
+    body = '{"error":{"code":"AllocationQuota.FreeTierOnly"}}'
+    _fake_call(monkeypatch, error=_status_error(401, body=body))
+    with pytest.raises(LLMAuthenticationError) as excinfo:
+        provider.generate(MESSAGES)
+    assert type(excinfo.value) is LLMAuthenticationError
+
+
+def test_quota_error_does_not_leak_body_or_key(provider, monkeypatch) -> None:
+    """配额异常同样必须通过 Secret 隔离约束。"""
+    body = (
+        '{"error":{"code":"AllocationQuota.FreeTierOnly",'
+        f'"key":"Bearer {FAKE_KEY}"}}}}'
+    )
+    _fake_call(monkeypatch, error=_status_error(403, body=body))
+    with pytest.raises(LLMQuotaError) as excinfo:
+        provider.generate(MESSAGES)
+    assert FAKE_KEY not in str(excinfo.value)
+    assert FAKE_KEY not in repr(excinfo.value)
+    assert "Bearer" not in str(excinfo.value)
+
+
+# ===========================================================================
 # I. 网络 / 超时
 # ===========================================================================
 
@@ -891,13 +964,23 @@ def test_mimo_module_is_untouched_by_design() -> None:
 
 
 # ===========================================================================
-# §十一 真实 API 冒烟（仅在配置了 DASHSCOPE_API_KEY 时执行）
+# §十一 真实 API 冒烟
+#
+# Task 70 起改为**显式 Opt-in**：默认一律 SKIP；
+# 只有 RUN_REAL_LLM_SMOKE=1 **且** DASHSCOPE_API_KEY 存在时才可能真实联网。
+#
+# 旧判据 `skipif(not os.getenv("DASHSCOPE_API_KEY"))` 已废弃 ——
+# 生产 .env 里一直配着该 key，于是"有 key"等价于"跑全量测试就自动联网"，
+# 只能靠人工 `DASHSCOPE_API_KEY="" ... --deselect ...` 绕开。
+# 判定表与两条不可动摇的规则见 `tests/real_llm_smoke_gate.py`。
 # ===========================================================================
+
+_REAL_SMOKE_ENABLED, _REAL_SMOKE_REASON = _real_llm_smoke_gate()
 
 
 @pytest.mark.skipif(
-    not os.getenv("DASHSCOPE_API_KEY", "").strip(),
-    reason="DASHSCOPE_API_KEY 未配置，跳过真实 API 冒烟（任务书 §十一）",
+    not _REAL_SMOKE_ENABLED,
+    reason=_REAL_SMOKE_REASON,
 )
 def test_real_bailian_smoke() -> None:
     """一次极小真实调用：要求模型只返回 SELECT 1;。

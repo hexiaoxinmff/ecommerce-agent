@@ -1,0 +1,1103 @@
+{
+  "meta": {
+    "run_id": "20260927_28404",
+    "timestamp": "2026-09-27T07:53:24Z",
+    "dataset_version": "1.1",
+    "database_version": "dev-2026-09-14",
+    "schema_version": "1.0",
+    "seed": 20260914,
+    "model": "qwen3.7-flash",
+    "provider": "bailian",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_version": "",
+    "fewshot_version": "",
+    "experiment": "",
+    "randomness": "provider API controlled randomness unavailable",
+    "mode": "subset",
+    "per_item_timeout_s": 60.0,
+    "total_items": 10,
+    "prompt_sha256": "10583478b3a7d972865050501cd6e4b9062531503f1c3852cdd79cbf66f796d5",
+    "fewshot_sha256": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee",
+    "fewshot_path": "F:\\基于 Text2SQL 的电商智能数据分析 Agent\\data\\fewshot\\ecommerce_examples.json",
+    "dataset_sha256": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a",
+    "db_table_counts": "{\"users\": 2000, \"categories\": 30, \"products\": 500, \"orders\": 10000, \"order_items\": 30457}"
+  },
+  "summary": {
+    "run_id": "20260927_28404",
+    "timestamp": "2026-09-27T07:53:24Z",
+    "total": 10,
+    "valid_model_runs": 10,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "final_ex": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "avg_latency_ms": 3425.99,
+    "p50_latency_ms": 3375.94,
+    "p95_latency_ms": 3992.57
+  },
+  "results": [
+    {
+      "eval_id": "E-0001",
+      "question": "平台上一共有多少用户？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT COUNT(*) AS user_count FROM users",
+      "pred_sql": "SELECT COUNT(*) AS total_users FROM users",
+      "initial_sql": "SELECT COUNT(*) AS total_users FROM users",
+      "final_sql": "SELECT COUNT(*) AS total_users FROM users",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 3778.2,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 2177.04490000051,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "users"
+            ],
+            "columns_count": 1,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.24020000000746222,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_007",
+              "ex_011",
+              "ex_016"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 1593.3912000000419,
+          "message": "",
+          "output_summary": {
+            "sql_length": 41,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.21250000008876668,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 1.1841999994430807,
+          "message": "",
+          "output_summary": {
+            "row_count": 1,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0006000000212225132,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0002",
+      "question": "广东省有多少用户？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE region = '广东'",
+      "pred_sql": "SELECT COUNT(*) AS user_count FROM users WHERE region = '广东'",
+      "initial_sql": "SELECT COUNT(*) AS user_count FROM users WHERE region = '广东'",
+      "final_sql": "SELECT COUNT(*) AS user_count FROM users WHERE region = '广东'",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 3722.71,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 2004.914799999824,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "users"
+            ],
+            "columns_count": 2,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.19080000038229628,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_007",
+              "ex_011",
+              "ex_016"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 1712.8555999997843,
+          "message": "",
+          "output_summary": {
+            "sql_length": 60,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.2996000002895016,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 1.5352000000348198,
+          "message": "",
+          "output_summary": {
+            "row_count": 1,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0006999998731771484,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0003",
+      "question": "平台有多少活跃用户？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE status = 'active'",
+      "pred_sql": "SELECT COUNT(*) AS active_users FROM users WHERE status = 'active'",
+      "initial_sql": "SELECT COUNT(*) AS active_users FROM users WHERE status = 'active'",
+      "final_sql": "SELECT COUNT(*) AS active_users FROM users WHERE status = 'active'",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 3393.06,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 1831.6703000000416,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "users"
+            ],
+            "columns_count": 1,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.18879999970522476,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_007",
+              "ex_011",
+              "ex_016"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 1556.0518000002048,
+          "message": "",
+          "output_summary": {
+            "sql_length": 66,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.2696999999898253,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 1.852399999734189,
+          "message": "",
+          "output_summary": {
+            "row_count": 1,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0007999997251317836,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0004",
+      "question": "2023年注册的用户有多少？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where",
+        "date_filter"
+      ],
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE register_date >= '2023-01-01' AND register_date <= '2023-12-31'",
+      "pred_sql": "SELECT COUNT(*) AS user_count FROM users WHERE strftime('%Y', register_date) = '2023'",
+      "initial_sql": "SELECT COUNT(*) AS user_count FROM users WHERE strftime('%Y', register_date) = '2023'",
+      "final_sql": "SELECT COUNT(*) AS user_count FROM users WHERE strftime('%Y', register_date) = '2023'",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 3202.9,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 1622.4763999998686,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "users"
+            ],
+            "columns_count": 1,
+            "confidence": 1.0
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.20810000023629982,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_011",
+              "ex_007",
+              "ex_016"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 1574.771800000235,
+          "message": "",
+          "output_summary": {
+            "sql_length": 85,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.3660000002128072,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 2.089900000100897,
+          "message": "",
+          "output_summary": {
+            "row_count": 1,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.000999999429041054,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0005",
+      "question": "注册时间最早的3位用户是哪些？（请给出用户名和注册日期）",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "gold_sql": "SELECT username, register_date FROM users ORDER BY register_date ASC LIMIT 3",
+      "pred_sql": "SELECT username, register_date FROM users ORDER BY register_date ASC LIMIT 3",
+      "initial_sql": "SELECT username, register_date FROM users ORDER BY register_date ASC LIMIT 3",
+      "final_sql": "SELECT username, register_date FROM users ORDER BY register_date ASC LIMIT 3",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 3992.57,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 2132.678599999963,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "users"
+            ],
+            "columns_count": 2,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.1899999997476698,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_011",
+              "ex_007",
+              "ex_016"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 1854.5751999999993,
+          "message": "",
+          "output_summary": {
+            "sql_length": 76,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.3933000007236842,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 1.524500000414264,
+          "message": "",
+          "output_summary": {
+            "row_count": 3,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0010000003385357559,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0006",
+      "question": "北京和上海两个地区的用户一共有多少？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE region IN ('北京', '上海')",
+      "pred_sql": "SELECT COUNT(*) AS user_count FROM users WHERE region IN ('北京', '上海')",
+      "initial_sql": "SELECT COUNT(*) AS user_count FROM users WHERE region IN ('北京', '上海')",
+      "final_sql": "SELECT COUNT(*) AS user_count FROM users WHERE region IN ('北京', '上海')",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 3349.82,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 1652.3995000006835,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "users"
+            ],
+            "columns_count": 2,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.18970000019180588,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_007",
+              "ex_011",
+              "ex_016"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 1692.4564999999347,
+          "message": "",
+          "output_summary": {
+            "sql_length": 69,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.28560000009747455,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 1.4232000003175926,
+          "message": "",
+          "output_summary": {
+            "row_count": 1,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0009000004865811206,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0007",
+      "question": "平台上一共有多少商品？",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT COUNT(*) AS product_count FROM products",
+      "pred_sql": "SELECT COUNT(*) AS total_products FROM products",
+      "initial_sql": "SELECT COUNT(*) AS total_products FROM products",
+      "final_sql": "SELECT COUNT(*) AS total_products FROM products",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 2995.51,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 1706.9294999992053,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "products"
+            ],
+            "columns_count": 1,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.22259999968810007,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_012",
+              "ex_013",
+              "ex_008"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 1283.001300000251,
+          "message": "",
+          "output_summary": {
+            "sql_length": 47,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.40409999928670004,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 1.4559999999619322,
+          "message": "",
+          "output_summary": {
+            "row_count": 1,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0007999997251317836,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0008",
+      "question": "所有商品的平均售价是多少？",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT ROUND(AVG(price), 2) AS avg_price FROM products",
+      "pred_sql": "SELECT ROUND(AVG(price), 2) AS avg_price FROM products",
+      "initial_sql": "SELECT ROUND(AVG(price), 2) AS avg_price FROM products",
+      "final_sql": "SELECT ROUND(AVG(price), 2) AS avg_price FROM products",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 3375.94,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 1825.0770000004195,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "products"
+            ],
+            "columns_count": 1,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.1965000001291628,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_013",
+              "ex_017",
+              "ex_012"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 1546.035500000471,
+          "message": "",
+          "output_summary": {
+            "sql_length": 54,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.25860000005195616,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 1.4997999996921862,
+          "message": "",
+          "output_summary": {
+            "row_count": 1,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.001100000190490391,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0009",
+      "question": "售价最高的商品价格是多少？",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT MAX(price) FROM products",
+      "pred_sql": "SELECT MAX(price) AS max_price FROM products",
+      "initial_sql": "SELECT MAX(price) AS max_price FROM products",
+      "final_sql": "SELECT MAX(price) AS max_price FROM products",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 3183.12,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 1771.5936000004149,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "products"
+            ],
+            "columns_count": 1,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.18620000082592014,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_013",
+              "ex_017",
+              "ex_012"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 1407.2267000001375,
+          "message": "",
+          "output_summary": {
+            "sql_length": 44,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.20080000012967503,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 1.1035999996238388,
+          "message": "",
+          "output_summary": {
+            "row_count": 1,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0006999998731771484,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0010",
+      "question": "在售商品中售价最低的是多少？",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "gold_sql": "SELECT MIN(price) FROM products WHERE status = 'on_sale'",
+      "pred_sql": "SELECT MIN(price) AS min_price FROM products WHERE status = 'on_sale'",
+      "initial_sql": "SELECT MIN(price) AS min_price FROM products WHERE status = 'on_sale'",
+      "final_sql": "SELECT MIN(price) AS min_price FROM products WHERE status = 'on_sale'",
+      "exec_success": true,
+      "exact_match": false,
+      "execution_accuracy": true,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": null,
+      "error_type": null,
+      "latency_ms": 3266.05,
+      "valid_model_run": true,
+      "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "success",
+          "duration_ms": 1840.4060000002573,
+          "message": "",
+          "output_summary": {
+            "tables": [
+              "products"
+            ],
+            "columns_count": 2,
+            "confidence": 0.95
+          }
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "success",
+          "duration_ms": 0.18940000063594198,
+          "message": "",
+          "output_summary": {
+            "match_count": 3,
+            "example_ids": [
+              "ex_012",
+              "ex_013",
+              "ex_024"
+            ]
+          }
+        },
+        {
+          "node": "sql_generate",
+          "status": "success",
+          "duration_ms": 1420.9032999997362,
+          "message": "",
+          "output_summary": {
+            "sql_length": 69,
+            "tables": 1
+          }
+        },
+        {
+          "node": "sql_safety",
+          "status": "success",
+          "duration_ms": 0.2700000004551839,
+          "message": "",
+          "output_summary": {
+            "allowed": true
+          }
+        },
+        {
+          "node": "sql_execute",
+          "status": "success",
+          "duration_ms": 1.337200000307348,
+          "message": "",
+          "output_summary": {
+            "row_count": 1,
+            "truncated": false
+          }
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0006999998731771484,
+          "message": "",
+          "output_summary": {
+            "success": true
+          }
+        }
+      ]
+    }
+  ]
+}

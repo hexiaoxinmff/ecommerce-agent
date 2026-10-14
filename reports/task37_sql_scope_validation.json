@@ -1,0 +1,217 @@
+{
+  "report_id": "task37_sql_scope_alias_validation",
+  "task": "Task 37 — SQL Scope / Alias 静态校验（E-0099 确定性缺陷修复）",
+  "date": "2026-09-20",
+  "baseline_commit": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+  "baseline_tags": ["release_baseline_20260920"],
+  "human_readable": "reports/task37_sql_scope_validation.md",
+  "status": "COMPLETE",
+  "llm_calls": 0,
+
+  "1_objective": {
+    "target_defect": "E-0099",
+    "defect_class": "undefined_table_alias_or_column_qualifier",
+    "symptom": "SQL 通过语法解析，但 SELECT/WHERE/JOIN 引用未定义别名，执行时报 no such column: r.region",
+    "goal": "在 SQL 执行前提前发现并阻止错误 SQL 进入 execute 阶段",
+    "explicitly_out_of_scope": [
+      "提高整体准确率",
+      "修改 Prompt / Few-shot / Schema Linking / Repair 策略"
+    ]
+  },
+
+  "2_audit": {
+    "validation_layers": [
+      {"layer": "生成后校验", "file": "backend/app/sqlgen/validator.py", "duty": "JSON 结构 / tables-columns ⊆ Schema Linking / 安全性"},
+      {"layer": "安全结构", "file": "backend/app/sqlgen/safety.py", "duty": "sqlglot 解析 / 单条语句 / 只读 SELECT-WITH / 提取引用表"},
+      {"layer": "Graph 节点", "file": "backend/app/agent/nodes.py::sql_safety_node", "duty": "调用 check_sql_safety，失败直接终态"},
+      {"layer": "执行前", "file": "backend/app/sqlexec/executor.py", "duty": "再次 Safety 校验（最后一道边界）"},
+      {"layer": "Repair 输出", "file": "backend/app/sqlrepair/validator.py", "duty": "Safety + 表一致性 + 有前缀列存在性"}
+    ],
+    "primary_insertion_point": "sqlexec/executor.py::execute，Safety 之后、打开数据库连接之前",
+    "primary_insertion_rationale": "首次执行与 Repair 后执行都必须经过的收窄口；一处接入覆盖两条路径，无需改动 Graph 结构",
+    "secondary_insertion_point": "sqlrepair/validator.py::validate_repair_output",
+    "sql_parser": "sqlglot",
+    "sqlglot_version": "30.18.0",
+    "sqlglot_already_dependency": true,
+    "new_dependency_introduced": false,
+    "scope_api_used": [
+      "sqlglot.optimizer.scope.traverse_scope",
+      "Scope.sources",
+      "Scope.external_columns",
+      "Scope.parent"
+    ],
+    "error_type_decision": {
+      "class": "SQLExecutionScopeError",
+      "inherits": "SQLExecutionDatabaseError",
+      "does_not_inherit": "SQLExecutionSafetyError",
+      "rationale": [
+        "语义等同于数据库报出的 no such column，只是提前发现，诚实归类为数据库故障域",
+        "继承 DatabaseError 保证 route_after_execute 仍返回 repair，Repair 流程不被静默缩短",
+        "若继承 SafetyError，SQL 会被直接判死、永不进入 Repair —— 属对既有行为的隐性破坏，任务明确禁止"
+      ]
+    },
+    "affects_execute_with_repair": false,
+    "affects_execute_with_repair_evidence": [
+      "路由层：route_after_execute(database, repair_count=0) == 'repair'",
+      "端到端：打桩 provider 下 Scope 错误触发 Repair，修复后执行成功 15 行"
+    ]
+  },
+
+  "3_e0099_execution_path": {
+    "source": "reports/eval/clean_baseline_v1_1/eval_clean_baseline_v1_1.json",
+    "trace": [
+      {"node": "schema_link", "status": "success", "duration_ms": 8107.3},
+      {"node": "fewshot_retrieve", "status": "success", "duration_ms": 0.2},
+      {"node": "sql_generate", "status": "success", "duration_ms": 9394.6},
+      {"node": "sql_safety", "status": "success", "duration_ms": 3.4, "note": "别名错误在此完全无法被发现"},
+      {"node": "sql_execute", "status": "error", "duration_ms": 4.2, "message": "SQL 执行失败: no such column: r.region"},
+      {"node": "sql_repair", "status": "error", "duration_ms": 8283.2, "message": "Repair SQL 引用了不存在的字段: rs.region"},
+      {"node": "sql_execute_repaired", "status": "skipped", "duration_ms": 0.0},
+      {"node": "result", "status": "success", "duration_ms": 0.0}
+    ],
+    "gold_sql_baseline_confusion": {
+      "no_such_column_failures_in_baseline": ["E-0099"],
+      "sql_execute_error_count": 1
+    }
+  },
+
+  "4_implementation": {
+    "new_module": "backend/app/sqlcheck/scope_validator.py",
+    "new_module_api": "check_sql_scope(sql: str) -> ScopeCheckResult",
+    "placement_rationale": "复用既有 sqlcheck 包（已有 fanout_detector.py，契约一致：只读 AST / 非干预 / 无 LLM 依赖）",
+    "visibility_rule": "带限定符的列引用 q.col 合法，当且仅当 q 出现在该查询块自身或其任意外层祖先查询块的 FROM/JOIN 数据源中（含 CTE 名）",
+    "why_ancestor_walk_required": "相关子查询合法引用外层别名；朴素只看本查询块 sources 会在 100 题 gold 上产生 3 处误报（E-0060/E-0087/E-0095）",
+    "modified_files": [
+      {"file": "backend/app/sqlexec/errors.py", "change": "新增 SQLExecutionScopeError(SQLExecutionDatabaseError)", "diff": "+16/-1"},
+      {"file": "backend/app/sqlexec/executor.py", "change": "Safety 之后、建连之前加 Scope 校验", "diff": "+18/-2"},
+      {"file": "backend/app/sqlrepair/validator.py", "change": "Repair 输出加同名校验（抛 SQLRepairSchemaError）", "diff": "+14/-2"}
+    ],
+    "net_change": "3 个已有文件 +43/-5，1 个新模块"
+  },
+
+  "5_verification": {
+    "confusion_matrix": {
+      "n": 100,
+      "true_positive": 1,
+      "false_positive": 0,
+      "false_negative": 0,
+      "true_negative": 99,
+      "hit_set": ["E-0099"],
+      "real_failure_set": ["E-0099"],
+      "hit_equals_real_failure": true
+    },
+    "gold_false_positives": {"value": "0/100", "threshold": 0, "verdict": "PASS"},
+    "pred_false_positives": {"value": 0, "threshold": 0, "verdict": "PASS"},
+    "pred_false_negatives": {"value": 0, "threshold": 0, "verdict": "PASS"},
+    "parse_failures": 0,
+    "legitimate_sql_regression": {
+      "cases_count": 15,
+      "all_passed": true,
+      "cases": [
+        "basic_alias", "table_name_qualifier", "unqualified_column", "joins",
+        "cte_reference", "cte_with_alias", "subquery_alias", "union",
+        "nested_subquery", "select_alias_in_order_by", "having",
+        "group_by_not_selected", "correlated_subquery_e0060",
+        "correlated_subquery_e0087", "correlated_subquery_e0095", "cross_join_cte"
+      ]
+    },
+    "tests": {
+      "task37_new": "33 passed",
+      "full_backend": "470 passed / 0 failed",
+      "duration_s": 25.77,
+      "composition": "437 (Task 36 结束时) + 33 (本次新增)",
+      "regressions": 0
+    },
+    "repair_routing": {
+      "route_database_repair_count_0": "repair",
+      "route_safety_repair_count_0": "result",
+      "scope_error_is_database_subclass": true,
+      "scope_error_is_safety_subclass": false,
+      "end_to_end_passed": true
+    }
+  },
+
+  "6_error_message_improvement": {
+    "before": "SQL 执行失败: no such column: r.region",
+    "after": "SQL 引用了未定义的表别名: 未定义的别名 r: r.region",
+    "actionability": "提升 —— 明确指出限定符 r 未定义，而非让 Repair 猜测"
+  },
+
+  "7_preexisting_defect_disclosure": {
+    "found": true,
+    "location": "backend/app/sqlrepair/validator.py::_check_spelled_columns",
+    "is_introduced_by_task37": false,
+    "independently_reproduced_against_git_head": true,
+    "description": "把 Column.table 直接当作真实表名送去 catalog 查列；catalog 只含真实表，故任何 CTE 别名限定符都被判为『字段不存在』",
+    "evidence": [
+      {"sql": "SELECT orders.region FROM orders", "result": "PASS"},
+      {"sql": "WITH t AS (...) SELECT rs.region FROM t rs", "result": "REJECT"},
+      {"sql": "WITH t AS (...) SELECT ps.region FROM t ps", "result": "REJECT"}
+    ],
+    "impact_on_task37_goal": {
+      "can_accurately_diagnose_e0099": true,
+      "can_make_such_repair_succeed": false,
+      "reason": "修复后的 CTE SQL 仍被该既有缺陷拒绝"
+    },
+    "not_fixed_because": "修它会改变 Repair 的接受行为，违反单变量确定性校验纪律",
+    "guarded_by_test": "test_baseline_spelled_column_check_rejects_cte_alias",
+    "recommended_followup": "让 _check_spelled_columns 区分『真实表名』与『别名/CTE 名』，仅对前者做 catalog 查列"
+  },
+
+  "8_change_boundary_compliance": {
+    "benchmark_gold_sql": "UNCHANGED (sha256 dba277cc…)",
+    "benchmark_questions": "UNCHANGED",
+    "evaluation_normalization": "UNCHANGED",
+    "evaluation_metrics": "UNCHANGED",
+    "baseline_data": "UNCHANGED",
+    "fewshot_data": "UNCHANGED (sha256 3c8dc8ea…)",
+    "prompt_v1_3": "UNCHANGED (sha256 31244e61…)",
+    "schema_linking_algorithm": "UNCHANGED",
+    "repair_prompt": "UNCHANGED",
+    "agent_main_flow_unrelated_logic": "UNCHANGED",
+    "provider_config": "UNCHANGED",
+    "mimo_api_key": "UNCHANGED",
+    "database_schema": "UNCHANGED",
+    "database_data": "UNCHANGED (sha256 65e5d8b2…)",
+    "prompt_rewrite": "NOT_DONE",
+    "fewshot_expansion": "NOT_DONE",
+    "new_llm_calls": "NONE",
+    "automatic_sql_rewrite": "NOT_DONE",
+    "ast_forced_rewrite": "NOT_DONE"
+  },
+
+  "9_artifact_hashes": {
+    "backend/app/sqlcheck/scope_validator.py": "ed3bcd6532ff11560dc0e92b7a9e6bc6e45476e8abfb12227debf45d399b1ddd",
+    "backend/app/sqlexec/errors.py": "904199edce69c74fe2007da38286346e0fc8598ac9cc2ffe73936c0e67e642b9",
+    "backend/app/sqlexec/executor.py": "56886c8a6cd37aac85f4583663898c50e8ec2d20262e3cf8a845e34488621104",
+    "backend/app/sqlrepair/validator.py": "c30bfd97230bf6fea76b3fabf7b70a8cf4e1409a96fedb4b83bcd35b9368fe69",
+    "backend/tests/test_task37_sql_scope.py": "ad99131e19ba713935b168af5edee374636aede41594c9f08b8517c38a662fca",
+    "scripts/task37_scope_impact_check.py": "fe735cbc57fcefe9fc8562dada6ca430b02712e62fea9e9e0f10366a1c2842f3",
+    "scripts/task37_repair_routing_check.py": "5b56bc5d3563014b9471655f8bc43a544c01bcabe67e3dc1fb3d010a1227ee57"
+  },
+
+  "10_limitations": [
+    "只处理『带限定符的列引用指向未定义别名』；裸列名多义性/拼写错误/语义错误不在范围",
+    "未做真实端到端评测；效果以确定性混淆矩阵呈现（TP=1/FP=0/FN=0）",
+    "不宣称任何准确率或延迟提升",
+    "『提前发现』不等于『修复成功』——Repair 仍受既有缺陷阻塞（见 §7）",
+    "未做受控性能测量，不给出性能数字"
+  ],
+
+  "11_conclusion": {
+    "audit": "COMPLETE",
+    "implementation": "1 新模块 + 3 接入点",
+    "gold_false_positive": "0/100",
+    "e0099_detected": "YES",
+    "pred_fp_fn": "0 / 0",
+    "full_test": "470 passed / 0 failed",
+    "repair_routing": "BEHAVIOR_UNCHANGED",
+    "change_boundary": "FULLY_COMPLIANT",
+    "llm_calls": 0
+  },
+
+  "final_output": {
+    "task": "Task 37",
+    "status": "TASK_37_COMPLETE"
+  }
+}

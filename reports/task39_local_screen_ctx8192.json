@@ -1,0 +1,38 @@
+{
+  "base_url": "http://127.0.0.1:11435/v1",
+  "screen_item": "E-0001",
+  "screen_protocol": "真实流水线 prompt 试跑；必须完成 Schema Linking 且产出通过输出契约的 SQL",
+  "candidates_provider_order": [
+    "medical-expert:latest",
+    "qwen3-vl:4b",
+    "qwen3.5:9b",
+    "qwen3.5-4b:latest",
+    "tipdm_qwen:latest",
+    "qwen3-0.6b:latest",
+    "qwen7b-opt:latest",
+    "qwen2.5:7b-instruct"
+  ],
+  "results": [
+    {
+      "model": "medical-expert:latest",
+      "callable": false,
+      "e2e_ms": 52756,
+      "provider_calls": 2,
+      "sql_len": 0,
+      "error_type": "SQLGenOutputInvalidError",
+      "final_error": "SQLGenOutputInvalidError: tables 必须是字符串数组",
+      "exec_success": false
+    },
+    {
+      "model": "qwen3-vl:4b",
+      "callable": true,
+      "e2e_ms": 232687,
+      "provider_calls": 2,
+      "sql_len": 41,
+      "error_type": "",
+      "final_error": "",
+      "exec_success": true
+    }
+  ],
+  "first_callable": "qwen3-vl:4b"
+}

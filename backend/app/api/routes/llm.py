@@ -7,7 +7,10 @@ POST /api/llm/test
 错误状态码约定（保持一致）：
 - LLMApiKeyNotConfiguredError（Key 未配置）          -> 503
 - LLMProviderNotConfiguredError（Provider 配置有误） -> 503
-- LLMAuthenticationError（上游 401/403）             -> 502
+- LLMAuthenticationError（上游 401/403 认证失败）    -> 502
+- LLMQuotaError（上游 403 + AllocationQuota.*，      -> 503
+  免费额度 / 配额分配耗尽；Key 有效，与认证失败严格区分，
+  文案附带上游结构化错误码，不吞掉原始错误信息）
 - LLMInsufficientBalanceError（上游 402 余额不足）    -> 503
 - LLMRateLimitError（上游 429）                      -> 503
 - LLMServiceUnavailableError（上游 5xx 等）          -> 503
@@ -29,10 +32,12 @@ from app.llm.provider import (
     LLMInsufficientBalanceError,
     LLMNetworkError,
     LLMProviderNotConfiguredError,
+    LLMQuotaError,
     LLMRateLimitError,
     LLMServiceUnavailableError,
     LLMTimeoutError,
     get_llm_provider,
+    provider_error_code_of,
 )
 from app.schemas.llm import LlmTestRequest, LlmTestResponse
 
@@ -50,6 +55,10 @@ _LLM_FAILURES: dict[type[LLMError], tuple[int, str]] = {
     LLMApiKeyNotConfiguredError: (503, "Mimo API key is not configured"),
     LLMProviderNotConfiguredError: (503, "LLM provider is not configured"),
     LLMAuthenticationError: (502, "Mimo authentication failed"),
+    LLMQuotaError: (
+        503,
+        "Provider quota / allocation exhausted (free tier)",
+    ),
     LLMInsufficientBalanceError: (503, "Mimo insufficient account balance"),
     LLMRateLimitError: (503, "Mimo rate limited"),
     LLMServiceUnavailableError: (503, "Mimo service unavailable"),
@@ -59,10 +68,21 @@ _LLM_FAILURES: dict[type[LLMError], tuple[int, str]] = {
 
 
 def _map_failure(exc: LLMError) -> tuple[int, str]:
-    """按异常类型（含继承链）映射为固定状态码与客户端文案。"""
+    """按异常类型（含继承链）映射为固定状态码与客户端文案。
+
+    配额类错误额外附加上游结构化错误码（如 ``AllocationQuota.FreeTierOnly``）：
+    该码在 Provider 层已经正则白名单校验（仅字母/数字/下划线/点），
+    不含任何凭据或响应体原文，可以安全透出 —— 让用户看到的是
+    「额度 / 配额耗尽」而不是「Key 无效」，同时不吞掉原始错误信息。
+    """
     for cls in type(exc).__mro__:
         if cls in _LLM_FAILURES:
-            return _LLM_FAILURES[cls]
+            status_code, message = _LLM_FAILURES[cls]
+            if cls is LLMQuotaError:
+                code = provider_error_code_of(exc)
+                if code:
+                    return status_code, f"{message} [{code}]"
+            return status_code, message
     return 503, "Mimo request failed"
 
 

@@ -5,7 +5,9 @@
 2. repaired_sql 必须再次通过 app.sqlgen.safety.check_sql_safety
    （安全/结构，与首次执行同一道闸）；
 3. 引用表 ⊆ Schema Linking 提供的表（sqlglot 提取，CTE 名剔除）；
-4. 有表前缀的列引用必须真实存在（无前缀列由第二次执行兜底）。
+4. 未定义表别名 / 列限定符检查（Task 37，复用 app.sqlcheck.scope_validator）：
+   Repair 若继续引用不存在的别名，必须在执行前拒绝；
+5. 有表前缀的列引用必须真实存在（无前缀列由第二次执行兜底）。
 
 与 Task 5 复用同一套 safety / SchemaCatalog，不重写。
 """
@@ -13,9 +15,11 @@
 import json
 import re
 
+import sqlglot
 from sqlglot import exp
 
 from app.schema.metadata import SchemaCatalog
+from app.sqlcheck.scope_validator import check_sql_scope
 from app.sqlgen.errors import SQLUnsafeError
 from app.sqlgen.safety import check_sql_safety, extract_referenced_tables
 from app.sqlrepair.errors import (
@@ -88,7 +92,13 @@ def validate_repair_output(
             "Repair SQL 引用了 Schema Linking 未提供的表: "
             + ", ".join(sorted(unexpected))
         )
-    import sqlglot
+
+    # 未定义别名检查（Task 37）：Repair 不得继续引用不存在的限定符
+    scope_result = check_sql_scope(repaired_sql)
+    if not scope_result.ok:
+        raise SQLRepairSchemaError(
+            "Repair SQL 引用了未定义的表别名: " + ", ".join(scope_result.messages)
+        )
 
     statement = sqlglot.parse_one(repaired_sql, read="sqlite")
     _check_spelled_columns(statement, catalog)

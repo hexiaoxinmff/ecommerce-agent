@@ -70,7 +70,21 @@ def build_repair_prompt(
     columns: list[str],
     catalog: SchemaCatalog,
     fewshot_text: str,
+    *,
+    business_rules: str | None = None,
+    appendix_rules: str | None = None,
 ) -> str:
+    """构建 Repair Prompt。
+
+    Phase 13（跨数据库适配）：business_rules 允许由 Database Profile 注入
+    当前数据库的业务口径；缺省 None = 本模块常量（冻结基线不变）。
+
+    Phase 15（P0-1）：appendix_rules 为运行时附录（数据时效契约），修复
+    涉及日期窗口时与生成 Prompt 共享同一时间锚点；缺省 None = 不追加
+    （冻结基线不变）。
+    """
+    rules = business_rules if business_rules is not None else BUSINESS_RULES
+    appendix = f"{appendix_rules}\n" if appendix_rules else ""
     return (
         f"【用户问题】{question}\n\n"
         f"【原始 SQL】\n{request_sql}\n\n"
@@ -78,7 +92,8 @@ def build_repair_prompt(
         f"【Schema Linking 结果】\n{format_schema_linking(tables, columns)}\n\n"
         f"【当前真实 Schema（只可使用这些表与字段）】\n{catalog.to_prompt_text()}\n\n"
         f"【Few-shot 参考】\n{fewshot_text}\n\n"
-        f"{BUSINESS_RULES}\n"
+        f"{rules}\n"
+        f"{appendix}"
         f"{_REPAIR_PRINCIPLE}\n"
         f"{_CONSTRAINTS}\n"
         '【输出】严格 JSON：{"repaired_sql": "...", "repair_reason": "..."}\n'

@@ -1,0 +1,893 @@
+{
+  "meta": {
+    "run_id": "20260927_24942",
+    "timestamp": "2026-09-27T06:55:42Z",
+    "dataset_version": "1.1",
+    "database_version": "dev-2026-09-14",
+    "schema_version": "1.0",
+    "seed": 20260914,
+    "model": "qwen3.7-flash-2026-07-15",
+    "provider": "bailian",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "prompt_version": "",
+    "fewshot_version": "",
+    "experiment": "",
+    "randomness": "provider API controlled randomness unavailable",
+    "mode": "subset",
+    "per_item_timeout_s": 60.0,
+    "total_items": 10,
+    "prompt_sha256": "10583478b3a7d972865050501cd6e4b9062531503f1c3852cdd79cbf66f796d5",
+    "fewshot_sha256": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee",
+    "fewshot_path": "F:\\基于 Text2SQL 的电商智能数据分析 Agent\\data\\fewshot\\ecommerce_examples.json",
+    "dataset_sha256": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a",
+    "db_table_counts": "{\"users\": 2000, \"categories\": 30, \"products\": 500, \"orders\": 10000, \"order_items\": 30457}"
+  },
+  "summary": {
+    "run_id": "20260927_24942",
+    "timestamp": "2026-09-27T06:55:42Z",
+    "total": 10,
+    "valid_model_runs": 0,
+    "provider_failures": 10,
+    "timeouts": 0,
+    "exec_rate": 0.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "final_ex": 0.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "avg_latency_ms": 223.23,
+    "p50_latency_ms": 132.07,
+    "p95_latency_ms": 1008.75
+  },
+  "results": [
+    {
+      "eval_id": "E-0001",
+      "question": "平台上一共有多少用户？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT COUNT(*) AS user_count FROM users",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMQuotaError",
+      "latency_ms": 1008.75,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 1002.3017999999411,
+          "message": "Bailian provider quota exhausted (free tier allocation)",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0008999998044600943,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0002",
+      "question": "广东省有多少用户？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE region = '广东'",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMQuotaError",
+      "latency_ms": 119.19,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 116.3970000000063,
+          "message": "Bailian provider quota exhausted (free tier allocation)",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0010000001111620804,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0003",
+      "question": "平台有多少活跃用户？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE status = 'active'",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMQuotaError",
+      "latency_ms": 116.41,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 113.8312999999016,
+          "message": "Bailian provider quota exhausted (free tier allocation)",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0007999999525054591,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0004",
+      "question": "2023年注册的用户有多少？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where",
+        "date_filter"
+      ],
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE register_date >= '2023-01-01' AND register_date <= '2023-12-31'",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMQuotaError",
+      "latency_ms": 132.07,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 129.79189999987284,
+          "message": "Bailian provider quota exhausted (free tier allocation)",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0006000000212225132,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0005",
+      "question": "注册时间最早的3位用户是哪些？（请给出用户名和注册日期）",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "order_by",
+        "limit",
+        "top_n"
+      ],
+      "gold_sql": "SELECT username, register_date FROM users ORDER BY register_date ASC LIMIT 3",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMQuotaError",
+      "latency_ms": 199.99,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 197.32140000019172,
+          "message": "Bailian provider quota exhausted (free tier allocation)",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0006000000212225132,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0006",
+      "question": "北京和上海两个地区的用户一共有多少？",
+      "difficulty": "easy",
+      "scenario": "user_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "gold_sql": "SELECT COUNT(*) FROM users WHERE region IN ('北京', '上海')",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMQuotaError",
+      "latency_ms": 133.12,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 131.0504000000492,
+          "message": "Bailian provider quota exhausted (free tier allocation)",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0007000001005508238,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0007",
+      "question": "平台上一共有多少商品？",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT COUNT(*) AS product_count FROM products",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMQuotaError",
+      "latency_ms": 127.38,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 125.35170000001017,
+          "message": "Bailian provider quota exhausted (free tier allocation)",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0006000000212225132,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0008",
+      "question": "所有商品的平均售价是多少？",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT ROUND(AVG(price), 2) AS avg_price FROM products",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMQuotaError",
+      "latency_ms": 157.03,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 154.79600000003302,
+          "message": "Bailian provider quota exhausted (free tier allocation)",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0006000000212225132,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0009",
+      "question": "售价最高的商品价格是多少？",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate"
+      ],
+      "gold_sql": "SELECT MAX(price) FROM products",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMQuotaError",
+      "latency_ms": 121.96,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 119.61180000002969,
+          "message": "Bailian provider quota exhausted (free tier allocation)",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0006000000212225132,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    },
+    {
+      "eval_id": "E-0010",
+      "question": "在售商品中售价最低的是多少？",
+      "difficulty": "easy",
+      "scenario": "product_analysis",
+      "operators": [
+        "aggregate",
+        "where"
+      ],
+      "gold_sql": "SELECT MIN(price) FROM products WHERE status = 'on_sale'",
+      "pred_sql": "",
+      "initial_sql": "",
+      "final_sql": "",
+      "exec_success": false,
+      "exact_match": false,
+      "execution_accuracy": false,
+      "repair_triggered": false,
+      "repair_count": 0,
+      "repair_success": false,
+      "failure_stage": "provider",
+      "error_type": "LLMQuotaError",
+      "latency_ms": 116.39,
+      "valid_model_run": false,
+      "trace_summary": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+      "trace": [
+        {
+          "node": "schema_link",
+          "status": "error",
+          "duration_ms": 114.28730000011456,
+          "message": "Bailian provider quota exhausted (free tier allocation)",
+          "output_summary": {}
+        },
+        {
+          "node": "fewshot_retrieve",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_generate",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_safety",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（Agent 已失败终止）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（SQL Safety 未通过）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_repair",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（无需修复）",
+          "output_summary": {}
+        },
+        {
+          "node": "sql_execute_repaired",
+          "status": "skipped",
+          "duration_ms": 0.0,
+          "message": "未执行（未进入 Repair）",
+          "output_summary": {}
+        },
+        {
+          "node": "result",
+          "status": "success",
+          "duration_ms": 0.0007000001005508238,
+          "message": "",
+          "output_summary": {
+            "success": false
+          }
+        }
+      ]
+    }
+  ]
+}

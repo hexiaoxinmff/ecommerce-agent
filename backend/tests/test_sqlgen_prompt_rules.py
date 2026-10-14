@@ -68,7 +68,10 @@ def test_multiple_extras(monkeypatch):
 
 
 def test_unknown_flag_ignored(monkeypatch):
-    p = _prompt(monkeypatch, "E9")
+    # Task 44：原用例用 "E9" 当「未知 flag」，但 E9 在 Task 44 中已成为真实 flag
+    # （条件性语义契约）。继续用 E9 会让本用例名不副实（它只是「已知 flag 不注入
+    # 无条件规则段」而非「未知 flag 被忽略」），因此改用真正未定义的 E999。
+    p = _prompt(monkeypatch, "E999")
     assert "输出列契约" not in p
 
 

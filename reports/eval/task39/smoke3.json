@@ -1,0 +1,123 @@
+{
+  "meta": {
+    "task": "Task 36 — E2E Benchmark",
+    "script": "scripts/task36_e2e_benchmark.py",
+    "generated_at": "2026-09-20T11:00:53.809285+00:00",
+    "frozen_dataset": "data/eval/ecommerce_eval_v1.json",
+    "item_count": 3,
+    "item_ids": [
+      "E-0001",
+      "E-0002",
+      "E-0003"
+    ],
+    "fixed_config": {
+      "model": "mimo-v2.5-pro",
+      "configured_model": "mimo-v2.5-pro",
+      "temperature": 0.0,
+      "timeout_s": 60.0,
+      "sdk_max_retries": 0,
+      "provider": "mimo",
+      "endpoint_identifier": "https://api.xiaomimimo.com",
+      "api_key_recorded": false
+    },
+    "latency_definitions": {
+      "provider_latency_ms": "LLMProvider.generate 累计墙钟耗时（可能含多次调用）",
+      "agent_non_llm_latency_ms": "total_latency_ms - provider_latency_ms",
+      "total_e2e_latency_ms": "run_agent() 端到端墙钟耗时（不含进程/图编译预热）"
+    }
+  },
+  "mode": "PARTIAL",
+  "classification": {
+    "mode": "PARTIAL",
+    "reason": "0/3 items succeeded; failures are not a single provider cause"
+  },
+  "rows": [
+    {
+      "eval_id": "E-0001",
+      "start_time": "2026-09-20T11:00:59.157299+00:00",
+      "end_time": "2026-09-20T11:01:05.057749+00:00",
+      "total_latency_ms": 5900.02,
+      "provider_latency_ms": 5846.78,
+      "success": false,
+      "exception_class": "LLMServiceUnavailableError",
+      "http_status": null,
+      "upstream_http_status": null,
+      "sql_success": false,
+      "repair_triggered": false,
+      "error_type": "LLMServiceUnavailableError",
+      "final_error": "Mimo request failed",
+      "provider_calls": 1,
+      "agent_non_llm_latency_ms": 53.23
+    },
+    {
+      "eval_id": "E-0002",
+      "start_time": "2026-09-20T11:01:05.057749+00:00",
+      "end_time": "2026-09-20T11:01:05.695467+00:00",
+      "total_latency_ms": 637.6,
+      "provider_latency_ms": 629.52,
+      "success": false,
+      "exception_class": "LLMServiceUnavailableError",
+      "http_status": null,
+      "upstream_http_status": null,
+      "sql_success": false,
+      "repair_triggered": false,
+      "error_type": "LLMServiceUnavailableError",
+      "final_error": "Mimo request failed",
+      "provider_calls": 1,
+      "agent_non_llm_latency_ms": 8.09
+    },
+    {
+      "eval_id": "E-0003",
+      "start_time": "2026-09-20T11:01:05.695467+00:00",
+      "end_time": "2026-09-20T11:01:06.242511+00:00",
+      "total_latency_ms": 547.46,
+      "provider_latency_ms": 539.62,
+      "success": false,
+      "exception_class": "LLMServiceUnavailableError",
+      "http_status": null,
+      "upstream_http_status": null,
+      "sql_success": false,
+      "repair_triggered": false,
+      "error_type": "LLMServiceUnavailableError",
+      "final_error": "Mimo request failed",
+      "provider_calls": 1,
+      "agent_non_llm_latency_ms": 7.83
+    }
+  ],
+  "summary": {
+    "total_e2e_latency_ms": {
+      "count": 3,
+      "mean": 2361.69,
+      "median": 637.6,
+      "p50": 637.6,
+      "p95": 5900.02,
+      "min": 547.46,
+      "max": 5900.02
+    },
+    "provider_latency_ms": {
+      "count": 0,
+      "mean": null,
+      "median": null,
+      "p50": null,
+      "p95": null,
+      "min": null,
+      "max": null
+    },
+    "agent_non_llm_latency_ms": {
+      "count": 0,
+      "mean": null,
+      "median": null,
+      "p50": null,
+      "p95": null,
+      "min": null,
+      "max": null
+    },
+    "success_count": 0,
+    "failure_count": 3,
+    "provider_calls_total": 3,
+    "classification": {
+      "mode": "PARTIAL",
+      "reason": "0/3 items succeeded; failures are not a single provider cause"
+    }
+  }
+}

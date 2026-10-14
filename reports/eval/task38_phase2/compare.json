@@ -1,0 +1,40 @@
+{
+  "target": "E-0057",
+  "single_variable": "SQLGEN_EXTRA_RULES=E8 (条件性统计实体/驱动表约束)",
+  "off": {
+    "n": 100,
+    "ex": 90.0,
+    "exec": 99.0,
+    "latency": {
+      "mean": 10876.08,
+      "p50": 10488.92,
+      "p95": 15440.79
+    },
+    "provider_failures": 0,
+    "target_ex": false
+  },
+  "on": {
+    "n": 100,
+    "ex": 93.0,
+    "exec": 100.0,
+    "latency": {
+      "mean": 7296.5,
+      "p50": 6348.87,
+      "p95": 14280.91
+    },
+    "provider_failures": 0,
+    "target_ex": true
+  },
+  "new_fixes": [
+    "E-0057",
+    "E-0099",
+    "E-0100"
+  ],
+  "regressions": [],
+  "gate": {
+    "target_flipped_fail_to_pass": true,
+    "no_new_regressions": true,
+    "exec_not_decreased": true,
+    "provider_failure_delta": 0
+  }
+}

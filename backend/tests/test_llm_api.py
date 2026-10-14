@@ -18,6 +18,7 @@ from app.core import config
 from app.llm.mimo import MimoProvider
 from app.llm.provider import (
     LLMAuthenticationError,
+    LLMQuotaError,
     LLMTimeoutError,
 )
 
@@ -112,6 +113,45 @@ def test_provider_authentication_error_returns_502(
     data = response.json()
     assert data["success"] is False
     assert data["error"] == "Mimo authentication failed"
+
+
+def test_provider_quota_error_returns_quota_text_not_auth(
+    client: TestClient, monkeypatch
+) -> None:
+    """Phase 4：AllocationQuota.FreeTierOnly 必须报「配额耗尽」而非认证失败。"""
+    _mock_provider(
+        monkeypatch,
+        _FakeProvider(
+            error=LLMQuotaError(
+                "Bailian provider quota exhausted (free tier allocation)",
+                http_status=403,
+                provider_error_code="AllocationQuota.FreeTierOnly",
+            )
+        ),
+    )
+    response = client.post("/api/llm/test", json={"prompt": "你好"})
+    assert response.status_code == 503
+    data = response.json()
+    assert data["success"] is False
+    assert data["error"] == (
+        "Provider quota / allocation exhausted (free tier) "
+        "[AllocationQuota.FreeTierOnly]"
+    )
+    # 绝不能让用户误以为 Key 无效
+    assert "authentication" not in data["error"].lower()
+
+
+def test_provider_quota_error_without_code_still_quota_text(
+    client: TestClient, monkeypatch
+) -> None:
+    """配额异常未携带错误码时：文案保持固定映射，不附加空括号。"""
+    _mock_provider(monkeypatch, _FakeProvider(error=LLMQuotaError("quota")))
+    response = client.post("/api/llm/test", json={"prompt": "你好"})
+    assert response.status_code == 503
+    assert (
+        response.json()["error"]
+        == "Provider quota / allocation exhausted (free tier)"
+    )
 
 
 def test_secret_never_leaks_through_real_provider_chain(

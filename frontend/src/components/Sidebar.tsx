@@ -1,6 +1,6 @@
 import { IconChart, IconDatabase, IconHistory, IconHome, IconSettings, IconSpark } from "./Icons";
 
-export type PageKey = "home" | "analysis" | "datasets" | "history" | "settings";
+export type PageKey = "home" | "analysis" | "datasets" | "history" | "settings" | "login";
 
 export const NAV_ITEMS: { key: PageKey; label: string; icon: React.ReactNode; hint: string }[] = [
   { key: "home", label: "首页", icon: <IconHome />, hint: "首页：数据概览与快速提问" },

@@ -1,4 +1,4 @@
-import { exampleQuestions } from "../data/demo";
+import { exampleQuestions } from "../data/uiCopy";
 import { IconSpark } from "./Icons";
 
 type HeroProps = {

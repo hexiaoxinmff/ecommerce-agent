@@ -148,7 +148,7 @@ function StageDetail({
     case 6:
       return (
         <div className="wf-detail fade-in">
-          <span className="wf-done-text">Agent 流程执行完毕，见右侧结果区</span>
+          <span className="wf-done-text">Agent 流程执行完毕，结果见上方结果区</span>
         </div>
       );
     default:

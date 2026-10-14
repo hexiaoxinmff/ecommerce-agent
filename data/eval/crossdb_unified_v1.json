@@ -1,0 +1,272 @@
+{
+  "name": "crossdb_unified_v1",
+  "version": "1.0",
+  "description": "Phase 13 跨数据库迁移验证统一问题集：同一组 24 个业务问题在 Database A（ecommerce.db）与 Database B（ecommerce_v2.db）上运行。gold_sql_a / gold_sql_b 分别为两库的 Gold SQL，语义等价但表名/字段名/口径不同。",
+  "categories": ["count", "filter", "topk", "join", "time", "metric", "agg"],
+  "items": [
+    {
+      "id": "X-001",
+      "question": "数据库里目前一共有多少个用户？",
+      "category": "count",
+      "difficulty": "easy",
+      "scenario": "total_user_count",
+      "operators": ["COUNT"],
+      "gold_sql_a": "SELECT COUNT(*) FROM users",
+      "gold_sql_b": "SELECT COUNT(*) FROM members",
+      "answer_slots": {"value_type": "", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-002",
+      "question": "当前在售商品有多少个？",
+      "category": "filter",
+      "difficulty": "easy",
+      "scenario": "on_sale_item_count",
+      "operators": ["COUNT", "WHERE"],
+      "gold_sql_a": "SELECT COUNT(*) FROM products WHERE status = 'on_sale'",
+      "gold_sql_b": "SELECT COUNT(*) FROM items WHERE availability = 'in_stock'",
+      "answer_slots": {"value_type": "", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-003",
+      "question": "活跃用户有多少个？",
+      "category": "filter",
+      "difficulty": "easy",
+      "scenario": "active_user_count",
+      "operators": ["COUNT", "WHERE"],
+      "gold_sql_a": "SELECT COUNT(*) FROM users WHERE status = 'active'",
+      "gold_sql_b": "SELECT COUNT(*) FROM members WHERE is_active = 1",
+      "answer_slots": {"value_type": "", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-004",
+      "question": "价格最高的10个商品的名称和售价是什么？",
+      "category": "topk",
+      "difficulty": "easy",
+      "scenario": "top_priced_products",
+      "operators": ["ORDER BY", "LIMIT"],
+      "gold_sql_a": "SELECT name, price FROM products ORDER BY price DESC LIMIT 10",
+      "gold_sql_b": "SELECT item_title, list_price FROM items ORDER BY list_price DESC LIMIT 10",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-005",
+      "question": "2026年8月的订单有多少笔？",
+      "category": "time",
+      "difficulty": "medium",
+      "scenario": "monthly_order_count",
+      "operators": ["COUNT", "时间条件"],
+      "gold_sql_a": "SELECT COUNT(*) FROM orders WHERE order_date >= '2026-08-01' AND order_date < '2026-09-01'",
+      "gold_sql_b": "SELECT COUNT(*) FROM sales_orders WHERE placed_on >= '2026-08-01' AND placed_on < '2026-09-01'",
+      "answer_slots": {"value_type": "", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-006",
+      "question": "平台总销售额是多少？（排除取消订单）",
+      "category": "metric",
+      "difficulty": "medium",
+      "scenario": "total_sales_amount",
+      "operators": ["SUM", "JOIN", "业务口径"],
+      "gold_sql_a": "SELECT ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled'",
+      "gold_sql_b": "SELECT ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id WHERE so.order_state != 'voided'",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-007",
+      "question": "销售额最高的5个商品的名称和销售额是什么？（排除取消订单）",
+      "category": "topk",
+      "difficulty": "hard",
+      "scenario": "product_sales_ranking",
+      "operators": ["SUM", "JOIN", "GROUP BY", "业务口径"],
+      "gold_sql_a": "SELECT p.name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id WHERE o.status != 'cancelled' GROUP BY p.id ORDER BY total_sales DESC LIMIT 5",
+      "gold_sql_b": "SELECT i.item_title, ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id JOIN items i ON i.id = ol.item_id WHERE so.order_state != 'voided' GROUP BY i.id ORDER BY total_sales DESC LIMIT 5",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-008",
+      "question": "各类目的销售额排名是多少？（排除取消订单）",
+      "category": "join",
+      "difficulty": "medium",
+      "scenario": "category_sales_ranking",
+      "operators": ["SUM", "JOIN", "GROUP BY", "业务口径"],
+      "gold_sql_a": "SELECT c.name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY c.id ORDER BY total_sales DESC",
+      "gold_sql_b": "SELECT d.dept_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM departments d JOIN items i ON i.dept_id = d.id JOIN order_lines ol ON ol.item_id = i.id JOIN sales_orders so ON so.id = ol.sales_order_id WHERE so.order_state != 'voided' GROUP BY d.id ORDER BY total_sales DESC",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-009",
+      "question": "各地区的销售额分别是多少？（排除取消订单）",
+      "category": "join",
+      "difficulty": "medium",
+      "scenario": "region_sales_ranking",
+      "operators": ["SUM", "JOIN", "GROUP BY", "业务口径"],
+      "gold_sql_a": "SELECT o.region, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY o.region ORDER BY total_sales DESC",
+      "gold_sql_b": "SELECT m.city, ROUND(SUM(ol.line_total), 2) AS total_sales FROM sales_orders so JOIN members m ON m.id = so.member_id JOIN order_lines ol ON ol.sales_order_id = so.id WHERE so.order_state != 'voided' GROUP BY m.city ORDER BY total_sales DESC",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-010",
+      "question": "销售额最高的地区是哪个？（排除取消订单，输出地区与销售额）",
+      "category": "topk",
+      "difficulty": "medium",
+      "scenario": "top_region_sales",
+      "operators": ["SUM", "JOIN", "GROUP BY", "业务口径"],
+      "gold_sql_a": "SELECT o.region, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY o.region ORDER BY total_sales DESC LIMIT 1",
+      "gold_sql_b": "SELECT m.city, ROUND(SUM(ol.line_total), 2) AS total_sales FROM sales_orders so JOIN members m ON m.id = so.member_id JOIN order_lines ol ON ol.sales_order_id = so.id WHERE so.order_state != 'voided' GROUP BY m.city ORDER BY total_sales DESC LIMIT 1",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-011",
+      "question": "客单价是多少？（排除取消订单，按订单实付金额平均）",
+      "category": "metric",
+      "difficulty": "medium",
+      "scenario": "average_order_amount",
+      "operators": ["AVG", "业务口径"],
+      "gold_sql_a": "SELECT ROUND(AVG(total_amount), 2) AS avg_order_amount FROM orders WHERE status != 'cancelled'",
+      "gold_sql_b": "SELECT ROUND(AVG(payment_due), 2) AS avg_order_amount FROM sales_orders WHERE order_state != 'voided'",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-012",
+      "question": "总订单数是多少？",
+      "category": "count",
+      "difficulty": "easy",
+      "scenario": "total_order_count",
+      "operators": ["COUNT", "业务口径"],
+      "gold_sql_a": "SELECT COUNT(*) FROM orders",
+      "gold_sql_b": "SELECT COUNT(*) FROM sales_orders",
+      "answer_slots": {"value_type": "", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-013",
+      "question": "累计消费金额最高的3名用户的用户名和消费金额是什么？（排除取消订单，按实付金额）",
+      "category": "topk",
+      "difficulty": "hard",
+      "scenario": "top_customer_sales",
+      "operators": ["SUM", "JOIN", "GROUP BY", "业务口径"],
+      "gold_sql_a": "SELECT u.username, ROUND(SUM(o.total_amount), 2) AS total_spent FROM users u JOIN orders o ON o.user_id = u.id WHERE o.status != 'cancelled' GROUP BY u.id ORDER BY total_spent DESC LIMIT 3",
+      "gold_sql_b": "SELECT m.member_name, ROUND(SUM(so.payment_due), 2) AS total_spent FROM members m JOIN sales_orders so ON so.member_id = m.id WHERE so.order_state != 'voided' GROUP BY m.id ORDER BY total_spent DESC LIMIT 3",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-014",
+      "question": "每月销售额趋势是怎样的？（排除取消订单）",
+      "category": "time",
+      "difficulty": "medium",
+      "scenario": "monthly_sales_trend",
+      "operators": ["SUM", "JOIN", "GROUP BY", "时间条件", "业务口径"],
+      "gold_sql_a": "SELECT substr(o.order_date, 1, 7) AS month, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status != 'cancelled' GROUP BY month ORDER BY month",
+      "gold_sql_b": "SELECT substr(so.placed_on, 1, 7) AS month, ROUND(SUM(ol.line_total), 2) AS total_sales FROM sales_orders so JOIN order_lines ol ON ol.sales_order_id = so.id WHERE so.order_state != 'voided' GROUP BY month ORDER BY month",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-015",
+      "question": "每个类目下有多少个商品？",
+      "category": "join",
+      "difficulty": "medium",
+      "scenario": "category_product_count",
+      "operators": ["COUNT", "JOIN", "GROUP BY"],
+      "gold_sql_a": "SELECT c.name, COUNT(p.id) AS product_count FROM categories c LEFT JOIN products p ON p.category_id = c.id GROUP BY c.id",
+      "gold_sql_b": "SELECT d.dept_name, COUNT(i.id) AS item_count FROM departments d LEFT JOIN items i ON i.dept_id = d.id GROUP BY d.id",
+      "answer_slots": {"value_type": "", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-016",
+      "question": "各订单状态的数量分布是怎样的？",
+      "category": "count",
+      "difficulty": "medium",
+      "scenario": "order_status_breakdown",
+      "operators": ["COUNT", "GROUP BY"],
+      "gold_sql_a": "SELECT status, COUNT(*) AS order_count FROM orders GROUP BY status",
+      "gold_sql_b": "SELECT order_state, COUNT(*) AS order_count FROM sales_orders GROUP BY order_state",
+      "answer_slots": {"value_type": "", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-017",
+      "question": "2026年第二季度的销售额是多少？（排除取消订单）",
+      "category": "time",
+      "difficulty": "medium",
+      "scenario": "quarterly_sales_amount",
+      "operators": ["SUM", "JOIN", "时间条件", "业务口径"],
+      "gold_sql_a": "SELECT ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' AND o.order_date >= '2026-04-01' AND o.order_date < '2026-07-01'",
+      "gold_sql_b": "SELECT ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id WHERE so.order_state != 'voided' AND so.placed_on >= '2026-04-01' AND so.placed_on < '2026-07-01'",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-018",
+      "question": "商品的平均售价是多少？",
+      "category": "agg",
+      "difficulty": "easy",
+      "scenario": "avg_product_price",
+      "operators": ["AVG"],
+      "gold_sql_a": "SELECT ROUND(AVG(price), 2) AS avg_price FROM products",
+      "gold_sql_b": "SELECT ROUND(AVG(list_price), 2) AS avg_price FROM items",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-019",
+      "question": "非取消订单的平均优惠金额是多少？",
+      "category": "metric",
+      "difficulty": "medium",
+      "scenario": "avg_discount_amount",
+      "operators": ["AVG", "业务口径"],
+      "gold_sql_a": "SELECT ROUND(AVG(discount_amount), 2) AS avg_discount FROM orders WHERE status != 'cancelled'",
+      "gold_sql_b": "SELECT ROUND(AVG(coupon_deduction), 2) AS avg_discount FROM sales_orders WHERE order_state != 'voided'",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-020",
+      "question": "单条明细购买数量达到5件的订单明细有多少条？",
+      "category": "filter",
+      "difficulty": "medium",
+      "scenario": "bulk_line_count",
+      "operators": ["COUNT", "WHERE"],
+      "gold_sql_a": "SELECT COUNT(*) FROM order_items WHERE quantity >= 5",
+      "gold_sql_b": "SELECT COUNT(*) FROM order_lines WHERE qty >= 5",
+      "answer_slots": {"value_type": "", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-021",
+      "question": "从未下过单的用户有多少个？",
+      "category": "join",
+      "difficulty": "medium",
+      "scenario": "user_without_order_count",
+      "operators": ["COUNT", "JOIN", "反连接"],
+      "gold_sql_a": "SELECT COUNT(*) AS users_without_orders FROM users u WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.user_id = u.id)",
+      "gold_sql_b": "SELECT COUNT(*) AS members_without_orders FROM members m WHERE NOT EXISTS (SELECT 1 FROM sales_orders so WHERE so.member_id = m.id)",
+      "answer_slots": {"value_type": "", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-022",
+      "question": "销售额最高的类目名称是什么？（排除取消订单）",
+      "category": "join",
+      "difficulty": "medium",
+      "scenario": "top_category_sales",
+      "operators": ["SUM", "JOIN", "GROUP BY", "业务口径"],
+      "gold_sql_a": "SELECT c.name, ROUND(SUM(oi.subtotal), 2) AS total_sales FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' GROUP BY c.id ORDER BY total_sales DESC LIMIT 1",
+      "gold_sql_b": "SELECT d.dept_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM departments d JOIN items i ON i.dept_id = d.id JOIN order_lines ol ON ol.item_id = i.id JOIN sales_orders so ON so.id = ol.sales_order_id WHERE so.order_state != 'voided' GROUP BY d.id ORDER BY total_sales DESC LIMIT 1",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-023",
+      "question": "2026年9月上半月（9月1日至9月15日）的订单有多少笔？",
+      "category": "time",
+      "difficulty": "easy",
+      "scenario": "half_month_order_count",
+      "operators": ["COUNT", "时间条件"],
+      "gold_sql_a": "SELECT COUNT(*) FROM orders WHERE order_date >= '2026-09-01' AND order_date < '2026-09-16'",
+      "gold_sql_b": "SELECT COUNT(*) FROM sales_orders WHERE placed_on >= '2026-09-01' AND placed_on < '2026-09-16'",
+      "answer_slots": {"value_type": "", "tolerance": 0.0, "order_sensitive": false}
+    },
+    {
+      "id": "X-024",
+      "question": "全体用户的平均累计消费金额是多少？（排除取消订单，按实付金额，先按用户汇总再求平均）",
+      "category": "agg",
+      "difficulty": "hard",
+      "scenario": "avg_lifetime_spend",
+      "operators": ["AVG", "SUM", "GROUP BY", "两阶段聚合", "业务口径"],
+      "gold_sql_a": "SELECT ROUND(AVG(user_total), 2) AS avg_lifetime_spend FROM (SELECT SUM(o.total_amount) AS user_total FROM orders o WHERE o.status != 'cancelled' GROUP BY o.user_id)",
+      "gold_sql_b": "SELECT ROUND(AVG(member_total), 2) AS avg_lifetime_spend FROM (SELECT SUM(so.payment_due) AS member_total FROM sales_orders so WHERE so.order_state != 'voided' GROUP BY so.member_id)",
+      "answer_slots": {"value_type": "currency", "tolerance": 0.0, "order_sensitive": false}
+    }
+  ]
+}

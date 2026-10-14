@@ -29,8 +29,13 @@ class FewShotDatasetInvalidError(FewShotDatasetError):
     """数据集内容非法（JSON/缺字段/重复 id/表字段不存在等）。"""
 
 
+# load_dataset catalog 参数缺省哨兵：区分「未传」（按默认库复核）与
+# 「显式传 None」（跳过表/字段复核，仅用于迁移实验）。
+_DEFAULT_CATALOG = object()
+
+
 def _validate_example(
-    raw: dict, catalog: SchemaCatalog, seen_ids: set[str]
+    raw: dict, catalog: SchemaCatalog | None, seen_ids: set[str]
 ) -> FewShotExample:
     try:
         example = FewShotExample(**raw)
@@ -43,6 +48,11 @@ def _validate_example(
 
     if not example.sql.strip():
         raise FewShotDatasetInvalidError(f"{example.id} 的 sql 为空")
+
+    # catalog 为 None 时跳过表/字段复核（Phase 13：迁移实验的「无适配裸切换」
+    # 场景允许注入引用其他库结构的示例；生产路径始终传入真实 catalog）
+    if catalog is None:
+        return example
 
     for table in example.tables:
         if not catalog.has_table(table):
@@ -72,8 +82,17 @@ def _validate_example(
     return example
 
 
-def load_dataset(path: Path | None = None) -> list[FewShotExample]:
-    """读取并校验数据集，返回按文件顺序排列的示例列表。"""
+def load_dataset(
+    path: Path | None = None,
+    *,
+    catalog: SchemaCatalog | None = _DEFAULT_CATALOG,
+) -> list[FewShotExample]:
+    """读取并校验数据集，返回按文件顺序排列的示例列表。
+
+    Phase 13（跨数据库适配）：catalog 参数允许注入 Database Profile 的
+    Schema 目录（示例表/字段按该库复核）；传 None 表示跳过表/字段复核
+    （仅用于迁移实验的「无适配裸切换」场景）。
+    """
     dataset_path = Path(path) if path is not None else Path(config.FEWSHOT_DATASET_PATH)
     if not dataset_path.is_file():
         raise FewShotDatasetNotFoundError(f"Few-shot 数据集不存在: {dataset_path}")
@@ -85,23 +104,25 @@ def load_dataset(path: Path | None = None) -> list[FewShotExample]:
     if not isinstance(raw_data, list):
         raise FewShotDatasetInvalidError("Few-shot 数据集顶层必须是数组")
 
-    catalog = SchemaCatalog.from_database()
+    resolved_catalog = (
+        SchemaCatalog.from_database() if catalog is _DEFAULT_CATALOG else catalog
+    )
     seen_ids: set[str] = set()
     examples: list[FewShotExample] = []
     for item in raw_data:
         if not isinstance(item, dict):
             raise FewShotDatasetInvalidError("数据集中的每一项必须是对象")
-        examples.append(_validate_example(item, catalog, seen_ids))
+        examples.append(_validate_example(item, resolved_catalog, seen_ids))
     return examples
 
 
-@lru_cache(maxsize=1)
-def get_dataset() -> list[FewShotExample]:
-    """首发缓存数据集（测试可通过 monkeypatch config 路径后调用 reload_dataset）。"""
-    return load_dataset()
+@lru_cache(maxsize=8)
+def get_dataset(path: Path | None = None) -> list[FewShotExample]:
+    """首发缓存数据集（按数据集路径缓存；测试可 monkeypatch 路径后 reload_dataset）。"""
+    return load_dataset(path)
 
 
-def reload_dataset() -> list[FewShotExample]:
+def reload_dataset(path: Path | None = None) -> list[FewShotExample]:
     """强制重新读取数据集（清空缓存）。"""
     get_dataset.cache_clear()
-    return get_dataset()
+    return get_dataset(path)

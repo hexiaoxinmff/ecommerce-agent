@@ -31,14 +31,17 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(PROJECT_ROOT / "backend"))
 
-from app.core import config  # noqa: E402
-
 from evaluation import metrics as ev_metrics  # noqa: E402
 from evaluation import report as ev_report  # noqa: E402
 from evaluation import runner as ev_runner  # noqa: E402
 from evaluation.models import EvalCaseResult  # noqa: E402
 from evaluation.runner import EvalConfig  # noqa: E402
 from evaluation.runner import eval_single_item  # noqa: E402
+from evaluation.benchmark_contract import BenchmarkContractError  # noqa: E402
+from evaluation.benchmark_contract import enforce_benchmark_contract  # noqa: E402
+
+# Formal benchmark Preflight 失败时的专有退出码（区别于崩塌的 2/3/4）。
+EXIT_PREFLIGHT = 5
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -140,6 +143,24 @@ def _db_counts() -> dict[str, int]:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
+    # Benchmark 配置契约 Preflight（Task72）：正式 benchmark 强制
+    # provider / model / model-lock / fallback 显式固定，任一不满足即 FAIL FAST，
+    # 禁止进入真实 generation loop。meta.provider / meta.model 一律取自
+    # 实际解析（enforce_benchmark_contract 的返回值），绝不读无关键。
+    try:
+        contract = enforce_benchmark_contract()
+    except BenchmarkContractError as exc:
+        print("[FATAL] Benchmark Preflight FAILED（BENCHMARK_PREFLIGHT=FAIL）", flush=True)
+        for line in exc.failures:
+            print(f"  ✗ {line}", flush=True)
+        print("禁止进入 benchmark generation loop。请先修好环境配置。", flush=True)
+        return EXIT_PREFLIGHT
+    print(
+        f"Benchmark Preflight PASS：provider={contract.provider} model={contract.model} "
+        f"lock={contract.model_lock} router_in_path={contract.router_in_path}",
+        flush=True,
+    )
+
     # 数据集 & 配置
     eval_cfg = EvalConfig(
         timeout_s=args.timeout,
@@ -212,9 +233,9 @@ def main(argv: list[str] | None = None) -> int:
         database_version="dev-2026-09-14",
         schema_version="1.0",
         seed=20260914,
-        model=config.MIMO_MODEL or "mimo-v2.5-pro",
-        provider=config.LLM_PROVIDER or "mimo",
-        base_url=config.MIMO_BASE_URL or "(default)",
+        model=contract.model,
+        provider=contract.provider,
+        base_url=contract.base_url,
         run_id=f"{time.strftime('%Y%m%d')}_{int(time.time()) % 86400:05d}",
         mode="full" if not args.ids and not args.difficulty and args.limit is None else "subset",
         per_item_timeout_s=args.timeout,

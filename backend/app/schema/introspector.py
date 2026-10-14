@@ -7,28 +7,46 @@ PRAGMA table_info / PRAGMA foreign_key_list），业务描述保存在代码中
 
 import sqlite3
 from contextlib import closing
-from typing import Any
+from typing import Any, Callable
 
 from app.db.sqlite import TABLE_NAMES, get_connection
 
 # 期望的业务表（顺序即展示顺序）；实际以数据库为准，缺失的表不会出现
 _BUSINESS_TABLE_NAMES = set(TABLE_NAMES)
 
+ConnectionFactory = Callable[[], sqlite3.Connection]
 
-def introspect_table_names() -> tuple[str, ...]:
-    """读取真实业务表名（按 TABLE_NAMES 顺序返回，忽略 sqlite_ 系统表）。"""
-    with closing(get_connection()) as conn:
+
+def introspect_table_names(
+    *,
+    connection_factory: ConnectionFactory | None = None,
+    allowed_tables: tuple[str, ...] | None = TABLE_NAMES,
+) -> tuple[str, ...]:
+    """读取真实业务表名。
+
+    Phase 13（跨数据库适配）新增两个可选参数（默认值 = 原全局行为）：
+    - connection_factory：连接来源，默认 app.db.sqlite.get_connection；
+    - allowed_tables：表白名单与展示顺序，默认 TABLE_NAMES；
+      传 None 表示不做白名单过滤（返回库内全部业务表，按名称稳定排序）。
+    """
+    get_conn = connection_factory or get_connection
+    with closing(get_conn()) as conn:
         rows = conn.execute(
             "SELECT name FROM sqlite_master "
             "WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
         ).fetchall()
+    if allowed_tables is None:
+        return tuple(sorted(row[0] for row in rows))
     present = {row[0] for row in rows}
-    return tuple(name for name in TABLE_NAMES if name in present)
+    return tuple(name for name in allowed_tables if name in present)
 
 
-def introspect_columns(table: str) -> list[dict[str, Any]]:
+def introspect_columns(
+    table: str, *, connection_factory: ConnectionFactory | None = None
+) -> list[dict[str, Any]]:
     """读取真实表字段结构（cid, name, type, not_null, default, pk）。"""
-    with closing(get_connection()) as conn:
+    get_conn = connection_factory or get_connection
+    with closing(get_conn()) as conn:
         rows = conn.execute(f"PRAGMA table_info({table})").fetchall()
     return [
         {
@@ -41,7 +59,9 @@ def introspect_columns(table: str) -> list[dict[str, Any]]:
     ]
 
 
-def introspect_foreign_keys(table: str) -> list[dict[str, Any]]:
+def introspect_foreign_keys(
+    table: str, *, connection_factory: ConnectionFactory | None = None
+) -> list[dict[str, Any]]:
     """读取真实表的外键约束（PRAGMA foreign_key_list）。
 
     返回值每项包含 from_column / to_table / to_column，全部来自数据库，
@@ -53,7 +73,8 @@ def introspect_foreign_keys(table: str) -> list[dict[str, Any]]:
     - PRAGMA 的返回顺序与建表声明顺序相反，故按
       (from_column, to_table, to_column) 排序，保证同一数据库的输出稳定。
     """
-    with closing(get_connection()) as conn:
+    get_conn = connection_factory or get_connection
+    with closing(get_conn()) as conn:
         rows = conn.execute(f"PRAGMA foreign_key_list({table})").fetchall()
     foreign_keys = [
         {

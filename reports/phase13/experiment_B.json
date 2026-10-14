@@ -1,0 +1,3522 @@
+{
+ "meta": {
+  "experiment": "B",
+  "label": "B库 + A 业务知识（最低限度适配）",
+  "profile_id": "ecommerce_A_on_B",
+  "gold_side": "gold_sql_b",
+  "db_path": "F:\\基于 Text2SQL 的电商智能数据分析 Agent\\db\\ecommerce_v2.db",
+  "db_sha256": "5610682dc7cfe8328eb25f7daf94deca4ee79eba5551032d6838111cfe5c99a6",
+  "database_info": {
+   "database": "ecommerce_v2.db",
+   "tables": 5,
+   "departments": 6,
+   "items": 150,
+   "members": 1200,
+   "order_lines": 15264,
+   "sales_orders": 6000
+  },
+  "fewshot_path": "F:\\基于 Text2SQL 的电商智能数据分析 Agent\\data\\fewshot\\ecommerce_examples.json",
+  "fewshot_sha256": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee",
+  "fewshot_validated": false,
+  "generation_rules_sha256": "10583478b3a7d972865050501cd6e4b9062531503f1c3852cdd79cbf66f796d5",
+  "baseline_business_rules_sha256": "10583478b3a7d972865050501cd6e4b9062531503f1c3852cdd79cbf66f796d5",
+  "sqlgen_extra_rules_env": "",
+  "provider": "mimo",
+  "model": "deepseek-chat",
+  "llm_provider_env": "mimo",
+  "question_set": "crossdb_unified_v1.json",
+  "question_set_sha256": "ad3a4932f53b8511508792a1bb7b1c04a8d58fcfa8ab426841b3624832284130",
+  "items": 24,
+  "per_item_timeout_s": 90.0,
+  "wall_seconds": 53.3,
+  "timestamp": "2026-09-30T13:28:19",
+  "runner_breaks": []
+ },
+ "summary": {
+  "overall": {
+   "total": 24,
+   "valid_model_runs": 24,
+   "provider_failures": 0,
+   "timeouts": 0,
+   "exec_rate": 83.33,
+   "overall_exec_rate": 83.33,
+   "valid_run_exec_rate": 83.33,
+   "ex": 50.0,
+   "conditional_ex": 50.0,
+   "pass_at_1": 50.0,
+   "final_ex": 50.0,
+   "repair_trigger_rate": 16.67,
+   "repair_success_rate": 0.0,
+   "latency_ms": {
+    "count": 24,
+    "avg": 2195.08,
+    "p50": 2153.74,
+    "p95": 3271.06,
+    "min": 1257.2,
+    "max": 3711.99
+   },
+   "latency_ms_all": {
+    "count": 24,
+    "avg": 2195.08,
+    "p50": 2153.74,
+    "p95": 3271.06,
+    "min": 1257.2,
+    "max": 3711.99
+   },
+   "latency_ms_success": {
+    "count": 20,
+    "avg": 1973.17,
+    "p50": 2059.64,
+    "p95": 2620.16,
+    "min": 1257.2,
+    "max": 2620.16
+   },
+   "latency_ms_failure": {
+    "count": 4,
+    "avg": 3304.64,
+    "p50": 3271.06,
+    "p95": 3711.99,
+    "min": 3063.83,
+    "max": 3711.99
+   }
+  },
+  "by_difficulty": {
+   "easy": {
+    "count": 7,
+    "valid_model_runs": 7,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 85.71,
+    "conditional_ex": 85.71,
+    "pass_at_1": 85.71,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 7,
+     "avg": 1812.89,
+     "p50": 1652.72,
+     "p95": 2620.16,
+     "min": 1402.75,
+     "max": 2620.16
+    }
+   },
+   "hard": {
+    "count": 3,
+    "valid_model_runs": 3,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 33.33,
+    "conditional_ex": 33.33,
+    "pass_at_1": 33.33,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 3,
+     "avg": 2320.16,
+     "p50": 2356.94,
+     "p95": 2449.81,
+     "min": 2153.74,
+     "max": 2449.81
+    }
+   },
+   "medium": {
+    "count": 14,
+    "valid_model_runs": 14,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 71.43,
+    "ex": 35.71,
+    "conditional_ex": 35.71,
+    "pass_at_1": 35.71,
+    "repair_trigger_rate": 28.57,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 14,
+     "avg": 2359.37,
+     "p50": 2198.89,
+     "p95": 3711.99,
+     "min": 1257.2,
+     "max": 3711.99
+    }
+   }
+  },
+  "by_scenario": {
+   "active_user_count": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 1402.75,
+     "p50": 1402.75,
+     "p95": 1402.75,
+     "min": 1402.75,
+     "max": 1402.75
+    }
+   },
+   "average_order_amount": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 1539.63,
+     "p50": 1539.63,
+     "p95": 1539.63,
+     "min": 1539.63,
+     "max": 1539.63
+    }
+   },
+   "avg_discount_amount": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 1845.31,
+     "p50": 1845.31,
+     "p95": 1845.31,
+     "min": 1845.31,
+     "max": 1845.31
+    }
+   },
+   "avg_lifetime_spend": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2153.74,
+     "p50": 2153.74,
+     "p95": 2153.74,
+     "min": 2153.74,
+     "max": 2153.74
+    }
+   },
+   "avg_product_price": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2620.16,
+     "p50": 2620.16,
+     "p95": 2620.16,
+     "min": 2620.16,
+     "max": 2620.16
+    }
+   },
+   "bulk_line_count": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2120.38,
+     "p50": 2120.38,
+     "p95": 2120.38,
+     "min": 2120.38,
+     "max": 2120.38
+    }
+   },
+   "category_product_count": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2198.89,
+     "p50": 2198.89,
+     "p95": 2198.89,
+     "min": 2198.89,
+     "max": 2198.89
+    }
+   },
+   "category_sales_ranking": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 0.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 100.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 3171.69,
+     "p50": 3171.69,
+     "p95": 3171.69,
+     "min": 3171.69,
+     "max": 3171.69
+    }
+   },
+   "half_month_order_count": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 1420.39,
+     "p50": 1420.39,
+     "p95": 1420.39,
+     "min": 1420.39,
+     "max": 1420.39
+    }
+   },
+   "monthly_order_count": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 1257.2,
+     "p50": 1257.2,
+     "p95": 1257.2,
+     "min": 1257.2,
+     "max": 1257.2
+    }
+   },
+   "monthly_sales_trend": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 0.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 100.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 3711.99,
+     "p50": 3711.99,
+     "p95": 3711.99,
+     "min": 3711.99,
+     "max": 3711.99
+    }
+   },
+   "on_sale_item_count": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 1859.89,
+     "p50": 1859.89,
+     "p95": 1859.89,
+     "min": 1859.89,
+     "max": 1859.89
+    }
+   },
+   "order_status_breakdown": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2052.34,
+     "p50": 2052.34,
+     "p95": 2052.34,
+     "min": 2052.34,
+     "max": 2052.34
+    }
+   },
+   "product_sales_ranking": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2356.94,
+     "p50": 2356.94,
+     "p95": 2356.94,
+     "min": 2356.94,
+     "max": 2356.94
+    }
+   },
+   "quarterly_sales_amount": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 0.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 100.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 3271.06,
+     "p50": 3271.06,
+     "p95": 3271.06,
+     "min": 3271.06,
+     "max": 3271.06
+    }
+   },
+   "region_sales_ranking": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2059.64,
+     "p50": 2059.64,
+     "p95": 2059.64,
+     "min": 2059.64,
+     "max": 2059.64
+    }
+   },
+   "top_category_sales": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 0.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 100.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 3063.83,
+     "p50": 3063.83,
+     "p95": 3063.83,
+     "min": 3063.83,
+     "max": 3063.83
+    }
+   },
+   "top_customer_sales": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2449.81,
+     "p50": 2449.81,
+     "p95": 2449.81,
+     "min": 2449.81,
+     "max": 2449.81
+    }
+   },
+   "top_priced_products": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 1652.72,
+     "p50": 1652.72,
+     "p95": 1652.72,
+     "min": 1652.72,
+     "max": 1652.72
+    }
+   },
+   "top_region_sales": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2360.39,
+     "p50": 2360.39,
+     "p95": 2360.39,
+     "min": 2360.39,
+     "max": 2360.39
+    }
+   },
+   "total_order_count": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 1560.11,
+     "p50": 1560.11,
+     "p95": 1560.11,
+     "min": 1560.11,
+     "max": 1560.11
+    }
+   },
+   "total_sales_amount": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2350.6,
+     "p50": 2350.6,
+     "p95": 2350.6,
+     "min": 2350.6,
+     "max": 2350.6
+    }
+   },
+   "total_user_count": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2174.18,
+     "p50": 2174.18,
+     "p95": 2174.18,
+     "min": 2174.18,
+     "max": 2174.18
+    }
+   },
+   "user_without_order_count": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2028.26,
+     "p50": 2028.26,
+     "p95": 2028.26,
+     "min": 2028.26,
+     "max": 2028.26
+    }
+   }
+  },
+  "by_operator": {
+   "AVG": {
+    "count": 4,
+    "valid_model_runs": 4,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 25.0,
+    "conditional_ex": 25.0,
+    "pass_at_1": 25.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 4,
+     "avg": 2039.71,
+     "p50": 2153.74,
+     "p95": 2620.16,
+     "min": 1539.63,
+     "max": 2620.16
+    }
+   },
+   "COUNT": {
+    "count": 10,
+    "valid_model_runs": 10,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 90.0,
+    "conditional_ex": 90.0,
+    "pass_at_1": 90.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 10,
+     "avg": 1807.44,
+     "p50": 2028.26,
+     "p95": 2198.89,
+     "min": 1257.2,
+     "max": 2198.89
+    }
+   },
+   "GROUP BY": {
+    "count": 10,
+    "valid_model_runs": 10,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 70.0,
+    "ex": 30.0,
+    "conditional_ex": 30.0,
+    "pass_at_1": 30.0,
+    "repair_trigger_rate": 30.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 10,
+     "avg": 2557.93,
+     "p50": 2360.39,
+     "p95": 3711.99,
+     "min": 2052.34,
+     "max": 3711.99
+    }
+   },
+   "JOIN": {
+    "count": 11,
+    "valid_model_runs": 11,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 63.64,
+    "ex": 27.27,
+    "conditional_ex": 27.27,
+    "pass_at_1": 27.27,
+    "repair_trigger_rate": 36.36,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 11,
+     "avg": 2638.46,
+     "p50": 2360.39,
+     "p95": 3711.99,
+     "min": 2028.26,
+     "max": 3711.99
+    }
+   },
+   "LIMIT": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 1652.72,
+     "p50": 1652.72,
+     "p95": 1652.72,
+     "min": 1652.72,
+     "max": 1652.72
+    }
+   },
+   "ORDER BY": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 1652.72,
+     "p50": 1652.72,
+     "p95": 1652.72,
+     "min": 1652.72,
+     "max": 1652.72
+    }
+   },
+   "SUM": {
+    "count": 10,
+    "valid_model_runs": 10,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 60.0,
+    "ex": 10.0,
+    "conditional_ex": 10.0,
+    "pass_at_1": 10.0,
+    "repair_trigger_rate": 40.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 10,
+     "avg": 2694.97,
+     "p50": 2449.81,
+     "p95": 3711.99,
+     "min": 2059.64,
+     "max": 3711.99
+    }
+   },
+   "WHERE": {
+    "count": 3,
+    "valid_model_runs": 3,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 66.67,
+    "conditional_ex": 66.67,
+    "pass_at_1": 66.67,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 3,
+     "avg": 1794.34,
+     "p50": 1859.89,
+     "p95": 2120.38,
+     "min": 1402.75,
+     "max": 2120.38
+    }
+   },
+   "业务口径": {
+    "count": 13,
+    "valid_model_runs": 13,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 69.23,
+    "ex": 15.38,
+    "conditional_ex": 15.38,
+    "pass_at_1": 15.38,
+    "repair_trigger_rate": 30.77,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 13,
+     "avg": 2453.44,
+     "p50": 2356.94,
+     "p95": 3711.99,
+     "min": 1539.63,
+     "max": 3711.99
+    }
+   },
+   "两阶段聚合": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 0.0,
+    "conditional_ex": 0.0,
+    "pass_at_1": 0.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2153.74,
+     "p50": 2153.74,
+     "p95": 2153.74,
+     "min": 2153.74,
+     "max": 2153.74
+    }
+   },
+   "反连接": {
+    "count": 1,
+    "valid_model_runs": 1,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 100.0,
+    "ex": 100.0,
+    "conditional_ex": 100.0,
+    "pass_at_1": 100.0,
+    "repair_trigger_rate": 0.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 1,
+     "avg": 2028.26,
+     "p50": 2028.26,
+     "p95": 2028.26,
+     "min": 2028.26,
+     "max": 2028.26
+    }
+   },
+   "时间条件": {
+    "count": 4,
+    "valid_model_runs": 4,
+    "provider_failures": 0,
+    "timeouts": 0,
+    "exec_rate": 50.0,
+    "ex": 50.0,
+    "conditional_ex": 50.0,
+    "pass_at_1": 50.0,
+    "repair_trigger_rate": 50.0,
+    "repair_success_rate": 0.0,
+    "latency_ms": {
+     "count": 4,
+     "avg": 2415.16,
+     "p50": 3271.06,
+     "p95": 3711.99,
+     "min": 1257.2,
+     "max": 3711.99
+    }
+   }
+  },
+  "failure_stages": {
+   "none": 12,
+   "result": 8,
+   "sql_repair": 4
+  },
+  "error_types": {
+   "SQL 执行失败: no such column: ol.order_id": 4,
+   "none": 12,
+   "result_mismatch": 8
+  },
+  "runner_breaks": 0
+ },
+ "taxonomy": {
+  "correct": 12,
+  "semantic_error(borrowed)": 8,
+  "failed:sql_repair": 4
+ },
+ "by_category": {
+  "count": {
+   "count": 3,
+   "ex": 3,
+   "exec": 3
+  },
+  "filter": {
+   "count": 3,
+   "ex": 2,
+   "exec": 3
+  },
+  "topk": {
+   "count": 4,
+   "ex": 2,
+   "exec": 4
+  },
+  "time": {
+   "count": 4,
+   "ex": 2,
+   "exec": 2
+  },
+  "metric": {
+   "count": 3,
+   "ex": 0,
+   "exec": 3
+  },
+  "join": {
+   "count": 5,
+   "ex": 2,
+   "exec": 3
+  },
+  "agg": {
+   "count": 2,
+   "ex": 1,
+   "exec": 2
+  }
+ },
+ "items": [
+  {
+   "eval_id": "X-001",
+   "question": "数据库里目前一共有多少个用户？",
+   "difficulty": "easy",
+   "scenario": "total_user_count",
+   "operators": [
+    "COUNT"
+   ],
+   "gold_sql": "SELECT COUNT(*) FROM members",
+   "pred_sql": "SELECT COUNT(*) AS user_count FROM members",
+   "initial_sql": "SELECT COUNT(*) AS user_count FROM members",
+   "final_sql": "SELECT COUNT(*) AS user_count FROM members",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 2174.18,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1568.4633999999278,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "members"
+      ],
+      "columns_count": 1,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.24000000007617928,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_007",
+       "ex_016",
+       "ex_010"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 597.787500000095,
+     "message": "",
+     "output_summary": {
+      "sql_length": 42,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.22009999997862906,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 1.4310999999906926,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0006999998731771484,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-002",
+   "question": "当前在售商品有多少个？",
+   "difficulty": "easy",
+   "scenario": "on_sale_item_count",
+   "operators": [
+    "COUNT",
+    "WHERE"
+   ],
+   "gold_sql": "SELECT COUNT(*) FROM items WHERE availability = 'in_stock'",
+   "pred_sql": "SELECT COUNT(*) AS on_sale_count FROM items WHERE availability = 'on_sale'",
+   "initial_sql": "SELECT COUNT(*) AS on_sale_count FROM items WHERE availability = 'on_sale'",
+   "final_sql": "SELECT COUNT(*) AS on_sale_count FROM items WHERE availability = 'on_sale'",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": "result",
+   "error_type": "result_mismatch",
+   "latency_ms": 1859.89,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 938.9653999999155,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "items"
+      ],
+      "columns_count": 2,
+      "confidence": 0.9
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.19399999996494444,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_012",
+       "ex_024",
+       "ex_008"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 915.7686999999441,
+     "message": "",
+     "output_summary": {
+      "sql_length": 74,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.25169999980789726,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 1.4880000001085136,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.000999999883788405,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-003",
+   "question": "活跃用户有多少个？",
+   "difficulty": "easy",
+   "scenario": "active_user_count",
+   "operators": [
+    "COUNT",
+    "WHERE"
+   ],
+   "gold_sql": "SELECT COUNT(*) FROM members WHERE is_active = 1",
+   "pred_sql": "SELECT COUNT(*) AS active_users FROM members WHERE is_active = 1",
+   "initial_sql": "SELECT COUNT(*) AS active_users FROM members WHERE is_active = 1",
+   "final_sql": "SELECT COUNT(*) AS active_users FROM members WHERE is_active = 1",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 1402.75,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 643.3481999999913,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "members"
+      ],
+      "columns_count": 2,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.24880000000848668,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_007",
+       "ex_016",
+       "ex_010"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 754.159399999935,
+     "message": "",
+     "output_summary": {
+      "sql_length": 64,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.27879999993274396,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 1.5593999999055086,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0007000001005508238,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-004",
+   "question": "价格最高的10个商品的名称和售价是什么？",
+   "difficulty": "easy",
+   "scenario": "top_priced_products",
+   "operators": [
+    "ORDER BY",
+    "LIMIT"
+   ],
+   "gold_sql": "SELECT item_title, list_price FROM items ORDER BY list_price DESC LIMIT 10",
+   "pred_sql": "SELECT item_title, list_price FROM items ORDER BY list_price DESC LIMIT 10",
+   "initial_sql": "SELECT item_title, list_price FROM items ORDER BY list_price DESC LIMIT 10",
+   "final_sql": "SELECT item_title, list_price FROM items ORDER BY list_price DESC LIMIT 10",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 1652.72,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 793.1945999998788,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "items"
+      ],
+      "columns_count": 2,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.18880000015997211,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_013",
+       "ex_017",
+       "ex_008"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 854.6334000000115,
+     "message": "",
+     "output_summary": {
+      "sql_length": 74,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.24489999987054034,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 1.5165999998316693,
+     "message": "",
+     "output_summary": {
+      "row_count": 10,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0007000001005508238,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-005",
+   "question": "2026年8月的订单有多少笔？",
+   "difficulty": "medium",
+   "scenario": "monthly_order_count",
+   "operators": [
+    "COUNT",
+    "时间条件"
+   ],
+   "gold_sql": "SELECT COUNT(*) FROM sales_orders WHERE placed_on >= '2026-08-01' AND placed_on < '2026-09-01'",
+   "pred_sql": "SELECT COUNT(*) AS order_count FROM sales_orders WHERE placed_on >= '2026-08-01' AND placed_on < '2026-09-01'",
+   "initial_sql": "SELECT COUNT(*) AS order_count FROM sales_orders WHERE placed_on >= '2026-08-01' AND placed_on < '2026-09-01'",
+   "final_sql": "SELECT COUNT(*) AS order_count FROM sales_orders WHERE placed_on >= '2026-08-01' AND placed_on < '2026-09-01'",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 1257.2,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 557.0691999998871,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders"
+      ],
+      "columns_count": 2,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.18939999995382095,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_009",
+       "ex_014",
+       "ex_016"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 694.9386000001141,
+     "message": "",
+     "output_summary": {
+      "sql_length": 109,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.3031000001101347,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 1.6546999997899547,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0008000001798791345,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-006",
+   "question": "平台总销售额是多少？（排除取消订单）",
+   "difficulty": "medium",
+   "scenario": "total_sales_amount",
+   "operators": [
+    "SUM",
+    "JOIN",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id WHERE so.order_state != 'voided'",
+   "pred_sql": "SELECT ROUND(SUM(payment_due), 2) AS total_sales FROM sales_orders WHERE order_state != 'cancelled'",
+   "initial_sql": "SELECT ROUND(SUM(payment_due), 2) AS total_sales FROM sales_orders WHERE order_state != 'cancelled'",
+   "final_sql": "SELECT ROUND(SUM(payment_due), 2) AS total_sales FROM sales_orders WHERE order_state != 'cancelled'",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": "result",
+   "error_type": "result_mismatch",
+   "latency_ms": 2350.6,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1012.5537999999779,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders"
+      ],
+      "columns_count": 2,
+      "confidence": 0.9
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.19520000000738946,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_015",
+       "ex_023",
+       "ex_005"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 1247.802800000045,
+     "message": "",
+     "output_summary": {
+      "sql_length": 99,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.31000000012681994,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 2.068099999860351,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0007000001005508238,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-007",
+   "question": "销售额最高的5个商品的名称和销售额是什么？（排除取消订单）",
+   "difficulty": "hard",
+   "scenario": "product_sales_ranking",
+   "operators": [
+    "SUM",
+    "JOIN",
+    "GROUP BY",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT i.item_title, ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id JOIN items i ON i.id = ol.item_id WHERE so.order_state != 'voided' GROUP BY i.id ORDER BY total_sales DESC LIMIT 5",
+   "pred_sql": "SELECT i.item_title AS item_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id JOIN items i ON i.id = ol.item_id WHERE so.order_state != 'cancelled' GROUP BY i.id ORDER BY total_sales DESC LIMIT 5",
+   "initial_sql": "SELECT i.item_title AS item_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id JOIN items i ON i.id = ol.item_id WHERE so.order_state != 'cancelled' GROUP BY i.id ORDER BY total_sales DESC LIMIT 5",
+   "final_sql": "SELECT i.item_title AS item_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id JOIN items i ON i.id = ol.item_id WHERE so.order_state != 'cancelled' GROUP BY i.id ORDER BY total_sales DESC LIMIT 5",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": "result",
+   "error_type": "result_mismatch",
+   "latency_ms": 2356.94,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1238.0723999999645,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders",
+       "order_lines",
+       "items"
+      ],
+      "columns_count": 7,
+      "confidence": 0.93
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.20429999995030812,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_003",
+       "ex_015",
+       "ex_018"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 1105.422200000021,
+     "message": "",
+     "output_summary": {
+      "sql_length": 265,
+      "tables": 3
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.8308999999826483,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 9.26589999994576,
+     "message": "",
+     "output_summary": {
+      "row_count": 5,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0007999999525054591,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-008",
+   "question": "各类目的销售额排名是多少？（排除取消订单）",
+   "difficulty": "medium",
+   "scenario": "category_sales_ranking",
+   "operators": [
+    "SUM",
+    "JOIN",
+    "GROUP BY",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT d.dept_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM departments d JOIN items i ON i.dept_id = d.id JOIN order_lines ol ON ol.item_id = i.id JOIN sales_orders so ON so.id = ol.sales_order_id WHERE so.order_state != 'voided' GROUP BY d.id ORDER BY total_sales DESC",
+   "pred_sql": "SELECT d.dept_name AS dept_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN items i ON i.id = ol.item_id JOIN departments d ON d.id = i.dept_id JOIN sales_orders so ON so.id = ol.order_id WHERE so.order_state != 'cancelled' GROUP BY d.id ORDER BY total_sales DESC",
+   "initial_sql": "SELECT d.dept_name AS dept_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN items i ON i.id = ol.item_id JOIN departments d ON d.id = i.dept_id JOIN sales_orders so ON so.id = ol.order_id WHERE so.order_state != 'cancelled' GROUP BY d.id ORDER BY total_sales DESC",
+   "final_sql": "",
+   "exec_success": false,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": true,
+   "repair_count": 1,
+   "repair_success": false,
+   "failure_stage": "sql_repair",
+   "error_type": "SQL 执行失败: no such column: ol.order_id",
+   "latency_ms": 3171.69,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:error;sql_repair:error;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 910.2594999999383,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "departments",
+       "items",
+       "order_lines",
+       "sales_orders"
+      ],
+      "columns_count": 8,
+      "confidence": 0.9
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.2563000000463944,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_003",
+       "ex_010",
+       "ex_015"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 997.9511999999886,
+     "message": "",
+     "output_summary": {
+      "sql_length": 289,
+      "tables": 4
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.9223000001838955,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "error",
+     "duration_ms": 2.8197999999974854,
+     "message": "SQL 执行失败: no such column: ol.order_id",
+     "output_summary": {
+      "ok": false,
+      "error": "SQL 执行失败: no such column: ol.order_id"
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "error",
+     "duration_ms": 1255.791199999976,
+     "message": "Repair SQL 引用了不存在的字段: d.dept_name",
+     "output_summary": {
+      "repair_success": false,
+      "repaired_sql_length": 0,
+      "error": "Repair SQL 引用了不存在的字段: d.dept_name"
+     }
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0007999999525054591,
+     "message": "",
+     "output_summary": {
+      "success": false
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-009",
+   "question": "各地区的销售额分别是多少？（排除取消订单）",
+   "difficulty": "medium",
+   "scenario": "region_sales_ranking",
+   "operators": [
+    "SUM",
+    "JOIN",
+    "GROUP BY",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT m.city, ROUND(SUM(ol.line_total), 2) AS total_sales FROM sales_orders so JOIN members m ON m.id = so.member_id JOIN order_lines ol ON ol.sales_order_id = so.id WHERE so.order_state != 'voided' GROUP BY m.city ORDER BY total_sales DESC",
+   "pred_sql": "SELECT m.city AS region, ROUND(SUM(so.payment_due), 2) AS total_sales FROM sales_orders so JOIN members m ON so.member_id = m.id WHERE so.order_state != 'cancelled' GROUP BY m.city ORDER BY total_sales DESC",
+   "initial_sql": "SELECT m.city AS region, ROUND(SUM(so.payment_due), 2) AS total_sales FROM sales_orders so JOIN members m ON so.member_id = m.id WHERE so.order_state != 'cancelled' GROUP BY m.city ORDER BY total_sales DESC",
+   "final_sql": "SELECT m.city AS region, ROUND(SUM(so.payment_due), 2) AS total_sales FROM sales_orders so JOIN members m ON so.member_id = m.id WHERE so.order_state != 'cancelled' GROUP BY m.city ORDER BY total_sales DESC",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": "result",
+   "error_type": "result_mismatch",
+   "latency_ms": 2059.64,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 950.9719000000132,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders",
+       "members"
+      ],
+      "columns_count": 6,
+      "confidence": 0.9
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.19620000011855154,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_005",
+       "ex_015",
+       "ex_021"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 1099.9607000001106,
+     "message": "",
+     "output_summary": {
+      "sql_length": 206,
+      "tables": 2
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.6902000000081898,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 4.651699999840275,
+     "message": "",
+     "output_summary": {
+      "row_count": 15,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0006999998731771484,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-010",
+   "question": "销售额最高的地区是哪个？（排除取消订单，输出地区与销售额）",
+   "difficulty": "medium",
+   "scenario": "top_region_sales",
+   "operators": [
+    "SUM",
+    "JOIN",
+    "GROUP BY",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT m.city, ROUND(SUM(ol.line_total), 2) AS total_sales FROM sales_orders so JOIN members m ON m.id = so.member_id JOIN order_lines ol ON ol.sales_order_id = so.id WHERE so.order_state != 'voided' GROUP BY m.city ORDER BY total_sales DESC LIMIT 1",
+   "pred_sql": "SELECT m.city AS region, ROUND(SUM(so.payment_due), 2) AS total_sales FROM sales_orders so JOIN members m ON so.member_id = m.id WHERE so.order_state != 'cancelled' GROUP BY m.city ORDER BY total_sales DESC LIMIT 1",
+   "initial_sql": "SELECT m.city AS region, ROUND(SUM(so.payment_due), 2) AS total_sales FROM sales_orders so JOIN members m ON so.member_id = m.id WHERE so.order_state != 'cancelled' GROUP BY m.city ORDER BY total_sales DESC LIMIT 1",
+   "final_sql": "SELECT m.city AS region, ROUND(SUM(so.payment_due), 2) AS total_sales FROM sales_orders so JOIN members m ON so.member_id = m.id WHERE so.order_state != 'cancelled' GROUP BY m.city ORDER BY total_sales DESC LIMIT 1",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": "result",
+   "error_type": "result_mismatch",
+   "latency_ms": 2360.39,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1098.2581000000664,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders",
+       "members"
+      ],
+      "columns_count": 6,
+      "confidence": 0.9
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.21700000002056186,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_005",
+       "ex_015",
+       "ex_021"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 1252.331599999934,
+     "message": "",
+     "output_summary": {
+      "sql_length": 214,
+      "tables": 2
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.8360000001630397,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 4.914699999972072,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0010999999631167157,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-011",
+   "question": "客单价是多少？（排除取消订单，按订单实付金额平均）",
+   "difficulty": "medium",
+   "scenario": "average_order_amount",
+   "operators": [
+    "AVG",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT ROUND(AVG(payment_due), 2) AS avg_order_amount FROM sales_orders WHERE order_state != 'voided'",
+   "pred_sql": "SELECT ROUND(AVG(payment_due), 2) AS avg_order_value FROM sales_orders WHERE order_state != 'cancelled'",
+   "initial_sql": "SELECT ROUND(AVG(payment_due), 2) AS avg_order_value FROM sales_orders WHERE order_state != 'cancelled'",
+   "final_sql": "SELECT ROUND(AVG(payment_due), 2) AS avg_order_value FROM sales_orders WHERE order_state != 'cancelled'",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": "result",
+   "error_type": "result_mismatch",
+   "latency_ms": 1539.63,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 715.3683999999885,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders"
+      ],
+      "columns_count": 2,
+      "confidence": 0.9
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.1965000001291628,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_009",
+       "ex_021",
+       "ex_023"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 818.2206999999835,
+     "message": "",
+     "output_summary": {
+      "sql_length": 103,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.30020000008335046,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 2.4247000001196284,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0007000001005508238,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-012",
+   "question": "总订单数是多少？",
+   "difficulty": "easy",
+   "scenario": "total_order_count",
+   "operators": [
+    "COUNT",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT COUNT(*) FROM sales_orders",
+   "pred_sql": "SELECT COUNT(id) AS total_orders FROM sales_orders",
+   "initial_sql": "SELECT COUNT(id) AS total_orders FROM sales_orders",
+   "final_sql": "SELECT COUNT(id) AS total_orders FROM sales_orders",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 1560.11,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 883.8381000000481,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders"
+      ],
+      "columns_count": 1,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.18619999991642544,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_009",
+       "ex_014",
+       "ex_016"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 671.2133999999423,
+     "message": "",
+     "output_summary": {
+      "sql_length": 50,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.2047000000402477,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 1.6387000000577245,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0009000000318337698,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-013",
+   "question": "累计消费金额最高的3名用户的用户名和消费金额是什么？（排除取消订单，按实付金额）",
+   "difficulty": "hard",
+   "scenario": "top_customer_sales",
+   "operators": [
+    "SUM",
+    "JOIN",
+    "GROUP BY",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT m.member_name, ROUND(SUM(so.payment_due), 2) AS total_spent FROM members m JOIN sales_orders so ON so.member_id = m.id WHERE so.order_state != 'voided' GROUP BY m.id ORDER BY total_spent DESC LIMIT 3",
+   "pred_sql": "SELECT m.member_name, SUM(o.payment_due) AS total_amount FROM members m JOIN sales_orders o ON o.member_id = m.id WHERE o.order_state != 'cancelled' GROUP BY m.id, m.member_name ORDER BY total_amount DESC LIMIT 3",
+   "initial_sql": "SELECT m.member_name, SUM(o.payment_due) AS total_amount FROM members m JOIN sales_orders o ON o.member_id = m.id WHERE o.order_state != 'cancelled' GROUP BY m.id, m.member_name ORDER BY total_amount DESC LIMIT 3",
+   "final_sql": "SELECT m.member_name, SUM(o.payment_due) AS total_amount FROM members m JOIN sales_orders o ON o.member_id = m.id WHERE o.order_state != 'cancelled' GROUP BY m.id, m.member_name ORDER BY total_amount DESC LIMIT 3",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 2449.81,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1102.5059000000965,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "members",
+       "sales_orders"
+      ],
+      "columns_count": 5,
+      "confidence": 0.9
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.2077999999983149,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_023",
+       "ex_009",
+       "ex_016"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 1338.4644000000208,
+     "message": "",
+     "output_summary": {
+      "sql_length": 212,
+      "tables": 2
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.9952999998859013,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 4.4565000000602595,
+     "message": "",
+     "output_summary": {
+      "row_count": 3,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0005999997938488377,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-014",
+   "question": "每月销售额趋势是怎样的？（排除取消订单）",
+   "difficulty": "medium",
+   "scenario": "monthly_sales_trend",
+   "operators": [
+    "SUM",
+    "JOIN",
+    "GROUP BY",
+    "时间条件",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT substr(so.placed_on, 1, 7) AS month, ROUND(SUM(ol.line_total), 2) AS total_sales FROM sales_orders so JOIN order_lines ol ON ol.sales_order_id = so.id WHERE so.order_state != 'voided' GROUP BY month ORDER BY month",
+   "pred_sql": "SELECT strftime('%Y-%m', o.placed_on) AS ym, ROUND(SUM(ol.line_total), 2) AS total_sales FROM sales_orders o JOIN order_lines ol ON ol.order_id = o.id WHERE o.order_state != 'cancelled' GROUP BY ym ORDER BY ym",
+   "initial_sql": "SELECT strftime('%Y-%m', o.placed_on) AS ym, ROUND(SUM(ol.line_total), 2) AS total_sales FROM sales_orders o JOIN order_lines ol ON ol.order_id = o.id WHERE o.order_state != 'cancelled' GROUP BY ym ORDER BY ym",
+   "final_sql": "",
+   "exec_success": false,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": true,
+   "repair_count": 1,
+   "repair_success": false,
+   "failure_stage": "sql_repair",
+   "error_type": "SQL 执行失败: no such column: ol.order_id",
+   "latency_ms": 3711.99,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:error;sql_repair:error;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1447.1654000001308,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders",
+       "order_lines"
+      ],
+      "columns_count": 4,
+      "confidence": 0.9
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.21010000000387663,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_015",
+       "ex_004",
+       "ex_023"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 1296.8105999998443,
+     "message": "",
+     "output_summary": {
+      "sql_length": 209,
+      "tables": 2
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.6395000000338769,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "error",
+     "duration_ms": 2.2382000001925917,
+     "message": "SQL 执行失败: no such column: ol.order_id",
+     "output_summary": {
+      "ok": false,
+      "error": "SQL 执行失败: no such column: ol.order_id"
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "error",
+     "duration_ms": 961.1327000000074,
+     "message": "Repair SQL 引用了不存在的字段: ol.sales_order_id",
+     "output_summary": {
+      "repair_success": false,
+      "repaired_sql_length": 0,
+      "error": "Repair SQL 引用了不存在的字段: ol.sales_order_id"
+     }
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0012000000424450263,
+     "message": "",
+     "output_summary": {
+      "success": false
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-015",
+   "question": "每个类目下有多少个商品？",
+   "difficulty": "medium",
+   "scenario": "category_product_count",
+   "operators": [
+    "COUNT",
+    "JOIN",
+    "GROUP BY"
+   ],
+   "gold_sql": "SELECT d.dept_name, COUNT(i.id) AS item_count FROM departments d LEFT JOIN items i ON i.dept_id = d.id GROUP BY d.id",
+   "pred_sql": "SELECT d.dept_name AS dept_name, COUNT(i.id) AS item_count FROM departments d LEFT JOIN items i ON i.dept_id = d.id GROUP BY d.id",
+   "initial_sql": "SELECT d.dept_name AS dept_name, COUNT(i.id) AS item_count FROM departments d LEFT JOIN items i ON i.dept_id = d.id GROUP BY d.id",
+   "final_sql": "SELECT d.dept_name AS dept_name, COUNT(i.id) AS item_count FROM departments d LEFT JOIN items i ON i.dept_id = d.id GROUP BY d.id",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 2198.89,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1171.9362999999703,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "items",
+       "departments"
+      ],
+      "columns_count": 4,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.18850000014936086,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_008",
+       "ex_012",
+       "ex_003"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 1021.5287999999418,
+     "message": "",
+     "output_summary": {
+      "sql_length": 129,
+      "tables": 2
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.4481000000851054,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 1.8887000001086562,
+     "message": "",
+     "output_summary": {
+      "row_count": 6,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0008000001798791345,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-016",
+   "question": "各订单状态的数量分布是怎样的？",
+   "difficulty": "medium",
+   "scenario": "order_status_breakdown",
+   "operators": [
+    "COUNT",
+    "GROUP BY"
+   ],
+   "gold_sql": "SELECT order_state, COUNT(*) AS order_count FROM sales_orders GROUP BY order_state",
+   "pred_sql": "SELECT order_state, COUNT(*) AS cnt FROM sales_orders GROUP BY order_state ORDER BY cnt DESC",
+   "initial_sql": "SELECT order_state, COUNT(*) AS cnt FROM sales_orders GROUP BY order_state ORDER BY cnt DESC",
+   "final_sql": "SELECT order_state, COUNT(*) AS cnt FROM sales_orders GROUP BY order_state ORDER BY cnt DESC",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 2052.34,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 739.6198999999797,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders"
+      ],
+      "columns_count": 2,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.25279999999838765,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_014",
+       "ex_016",
+       "ex_018"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 1306.968400000187,
+     "message": "",
+     "output_summary": {
+      "sql_length": 92,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.35469999988890777,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 1.9216999999116524,
+     "message": "",
+     "output_summary": {
+      "row_count": 5,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0005999997938488377,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-017",
+   "question": "2026年第二季度的销售额是多少？（排除取消订单）",
+   "difficulty": "medium",
+   "scenario": "quarterly_sales_amount",
+   "operators": [
+    "SUM",
+    "JOIN",
+    "时间条件",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id WHERE so.order_state != 'voided' AND so.placed_on >= '2026-04-01' AND so.placed_on < '2026-07-01'",
+   "pred_sql": "SELECT ROUND(SUM(ol.line_total), 2) AS total_sales FROM sales_orders so JOIN order_lines ol ON ol.order_id = so.id WHERE so.order_state != 'cancelled' AND so.placed_on >= '2026-04-01' AND so.placed_on < '2026-07-01'",
+   "initial_sql": "SELECT ROUND(SUM(ol.line_total), 2) AS total_sales FROM sales_orders so JOIN order_lines ol ON ol.order_id = so.id WHERE so.order_state != 'cancelled' AND so.placed_on >= '2026-04-01' AND so.placed_on < '2026-07-01'",
+   "final_sql": "",
+   "exec_success": false,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": true,
+   "repair_count": 1,
+   "repair_success": false,
+   "failure_stage": "sql_repair",
+   "error_type": "SQL 执行失败: no such column: ol.order_id",
+   "latency_ms": 3271.06,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:error;sql_repair:error;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1258.1658999999945,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders",
+       "order_lines"
+      ],
+      "columns_count": 4,
+      "confidence": 0.9
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.22669999998470303,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_015",
+       "ex_023",
+       "ex_005"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 918.4766000000764,
+     "message": "",
+     "output_summary": {
+      "sql_length": 215,
+      "tables": 2
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.6511999999929685,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "error",
+     "duration_ms": 2.3602999999638996,
+     "message": "SQL 执行失败: no such column: ol.order_id",
+     "output_summary": {
+      "ok": false,
+      "error": "SQL 执行失败: no such column: ol.order_id"
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "error",
+     "duration_ms": 1087.3693000000912,
+     "message": "Repair SQL 引用了不存在的字段: ol.sales_order_id",
+     "output_summary": {
+      "repair_success": false,
+      "repaired_sql_length": 0,
+      "error": "Repair SQL 引用了不存在的字段: ol.sales_order_id"
+     }
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0006000000212225132,
+     "message": "",
+     "output_summary": {
+      "success": false
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-018",
+   "question": "商品的平均售价是多少？",
+   "difficulty": "easy",
+   "scenario": "avg_product_price",
+   "operators": [
+    "AVG"
+   ],
+   "gold_sql": "SELECT ROUND(AVG(list_price), 2) AS avg_price FROM items",
+   "pred_sql": "SELECT ROUND(AVG(list_price), 2) AS avg_list_price FROM items",
+   "initial_sql": "SELECT ROUND(AVG(list_price), 2) AS avg_list_price FROM items",
+   "final_sql": "SELECT ROUND(AVG(list_price), 2) AS avg_list_price FROM items",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 2620.16,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1578.695400000015,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "items"
+      ],
+      "columns_count": 1,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.2160999999887281,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_017",
+       "ex_018",
+       "ex_019"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 1036.1554999999498,
+     "message": "",
+     "output_summary": {
+      "sql_length": 61,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.2323000001069886,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 1.5622999999322928,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0007000001005508238,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-019",
+   "question": "非取消订单的平均优惠金额是多少？",
+   "difficulty": "medium",
+   "scenario": "avg_discount_amount",
+   "operators": [
+    "AVG",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT ROUND(AVG(coupon_deduction), 2) AS avg_discount FROM sales_orders WHERE order_state != 'voided'",
+   "pred_sql": "SELECT ROUND(AVG(coupon_deduction), 2) AS avg_coupon_deduction FROM sales_orders WHERE order_state != 'cancelled'",
+   "initial_sql": "SELECT ROUND(AVG(coupon_deduction), 2) AS avg_coupon_deduction FROM sales_orders WHERE order_state != 'cancelled'",
+   "final_sql": "SELECT ROUND(AVG(coupon_deduction), 2) AS avg_coupon_deduction FROM sales_orders WHERE order_state != 'cancelled'",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": "result",
+   "error_type": "result_mismatch",
+   "latency_ms": 1845.31,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1031.5515999998297,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders"
+      ],
+      "columns_count": 2,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.2606999998988613,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_009",
+       "ex_021",
+       "ex_023"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 805.961600000046,
+     "message": "",
+     "output_summary": {
+      "sql_length": 113,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.6084999999984575,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 2.605800000083036,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0008000001798791345,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-020",
+   "question": "单条明细购买数量达到5件的订单明细有多少条？",
+   "difficulty": "medium",
+   "scenario": "bulk_line_count",
+   "operators": [
+    "COUNT",
+    "WHERE"
+   ],
+   "gold_sql": "SELECT COUNT(*) FROM order_lines WHERE qty >= 5",
+   "pred_sql": "SELECT COUNT(*) AS cnt FROM order_lines WHERE qty >= 5",
+   "initial_sql": "SELECT COUNT(*) AS cnt FROM order_lines WHERE qty >= 5",
+   "final_sql": "SELECT COUNT(*) AS cnt FROM order_lines WHERE qty >= 5",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 2120.38,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1182.8511999999591,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "order_lines"
+      ],
+      "columns_count": 2,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.19109999993816018,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_014",
+       "ex_016",
+       "ex_018"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 931.8195000000742,
+     "message": "",
+     "output_summary": {
+      "sql_length": 54,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.27719999980035936,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 2.2105000000465225,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0007000001005508238,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-021",
+   "question": "从未下过单的用户有多少个？",
+   "difficulty": "medium",
+   "scenario": "user_without_order_count",
+   "operators": [
+    "COUNT",
+    "JOIN",
+    "反连接"
+   ],
+   "gold_sql": "SELECT COUNT(*) AS members_without_orders FROM members m WHERE NOT EXISTS (SELECT 1 FROM sales_orders so WHERE so.member_id = m.id)",
+   "pred_sql": "SELECT COUNT(*) AS never_ordered_users FROM members m WHERE NOT EXISTS (SELECT 1 FROM sales_orders o WHERE o.member_id = m.id)",
+   "initial_sql": "SELECT COUNT(*) AS never_ordered_users FROM members m WHERE NOT EXISTS (SELECT 1 FROM sales_orders o WHERE o.member_id = m.id)",
+   "final_sql": "SELECT COUNT(*) AS never_ordered_users FROM members m WHERE NOT EXISTS (SELECT 1 FROM sales_orders o WHERE o.member_id = m.id)",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 2028.26,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 935.3185000002213,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "members",
+       "sales_orders"
+      ],
+      "columns_count": 2,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.21270000002004963,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_007",
+       "ex_016",
+       "ex_010"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 1086.998400000084,
+     "message": "",
+     "output_summary": {
+      "sql_length": 126,
+      "tables": 2
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.42069999994964746,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 2.0644999999603897,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0008000001798791345,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-022",
+   "question": "销售额最高的类目名称是什么？（排除取消订单）",
+   "difficulty": "medium",
+   "scenario": "top_category_sales",
+   "operators": [
+    "SUM",
+    "JOIN",
+    "GROUP BY",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT d.dept_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM departments d JOIN items i ON i.dept_id = d.id JOIN order_lines ol ON ol.item_id = i.id JOIN sales_orders so ON so.id = ol.sales_order_id WHERE so.order_state != 'voided' GROUP BY d.id ORDER BY total_sales DESC LIMIT 1",
+   "pred_sql": "SELECT d.dept_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN items i ON ol.item_id = i.id JOIN departments d ON i.dept_id = d.id JOIN sales_orders so ON ol.order_id = so.id WHERE so.order_state != 'cancelled' GROUP BY d.dept_name ORDER BY total_sales DESC LIMIT 1",
+   "initial_sql": "SELECT d.dept_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN items i ON ol.item_id = i.id JOIN departments d ON i.dept_id = d.id JOIN sales_orders so ON ol.order_id = so.id WHERE so.order_state != 'cancelled' GROUP BY d.dept_name ORDER BY total_sales DESC LIMIT 1",
+   "final_sql": "",
+   "exec_success": false,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": true,
+   "repair_count": 1,
+   "repair_success": false,
+   "failure_stage": "sql_repair",
+   "error_type": "SQL 执行失败: no such column: ol.order_id",
+   "latency_ms": 3063.83,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:error;sql_repair:error;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1130.3697999999258,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "departments",
+       "items",
+       "order_lines",
+       "sales_orders"
+      ],
+      "columns_count": 7,
+      "confidence": 0.9
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.1995000000079017,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_015",
+       "ex_023",
+       "ex_005"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 976.8584000000828,
+     "message": "",
+     "output_summary": {
+      "sql_length": 291,
+      "tables": 4
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 1.058699999930468,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "error",
+     "duration_ms": 2.518900000040958,
+     "message": "SQL 执行失败: no such column: ol.order_id",
+     "output_summary": {
+      "ok": false,
+      "error": "SQL 执行失败: no such column: ol.order_id"
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "error",
+     "duration_ms": 949.0880000000743,
+     "message": "Repair SQL 引用了不存在的字段: d.dept_name",
+     "output_summary": {
+      "repair_success": false,
+      "repaired_sql_length": 0,
+      "error": "Repair SQL 引用了不存在的字段: d.dept_name"
+     }
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0009000000318337698,
+     "message": "",
+     "output_summary": {
+      "success": false
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-023",
+   "question": "2026年9月上半月（9月1日至9月15日）的订单有多少笔？",
+   "difficulty": "easy",
+   "scenario": "half_month_order_count",
+   "operators": [
+    "COUNT",
+    "时间条件"
+   ],
+   "gold_sql": "SELECT COUNT(*) FROM sales_orders WHERE placed_on >= '2026-09-01' AND placed_on < '2026-09-16'",
+   "pred_sql": "SELECT COUNT(*) AS order_count FROM sales_orders WHERE placed_on >= '2026-09-01' AND placed_on <= '2026-09-15'",
+   "initial_sql": "SELECT COUNT(*) AS order_count FROM sales_orders WHERE placed_on >= '2026-09-01' AND placed_on <= '2026-09-15'",
+   "final_sql": "SELECT COUNT(*) AS order_count FROM sales_orders WHERE placed_on >= '2026-09-01' AND placed_on <= '2026-09-15'",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": true,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": null,
+   "error_type": null,
+   "latency_ms": 1420.39,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 676.2051000000611,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders"
+      ],
+      "columns_count": 2,
+      "confidence": 0.95
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.1927999999224994,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_009",
+       "ex_014",
+       "ex_016"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 738.352999999961,
+     "message": "",
+     "output_summary": {
+      "sql_length": 110,
+      "tables": 1
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.3249000001233071,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 1.8705999998473999,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0006999998731771484,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  },
+  {
+   "eval_id": "X-024",
+   "question": "全体用户的平均累计消费金额是多少？（排除取消订单，按实付金额，先按用户汇总再求平均）",
+   "difficulty": "hard",
+   "scenario": "avg_lifetime_spend",
+   "operators": [
+    "AVG",
+    "SUM",
+    "GROUP BY",
+    "两阶段聚合",
+    "业务口径"
+   ],
+   "gold_sql": "SELECT ROUND(AVG(member_total), 2) AS avg_lifetime_spend FROM (SELECT SUM(so.payment_due) AS member_total FROM sales_orders so WHERE so.order_state != 'voided' GROUP BY so.member_id)",
+   "pred_sql": "SELECT ROUND(AVG(user_total), 2) AS avg_user_total FROM (SELECT o.member_id, SUM(o.payment_due) AS user_total FROM sales_orders o WHERE o.order_state != 'cancelled' GROUP BY o.member_id)",
+   "initial_sql": "SELECT ROUND(AVG(user_total), 2) AS avg_user_total FROM (SELECT o.member_id, SUM(o.payment_due) AS user_total FROM sales_orders o WHERE o.order_state != 'cancelled' GROUP BY o.member_id)",
+   "final_sql": "SELECT ROUND(AVG(user_total), 2) AS avg_user_total FROM (SELECT o.member_id, SUM(o.payment_due) AS user_total FROM sales_orders o WHERE o.order_state != 'cancelled' GROUP BY o.member_id)",
+   "exec_success": true,
+   "exact_match": false,
+   "execution_accuracy": false,
+   "repair_triggered": false,
+   "repair_count": 0,
+   "repair_success": false,
+   "failure_stage": "result",
+   "error_type": "result_mismatch",
+   "latency_ms": 2153.74,
+   "valid_model_run": true,
+   "trace_summary": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+   "trace": [
+    {
+     "node": "schema_link",
+     "status": "success",
+     "duration_ms": 1034.921999999824,
+     "message": "",
+     "output_summary": {
+      "tables": [
+       "sales_orders",
+       "members"
+      ],
+      "columns_count": 4,
+      "confidence": 0.9
+     }
+    },
+    {
+     "node": "fewshot_retrieve",
+     "status": "success",
+     "duration_ms": 0.2173000000311731,
+     "message": "",
+     "output_summary": {
+      "match_count": 3,
+      "example_ids": [
+       "ex_009",
+       "ex_021",
+       "ex_023"
+      ]
+     }
+    },
+    {
+     "node": "sql_generate",
+     "status": "success",
+     "duration_ms": 1110.0506000000223,
+     "message": "",
+     "output_summary": {
+      "sql_length": 186,
+      "tables": 2
+     }
+    },
+    {
+     "node": "sql_safety",
+     "status": "success",
+     "duration_ms": 0.6516000000829081,
+     "message": "",
+     "output_summary": {
+      "allowed": true
+     }
+    },
+    {
+     "node": "sql_execute",
+     "status": "success",
+     "duration_ms": 4.3579000000590895,
+     "message": "",
+     "output_summary": {
+      "row_count": 1,
+      "truncated": false
+     }
+    },
+    {
+     "node": "sql_repair",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（无需修复）",
+     "output_summary": {}
+    },
+    {
+     "node": "sql_execute_repaired",
+     "status": "skipped",
+     "duration_ms": 0.0,
+     "message": "未执行（未进入 Repair）",
+     "output_summary": {}
+    },
+    {
+     "node": "result",
+     "status": "success",
+     "duration_ms": 0.0007000001005508238,
+     "message": "",
+     "output_summary": {
+      "success": true
+     }
+    }
+   ]
+  }
+ ]
+}

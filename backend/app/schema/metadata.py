@@ -87,6 +87,10 @@ class TableMeta:
 # 数据库为只读且 Schema 已冻结，故可安全缓存。
 _CATALOG_CACHE: "SchemaCatalog | None" = None
 
+# from_database() 参数缺省哨兵：区分「未传 allowed_tables」（用默认白名单）
+# 与「显式传 None」（不做白名单过滤）。
+_UNSET = object()
+
 
 class SchemaCatalog:
     """项目数据库的 Schema 元数据目录（来自真实数据库 + 业务描述）。"""
@@ -129,25 +133,53 @@ class SchemaCatalog:
         return json.dumps(schema_list, ensure_ascii=False, indent=2)
 
     @classmethod
-    def from_database(cls) -> "SchemaCatalog":
-        """从真实 SQLite 数据库构建目录（表/字段名与数据库完全一致）。"""
+    def from_database(
+        cls,
+        *,
+        connection_factory=None,
+        allowed_tables: "tuple[str, ...] | None | object" = _UNSET,
+        table_descriptions: "dict[str, str] | None" = None,
+        column_descriptions: "dict[str, dict[str, str]] | None" = None,
+    ) -> "SchemaCatalog":
+        """从真实 SQLite 数据库构建目录（表/字段名与数据库完全一致）。
+
+        Phase 13（跨数据库适配）新增可选参数（全部缺省 = 原全局行为）：
+        - connection_factory：连接来源（默认 app.db.sqlite.get_connection）；
+        - allowed_tables：表白名单（默认 introspector.TABLE_NAMES；
+          显式传 None 表示不过滤，内省库内全部业务表）；
+        - table_descriptions / column_descriptions：业务描述
+          （默认本模块 TABLE_DESCRIPTIONS / COLUMN_DESCRIPTIONS）。
+        """
+        tables_desc = (
+            table_descriptions if table_descriptions is not None else TABLE_DESCRIPTIONS
+        )
+        cols_desc = (
+            column_descriptions
+            if column_descriptions is not None
+            else COLUMN_DESCRIPTIONS
+        )
+        introspect_kwargs: dict[str, object] = {}
+        if connection_factory is not None:
+            introspect_kwargs["connection_factory"] = connection_factory
+        if allowed_tables is not _UNSET:
+            introspect_kwargs["allowed_tables"] = allowed_tables
         tables: dict[str, TableMeta] = {}
-        for table_name in introspector.introspect_table_names():
+        for table_name in introspector.introspect_table_names(**introspect_kwargs):
             columns = tuple(
                 ColumnMeta(
                     name=col["name"],
                     type=col["type"],
-                    description=COLUMN_DESCRIPTIONS.get(table_name, {}).get(
-                        col["name"], ""
-                    ),
+                    description=cols_desc.get(table_name, {}).get(col["name"], ""),
                     not_null=col["not_null"],
                     primary_key=col["primary_key"],
                 )
-                for col in introspector.introspect_columns(table_name)
+                for col in introspector.introspect_columns(
+                    table_name, connection_factory=connection_factory
+                )
             )
             tables[table_name] = TableMeta(
                 name=table_name,
-                description=TABLE_DESCRIPTIONS.get(table_name, ""),
+                description=tables_desc.get(table_name, ""),
                 columns=columns,
             )
         return cls(tables)

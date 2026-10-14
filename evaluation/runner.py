@@ -47,6 +47,9 @@ PROVIDER_ERROR_NAMES = frozenset(
         "LLMError",
         "LLMApiKeyNotConfiguredError",
         "LLMAuthenticationError",
+        # Phase 4：403 + AllocationQuota.*（免费额度/配额耗尽）的专属异常类，
+        # 必须与认证失败一样归入 provider 失败，不得计入模型能力分母。
+        "LLMQuotaError",
         "LLMInsufficientBalanceError",
         "LLMRateLimitError",
         "LLMServiceUnavailableError",

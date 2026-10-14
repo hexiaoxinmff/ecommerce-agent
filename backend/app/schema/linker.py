@@ -11,6 +11,7 @@
 
 import json
 import re
+from typing import TYPE_CHECKING
 
 from app.llm.provider import LLMProvider, get_llm_provider
 from app.schema.metadata import SchemaCatalog
@@ -19,6 +20,9 @@ from app.schema.validation import (
     validate_schema_link,
 )
 from app.schemas.schema_link import SchemaLinkResult
+
+if TYPE_CHECKING:  # 仅类型标注；运行时由调用方注入，避免反向依赖
+    from app.dbprofile.adapter import DatabaseAdapter
 
 SYSTEM_PROMPT = (
     "你是电商智能数据分析 Agent 的 Schema Linking 组件。"
@@ -116,14 +120,34 @@ def _parse_llm_output(raw: str, catalog: SchemaCatalog, question: str) -> Schema
     )
 
 
-def build_link_prompt(catalog: SchemaCatalog, question: str) -> str:
-    """构造 Schema Linking 用户侧 Prompt。"""
+def build_link_prompt(
+    catalog: SchemaCatalog,
+    question: str,
+    *,
+    business_rules: str | None = None,
+    example: str | None = None,
+    appendix_rules: str | None = None,
+) -> str:
+    """构造 Schema Linking 用户侧 Prompt。
+
+    Phase 13（跨数据库适配）：business_rules / example 允许由 Database
+    Profile 注入当前数据库的业务口径与示例；缺省 None = 本模块常量
+    （冻结基线逐字节不变）。
+
+    Phase 15（P0-2）：appendix_rules 为 KPI 口径定义 —— Linking 必须与
+    生成阶段共享同一口径（否则「销售额 → order_items」会在生成阶段被
+    Schema 校验拒绝）；缺省 None = 不追加（冻结基线逐字节不变）。
+    """
+    rules = business_rules if business_rules is not None else BUSINESS_RULES
+    example_text = example if example is not None else _EXAMPLE
+    appendix = f"\n{appendix_rules}\n" if appendix_rules else ""
     return (
         "【数据库 Schema】（来自真实 SQLite 数据库，只允许使用这些表与字段）\n"
         f"{catalog.to_prompt_text()}\n"
-        f"{BUSINESS_RULES}\n"
+        f"{rules}\n"
+        f"{appendix}"
         f"{_LINK_INSTRUCTIONS}\n"
-        f"{_EXAMPLE}\n"
+        f"{example_text}\n"
         f"【用户问题】{question}\n"
     )
 
@@ -131,8 +155,27 @@ def build_link_prompt(catalog: SchemaCatalog, question: str) -> str:
 class SchemaLinker:
     """Schema Linking 服务：通过 LLMProvider 识别相关表与字段。"""
 
-    def __init__(self, provider: LLMProvider | None = None) -> None:
+    def __init__(
+        self,
+        provider: LLMProvider | None = None,
+        adapter: "DatabaseAdapter | None" = None,
+        appendix_rules: str = "",
+    ) -> None:
         self._provider = provider or get_llm_provider()
+        # Phase 13：注入 DatabaseAdapter 后，Schema 目录 / 业务口径 / 示例
+        # 全部来自 Profile；缺省 None = 原全局行为（默认业务库 + 本模块常量）。
+        self._adapter = adapter
+        # Phase 15（P0-2）：无 adapter 路径的 KPI 口径附录（default_components 注入）。
+        self._appendix_rules = appendix_rules
+
+    def _prompt_texts(self) -> tuple[str, str, str]:
+        if self._adapter is None:
+            return BUSINESS_RULES, _EXAMPLE, self._appendix_rules
+        return (
+            self._adapter.profile.business_rules.schema_link_rules,
+            self._adapter.profile.business_rules.schema_link_example,
+            self._adapter.profile.business_rules.kpi_rules,
+        )
 
     def link(self, question: str) -> SchemaLinkResult:
         """执行 Schema Linking，返回经过真实 Schema 复核的结构化结果。
@@ -143,10 +186,20 @@ class SchemaLinker:
         """
         if not question or not question.strip():
             raise SchemaLinkingInvalidError("question 不能为空")
-        catalog = SchemaCatalog.from_database()
+        if self._adapter is not None:
+            catalog = self._adapter.get_cached_catalog()
+        else:
+            catalog = SchemaCatalog.from_database()
+        business_rules, example, appendix = self._prompt_texts()
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": build_link_prompt(catalog, question)},
+            {"role": "user", "content": build_link_prompt(
+                catalog,
+                question,
+                business_rules=business_rules,
+                example=example,
+                appendix_rules=appendix or None,
+            )},
         ]
         raw = self._provider.generate(messages, temperature=0.0)
         return _parse_llm_output(raw, catalog, question)

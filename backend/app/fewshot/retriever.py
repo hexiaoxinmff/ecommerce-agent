@@ -106,8 +106,18 @@ def score_example(query: FewShotQuery, example: FewShotExample) -> float:
 class FewShotRetriever:
     """基于本地数据集的规则型 Top-K 检索器。"""
 
-    def __init__(self, dataset: list[FewShotExample] | None = None) -> None:
+    def __init__(
+        self,
+        dataset: list[FewShotExample] | None = None,
+        keywords: tuple[str, ...] | None = None,
+    ) -> None:
         self._dataset = dataset if dataset is not None else get_dataset()
+        # Phase 13（跨数据库适配）：关键词词表可由 Few-shot Profile 注入；
+        # 缺省 None = 本模块 KEYWORDS（默认电商词表，行为不变）。
+        self._keywords = keywords if keywords is not None else KEYWORDS
+
+    def _matched_keywords_of(self, text: str) -> set[str]:
+        return {kw for kw in self._keywords if kw in text}
 
     def retrieve(self, query: FewShotQuery) -> FewShotResult:
         """检索 Top-K 示例：按 (score 降序, example_id 升序) 稳定排序。"""
@@ -115,7 +125,7 @@ class FewShotRetriever:
             raise ValueError("top_k 必须大于等于 1")
 
         scored = [
-            (example, round(score_example(query, example), 4))
+            (example, round(self._score_example(query, example), 4))
             for example in self._dataset
         ]
         scored.sort(key=lambda item: (-item[1], item[0].id))
@@ -135,3 +145,15 @@ class FewShotRetriever:
             for example, score in scored[:effective_k]
         ]
         return FewShotResult(question=query.question, matches=matches)
+
+    def _score_example(self, query: FewShotQuery, example: FewShotExample) -> float:
+        query_keys = self._matched_keywords_of(query.question)
+        example_keys = self._matched_keywords_of(example.question).union(
+            set(example.tags)
+        )
+        return (
+            WEIGHTS["keyword"] * _jaccard(query_keys, example_keys)
+            + WEIGHTS["table"] * _table_score(query.tables, example)
+            + WEIGHTS["column"] * _column_score(query.columns, example)
+            + WEIGHTS["scenario"] * _scenario_score(query.scenario, example)
+        )

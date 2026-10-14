@@ -1,0 +1,172 @@
+[
+  {
+    "id": "exb_001",
+    "question": "近30天销售额最高的商品有哪些？",
+    "scenario": "product_sales_ranking",
+    "tables": ["sales_orders", "order_lines", "items"],
+    "columns": [
+      "sales_orders.placed_on",
+      "sales_orders.order_state",
+      "order_lines.item_id",
+      "order_lines.line_total",
+      "items.id",
+      "items.item_title"
+    ],
+    "sql": "SELECT i.item_title AS item_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id JOIN items i ON i.id = ol.item_id WHERE so.placed_on >= date('now', '-30 day') AND so.order_state != 'voided' GROUP BY i.id ORDER BY total_sales DESC",
+    "explanation": "关联订单与商品，按商品汇总明细行金额（排除作废订单），按销售额降序。",
+    "tags": ["商品", "销售额", "排名", "时间范围"]
+  },
+  {
+    "id": "exb_002",
+    "question": "平台总销售额是多少？（排除作废订单）",
+    "scenario": "total_sales_amount",
+    "tables": ["sales_orders", "order_lines"],
+    "columns": [
+      "sales_orders.order_state",
+      "order_lines.line_total"
+    ],
+    "sql": "SELECT ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id WHERE so.order_state != 'voided'",
+    "explanation": "全部明细行金额求和即为总销售额，作废订单不参与统计。",
+    "tags": ["销售额", "金额", "作废"]
+  },
+  {
+    "id": "exb_003",
+    "question": "有多少活跃会员？",
+    "scenario": "active_member_count",
+    "tables": ["members"],
+    "columns": ["members.is_active"],
+    "sql": "SELECT COUNT(*) AS active_members FROM members WHERE is_active = 1",
+    "explanation": "统计 is_active 为 1（整数）的会员数量。",
+    "tags": ["会员", "数量", "活跃"]
+  },
+  {
+    "id": "exb_004",
+    "question": "在库商品有多少个？",
+    "scenario": "in_stock_item_count",
+    "tables": ["items"],
+    "columns": ["items.availability"],
+    "sql": "SELECT COUNT(*) AS in_stock_items FROM items WHERE availability = 'in_stock'",
+    "explanation": "统计 availability 为 in_stock 的商品数量。",
+    "tags": ["商品", "数量", "在库"]
+  },
+  {
+    "id": "exb_005",
+    "question": "各类目的销售额排名是多少？（排除作废订单）",
+    "scenario": "category_sales_ranking",
+    "tables": ["departments", "items", "order_lines", "sales_orders"],
+    "columns": [
+      "departments.dept_name",
+      "items.dept_id",
+      "order_lines.item_id",
+      "order_lines.line_total",
+      "sales_orders.order_state"
+    ],
+    "sql": "SELECT d.dept_name, ROUND(SUM(ol.line_total), 2) AS total_sales FROM departments d JOIN items i ON i.dept_id = d.id JOIN order_lines ol ON ol.item_id = i.id JOIN sales_orders so ON so.id = ol.sales_order_id WHERE so.order_state != 'voided' GROUP BY d.id ORDER BY total_sales DESC",
+    "explanation": "类目单层结构直接一层 JOIN，按类目汇总明细行金额（排除作废订单）并降序。",
+    "tags": ["类目", "销售额", "排名"]
+  },
+  {
+    "id": "exb_006",
+    "question": "各城市的销售额分别是多少？（排除作废订单）",
+    "scenario": "city_sales_ranking",
+    "tables": ["members", "sales_orders", "order_lines"],
+    "columns": [
+      "members.city",
+      "sales_orders.member_id",
+      "sales_orders.order_state",
+      "order_lines.line_total"
+    ],
+    "sql": "SELECT m.city, ROUND(SUM(ol.line_total), 2) AS total_sales FROM sales_orders so JOIN members m ON m.id = so.member_id JOIN order_lines ol ON ol.sales_order_id = so.id WHERE so.order_state != 'voided' GROUP BY m.city ORDER BY total_sales DESC",
+    "explanation": "订单表无城市字段，必须 JOIN members 取会员城市，再按明细口径汇总销售额。",
+    "tags": ["城市", "销售额", "排名", "会员"]
+  },
+  {
+    "id": "exb_007",
+    "question": "客单价是多少？（排除作废订单，按应付金额平均）",
+    "scenario": "average_order_amount",
+    "tables": ["sales_orders"],
+    "columns": ["sales_orders.payment_due", "sales_orders.order_state"],
+    "sql": "SELECT ROUND(AVG(payment_due), 2) AS avg_order_amount FROM sales_orders WHERE order_state != 'voided'",
+    "explanation": "客单价指平均实付/应付金额，用 payment_due 并排除作废订单。",
+    "tags": ["客单", "金额", "平均", "作废"]
+  },
+  {
+    "id": "exb_008",
+    "question": "总订单数是多少？（包含作废订单）",
+    "scenario": "total_order_count",
+    "tables": ["sales_orders"],
+    "columns": ["sales_orders.id"],
+    "sql": "SELECT COUNT(*) AS total_orders FROM sales_orders",
+    "explanation": "订单数属于结构统计（计数类），包含作废订单，不加状态过滤。",
+    "tags": ["订单", "数量"]
+  },
+  {
+    "id": "exb_009",
+    "question": "各订单状态的数量分布是怎样的？",
+    "scenario": "order_status_breakdown",
+    "tables": ["sales_orders"],
+    "columns": ["sales_orders.order_state"],
+    "sql": "SELECT order_state, COUNT(*) AS order_count FROM sales_orders GROUP BY order_state ORDER BY order_count DESC",
+    "explanation": "按 order_state 分组计数，结构统计包含作废订单。",
+    "tags": ["订单", "数量", "作废"]
+  },
+  {
+    "id": "exb_010",
+    "question": "累计消费金额最高的3名会员是谁？（排除作废订单，按应付金额）",
+    "scenario": "top_customer_sales",
+    "tables": ["members", "sales_orders"],
+    "columns": [
+      "members.member_name",
+      "sales_orders.member_id",
+      "sales_orders.payment_due",
+      "sales_orders.order_state"
+    ],
+    "sql": "SELECT m.member_name, ROUND(SUM(so.payment_due), 2) AS total_spent FROM members m JOIN sales_orders so ON so.member_id = m.id WHERE so.order_state != 'voided' GROUP BY m.id ORDER BY total_spent DESC LIMIT 3",
+    "explanation": "按会员汇总应付金额（累计消费口径，排除作废订单），降序取前3。",
+    "tags": ["会员", "金额", "排名"]
+  },
+  {
+    "id": "exb_011",
+    "question": "每月销售额趋势是怎样的？（排除作废订单）",
+    "scenario": "monthly_sales_trend",
+    "tables": ["sales_orders", "order_lines"],
+    "columns": [
+      "sales_orders.placed_on",
+      "sales_orders.order_state",
+      "order_lines.line_total"
+    ],
+    "sql": "SELECT substr(so.placed_on, 1, 7) AS month, ROUND(SUM(ol.line_total), 2) AS total_sales FROM order_lines ol JOIN sales_orders so ON so.id = ol.sales_order_id WHERE so.order_state != 'voided' GROUP BY month ORDER BY month",
+    "explanation": "用 substr 截取年月分组，按明细口径汇总销售额（排除作废订单）。",
+    "tags": ["销售额", "趋势", "时间范围"]
+  },
+  {
+    "id": "exb_012",
+    "question": "价格最贵的5个商品及其吊牌价是什么？",
+    "scenario": "top_priced_items",
+    "tables": ["items"],
+    "columns": ["items.item_title", "items.list_price"],
+    "sql": "SELECT item_title, list_price FROM items ORDER BY list_price DESC LIMIT 5",
+    "explanation": "商品标价用 list_price（吊牌价），降序取前5。",
+    "tags": ["商品", "价格", "排名"]
+  },
+  {
+    "id": "exb_013",
+    "question": "从未下过单的会员有多少个？",
+    "scenario": "member_without_order_count",
+    "tables": ["members", "sales_orders"],
+    "columns": ["members.id", "sales_orders.member_id"],
+    "sql": "SELECT COUNT(*) AS members_without_orders FROM members m WHERE NOT EXISTS (SELECT 1 FROM sales_orders so WHERE so.member_id = m.id)",
+    "explanation": "用 NOT EXISTS 找没有任何订单的会员并计数。",
+    "tags": ["会员", "订单", "数量"]
+  },
+  {
+    "id": "exb_014",
+    "question": "2026年8月的订单有多少笔？",
+    "scenario": "monthly_order_count",
+    "tables": ["sales_orders"],
+    "columns": ["sales_orders.placed_on"],
+    "sql": "SELECT COUNT(*) AS order_count FROM sales_orders WHERE placed_on >= '2026-08-01' AND placed_on < '2026-09-01'",
+    "explanation": "日期为 ISO 字符串，用半开区间筛选单月并计数（计数类不排除作废订单）。",
+    "tags": ["订单", "数量", "时间范围"]
+  }
+]

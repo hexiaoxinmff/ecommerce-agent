@@ -35,17 +35,27 @@ from app.sqlexec.executor import execute as executor_execute
 
 
 def default_components() -> AgentComponents:
-    """生产默认组件（真实模块；provider 为当前默认 Mimo）。"""
+    """生产默认组件（真实模块；provider 为当前默认 Provider）。
+
+    Phase 15（P0-1/P0-2）：默认组件与 Profile 组件共享同一运行时附录
+    （KPI 口径定义 + 数据时效契约）——生产 API 与实验路径行为一致；
+    附录为空（库不可读降级）时 Prompt 与冻结基线逐字节一致。
+    """
+    from app.dbprofile.time_anchor import default_kpi_rules, default_prompt_appendix
+
+    appendix = default_prompt_appendix()
+    kpi_rules = default_kpi_rules()
     provider = get_llm_provider()
-    schema_linker = SchemaLinker(provider=provider)
+    schema_linker = SchemaLinker(provider=provider, appendix_rules=kpi_rules)
     fewshot_retriever = FewShotRetriever()
     sql_generator = SQLGenerator(
         provider=provider,
         schema_linker=schema_linker,
         fewshot_retriever=fewshot_retriever,
+        appendix_rules=appendix,
     )
     sql_repairer = SQLRepairer(
-        provider=provider, fewshot_retriever=fewshot_retriever
+        provider=provider, fewshot_retriever=fewshot_retriever, appendix_rules=appendix
     )
     return AgentComponents(
         schema_linker=schema_linker,

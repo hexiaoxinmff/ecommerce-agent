@@ -26,6 +26,21 @@ def test_health_ok(client: TestClient) -> None:
     }
 
 
+def test_health_reports_runtime_llm_config(client: TestClient) -> None:
+    """Phase 4：health 携带实际配置的 Provider/Model（前端 Runtime LLM 徽标数据源）。
+
+    断言对齐 config 真实值而非硬编码：llm.provider 必须等于当前
+    LLM_PROVIDER 配置，model 与配置一致或为 null（未配置模型名时）。
+    """
+    response = client.get("/api/health")
+    assert response.status_code == 200
+    llm = response.json()["llm"]
+    assert llm is not None
+    assert llm["provider"] == config.LLM_PROVIDER
+    expected_model = (config.MIMO_MODEL or "").strip() or None
+    assert llm["model"] == expected_model
+
+
 def test_health_degraded_when_database_missing(
     client: TestClient, monkeypatch
 ) -> None:

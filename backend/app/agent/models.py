@@ -40,8 +40,14 @@ class AgentResult(BaseModel):
 
 
 class AgentResponse(BaseModel):
-    """POST /api/agent/analyze 响应体。"""
+    """POST /api/agent/analyze 响应体。
+
+    data_as_of（Phase 15 · P0-1 最小版）：业务数据截止日，来自
+    Data As-Of 契约的真实查询；前端在结果区展示「数据截至」，使
+    相对时间口径可验证。契约不可用时为空串（前端不展示该行）。
+    """
 
     success: bool
     result: AgentResult | None = None
     error: str = ""
+    data_as_of: str = ""

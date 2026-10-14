@@ -54,14 +54,17 @@ def _readonly_uri(path: Path) -> str:
     return f"file:{uri_path}?mode=ro"
 
 
-def get_connection() -> sqlite3.Connection:
-    """获取一条独立的只读连接，调用方负责关闭。
+def get_connection_for(db_path: Path) -> sqlite3.Connection:
+    """获取指向指定数据库文件的一条独立只读连接，调用方负责关闭。
+
+    Phase 13（跨数据库适配）：把「连接哪个库」参数化，
+    get_connection() 等价于 get_connection_for(config.DB_PATH)。
 
     Raises:
         DatabaseNotFoundError: 数据库文件不存在。
-        DatabaseConnectionError: 数据库无法以只读方式打开。
+        DatabaseConnectionError: 数据库文件存在但无法以只读方式打开。
     """
-    db_path = Path(config.DB_PATH)
+    db_path = Path(db_path)
     if not db_path.is_file():
         raise DatabaseNotFoundError(
             f"数据库文件不存在: {db_path}（请先运行 scripts/init_db.py 生成数据库）"
@@ -76,6 +79,16 @@ def get_connection() -> sqlite3.Connection:
     conn.execute("PRAGMA query_only = ON")
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
+
+
+def get_connection() -> sqlite3.Connection:
+    """获取默认业务库（config.DB_PATH）的一条独立只读连接，调用方负责关闭。
+
+    Raises:
+        DatabaseNotFoundError: 数据库文件不存在。
+        DatabaseConnectionError: 数据库文件存在但无法以只读方式打开。
+    """
+    return get_connection_for(config.DB_PATH)
 
 
 def is_database_readable() -> bool:

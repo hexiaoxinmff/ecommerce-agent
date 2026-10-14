@@ -1,0 +1,280 @@
+{
+  "phase": "2D",
+  "artifact": "CANDIDATE_A_PROMOTION_REVIEW",
+  "generated": "2026-09-20",
+  "mode": "READ_ONLY_ACCEPTANCE_AUDIT",
+  "prohibitions_honored": [
+    "no merge",
+    "no rebase",
+    "no reset",
+    "no cherry-pick",
+    "no commit",
+    "no push",
+    "no production code change",
+    "no test change",
+    "no Prompt / Few-shot / Benchmark / DB change",
+    "no modification to master"
+  ],
+
+  "objects": {
+    "master": "518cd8964fc438aa82151f60b415cb4d9ce17a37",
+    "candidate_a_production_commit": "019b18a450c25887c1786ce2a76d55af57640ea8",
+    "documentation_commit": "681415360f08b905cb607947ead5bc9a3767165d",
+    "candidate_a_branch": "candidateA_promotion_20260920"
+  },
+
+  "section2_commit_ancestry": {
+    "019b18a_parent": "518cd8964fc438aa82151f60b415cb4d9ce17a37",
+    "master": "518cd8964fc438aa82151f60b415cb4d9ce17a37",
+    "6814153_parent": "019b18a450c25887c1786ce2a76d55af57640ea8",
+    "assertion_019b18a_parent_eq_master": "PASS",
+    "assertion_6814153_parent_eq_019b18a": "PASS"
+  },
+
+  "section3_production_diff": {
+    "command": "git diff --name-only master 019b18a",
+    "file_count": 6,
+    "production_file_count": 5,
+    "test_file_count": 1,
+    "stat": "6 files changed, 383 insertions(+), 13 deletions(-)",
+    "files": [
+      {
+        "path": "backend/app/agent/graph.py",
+        "role": "A1 graph cache",
+        "blob_sha1": "cbfff471bcc84acbdef0c72f38dc83b7f04d6d70",
+        "content_sha256": "9d09cbae3de49521cef242e106e967b8065aa368c9a6dcc0183b16503d14a25b",
+        "size_bytes": 4889
+      },
+      {
+        "path": "backend/app/llm/mimo.py",
+        "role": "A3 client reuse",
+        "blob_sha1": "3f79645d53f63cb136b2ce50139f5b2194abe754",
+        "content_sha256": "2eddd623bf8db37a91cf9462783eba6f462944c08363c977540999750e2be403",
+        "size_bytes": 5779
+      },
+      {
+        "path": "backend/app/schema/metadata.py",
+        "role": "A2 catalog cache",
+        "blob_sha1": "88f829e09e687d706b9193ec54ee3da58e50c249",
+        "content_sha256": "6aa9b571229d17ad6d9f066c911886f35b046b48a39911280d3a1989293e2de8",
+        "size_bytes": 6219
+      },
+      {
+        "path": "backend/app/sqlgen/safety.py",
+        "role": "A4 single parse",
+        "blob_sha1": "cf2f597903dcaf1908b5c3c39752ef1f3ec5281d",
+        "content_sha256": "c9cd072471381036b9e32c675225dafa30a7992e096ee2fbbb0f42fa03bb85b1",
+        "size_bytes": 3575
+      },
+      {
+        "path": "backend/app/sqlgen/validator.py",
+        "role": "A4 consumer",
+        "blob_sha1": "0c24047b98dcf0145ef7041841e8c5a16dc28ee7",
+        "content_sha256": "1c0e9a2c395adabcf1528ced1f90f844e1e2b9d6f5f76a2138570ff05f384e59",
+        "size_bytes": 4545
+      },
+      {
+        "path": "backend/tests/test_task29_runtime_reuse.py",
+        "role": "Candidate A test",
+        "blob_sha1": "dec8e72f64aa2064b13aa884667cdd1a1b2bffb7",
+        "content_sha256": "5d6282299832c69e7b75a5a5a768ba1307661a529940cfc24cd0cb0bf4d52383",
+        "size_bytes": 9783
+      }
+    ]
+  },
+
+  "section4_content_level_contamination_check": {
+    "graph_py_required_present": "SchemaLinker(provider=provider)",
+    "graph_py_forbidden_present": {
+      "create_schema_linker": false,
+      "linker_factory": false
+    },
+    "graph_py_verdict": "PASS",
+    "full_diff_scan_patterns": {
+      "linker_factory": { "added": 0, "removed": 0 },
+      "create_schema_linker": { "added": 0, "removed": 0 },
+      "Rule Linker": { "added": 0, "removed": 0 },
+      "RuleSchemaLinker": { "added": 0, "removed": 0 },
+      "rule_linker": { "added": 0, "removed": 0 },
+      "Coverage Guard": { "added": 0, "removed": 0 },
+      "coverage_guard": { "added": 0, "removed": 0 },
+      "Hybrid": { "added": 0, "removed": 0 },
+      "hybrid": { "added": 0, "removed": 0 },
+      "Schema Retrieval": { "added": 0, "removed": 0 },
+      "schema_retrieval": { "added": 0, "removed": 0 },
+      "structural_coverage": { "added": 0, "removed": 0 },
+      "Task 30": { "added": 0 },
+      "Task 32": { "added": 0 },
+      "Task 33": { "added": 0 },
+      "Task 34": { "added": 0 },
+      "LINKER_MODE": { "added": 0, "removed": 0 }
+    },
+    "optimization_signatures_present": {
+      "_DEFAULT_GRAPH_CACHE": 7,
+      "get_default_graph": 12,
+      "clear_default_graph_cache": 4,
+      "_CATALOG_CACHE": 7,
+      "get_cached": 11,
+      "clear_cache": 5,
+      "_get_client": 7,
+      "max_retries=0": 1,
+      "_parse_single_readonly": 3,
+      "check_sql_safety_with_tables": 12
+    },
+    "forbidden_production_contamination": 0,
+    "verdict": "PASS"
+  },
+
+  "section5_experimental_component_isolation": {
+    "files_absent_from_promotion_tree": [
+      "backend/app/schema/rule_linker.py",
+      "backend/app/schema/coverage_guard.py",
+      "backend/app/schema/hybrid_linker.py",
+      "backend/app/agent/schema_retrieval.py",
+      "backend/app/schema/linker_factory.py",
+      "backend/app/agent/structural_coverage.py"
+    ],
+    "whole_tree_reference_scan": {
+      "python_files_scanned": 123,
+      "rule_linker": 0,
+      "coverage_guard": 0,
+      "hybrid_linker": 0,
+      "schema_retrieval": 0,
+      "structural_coverage": 0,
+      "linker_factory": 0
+    },
+    "wiring_surface": {
+      "graph_py_import": "from app.schema.linker import SchemaLinker",
+      "graph_default_components": "SchemaLinker(provider=provider)",
+      "LINKER_MODE_in_backend": "0 occurrences (absent)",
+      "create_schema_linker": "not present, not called",
+      "config_linker_settings": "no experimental linker settings"
+    },
+    "verdict": "NOT REACHABLE FROM PRODUCTION"
+  },
+
+  "section6_functional_tests": {
+    "command": "python -m pytest backend/tests",
+    "branch": "candidateA_promotion_20260920",
+    "passed": 399,
+    "failed": 0,
+    "warnings": 1,
+    "warning_detail": "anyio.abc.BlockingPortal deprecation from starlette.testclient",
+    "duration_s": 25.5,
+    "recovered_master_passed_for_context": 367,
+    "delta": "+32",
+    "delta_explanation": "test_task29_runtime_reuse.py: 16 test functions parameterizing to 32 cases",
+    "delta_is_business_metric": false,
+    "verdict": "PASS"
+  },
+
+  "section7_safety_regression": {
+    "sample_count": 11,
+    "dimensions_checked": ["exception class", "message", "status", "repair behavior"],
+    "cases": [
+      { "case": "valid_select", "baseline": "OK: ['users']", "candidate_a": "OK: ['users']", "equivalent": true },
+      { "case": "valid_with_cte", "baseline": "OK: ['orders']", "candidate_a": "OK: ['orders']", "equivalent": true },
+      { "case": "multi_statement", "baseline": "SQLUnsafeError: 只允许单条 SQL 语句", "candidate_a": "same", "equivalent": true },
+      { "case": "pragma", "baseline": "SQLUnsafeError: 只允许 SELECT / WITH 查询", "candidate_a": "same", "equivalent": true },
+      { "case": "write_insert", "baseline": "SQLUnsafeError: 只允许 SELECT / WITH 查询", "candidate_a": "same", "equivalent": true },
+      { "case": "write_update", "baseline": "SQLUnsafeError: 只允许 SELECT / WITH 查询", "candidate_a": "same", "equivalent": true },
+      { "case": "write_delete", "baseline": "SQLUnsafeError: 只允许 SELECT / WITH 查询", "candidate_a": "same", "equivalent": true },
+      { "case": "write_drop", "baseline": "SQLUnsafeError: 只允许 SELECT / WITH 查询", "candidate_a": "same", "equivalent": true },
+      { "case": "attach", "baseline": "SQLUnsafeError: 只允许 SELECT / WITH 查询", "candidate_a": "same", "equivalent": true },
+      { "case": "empty_sql", "baseline": "SQLUnsafeError: SQL 为空", "candidate_a": "same", "equivalent": true },
+      { "case": "non_select", "baseline": "SQLUnsafeError: 只允许 SELECT / WITH 查询", "candidate_a": "same", "equivalent": true }
+    ],
+    "ALL_EQUIVALENT": true,
+    "repair_path_present_in_graph": true,
+    "repair_bounded": true,
+    "verdict": "PASS"
+  },
+
+  "section8_runtime_smoke": {
+    "network_calls": "NONE (no Mimo provider call)",
+    "A1_graph_reuse": { "result": "PASS", "detail": "builder invoked exactly once across two get_default_graph() calls; clear -> rebuild to new object" },
+    "A2_schema_resource_reuse": { "result": "PASS", "detail": "get_cached() same instance twice; tables=(users, categories, products, orders, order_items); clear_cache -> rebuild" },
+    "A3_mimo_client_reuse": { "result": "PASS", "detail": "lazy create, max_retries=0, instance-level self._client (not a class attribute)" },
+    "A4_safety_referenced_table_reuse": { "result": "PASS", "detail": "join -> {'users','orders'}; CTE name correctly excluded, WITH t -> {'orders'}" },
+    "RUNTIME_SMOKE": "PASS"
+  },
+
+  "section9_frozen_asset_verification": {
+    "working_tree_hashes": {
+      "prompt": { "file": "backend/app/sqlgen/prompt.py", "sha256": "31244e614fb36a693220a44d5a71610b0350aca26c61c8b98075afcd70d87fed", "match": "MATCH" },
+      "dataset": { "file": "data/eval/ecommerce_eval_v1.json", "sha256": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a", "match": "MATCH" },
+      "fewshot": { "file": "data/fewshot/ecommerce_examples.json", "sha256": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee", "match": "MATCH" },
+      "db": { "file": "db/ecommerce.db", "sha256": "65e5d8b2727cfa064174f9a08aa7d4b08209e0edd1eba81f3155698f1a4491d9", "match": "MATCH" }
+    },
+    "commit_level_cross_check_019b18a_vs_master": {
+      "backend/app/sqlgen/prompt.py": { "019b18a_blob_sha256": "a7803fa414c2d4d666214915a01f80374da8c2c2a2be2a678088e61512f039f6", "master_blob_sha256": "a7803fa414c2d4d666214915a01f80374da8c2c2a2be2a678088e61512f039f6", "same": true },
+      "data/eval/ecommerce_eval_v1.json": { "019b18a_blob_sha256": "28159b29fc59452d55632318e8395568cb72b218e51c152641019396cbf6c7e1", "master_blob_sha256": "28159b29fc59452d55632318e8395568cb72b218e51c152641019396cbf6c7e1", "same": true },
+      "data/fewshot/ecommerce_examples.json": { "019b18a_blob_sha256": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee", "master_blob_sha256": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee", "same": true }
+    },
+    "note": "Blob-content hashes differ from working-tree SHA256 only due to core.autocrlf CRLF->LF normalization inside the object store. The working-tree values are the authoritative frozen hashes, and both trees agree with each other.",
+    "verdict": "MATCH"
+  },
+
+  "section10_master_integrity": {
+    "master_rev": "518cd8964fc438aa82151f60b415cb4d9ce17a37",
+    "branch_rev": "681415360f08b905cb607947ead5bc9a3767165d",
+    "master_eq_518cd896": true,
+    "master_contains_candidate_a": {
+      "_DEFAULT_GRAPH_CACHE_A1": false,
+      "_CATALOG_CACHE_A2": false,
+      "_get_client_A3": false,
+      "_parse_single_readonly_A4": false
+    },
+    "verdict": "UNCHANGED"
+  },
+
+  "section11_documentation_commit_separation": {
+    "command": "git diff --name-only 019b18a 6814153",
+    "files": [
+      "reports/CANDIDATE_A_PROMOTION_MANIFEST.json",
+      "reports/CANDIDATE_A_PROMOTION_MANIFEST.md",
+      "reports/REPOSITORY_RECOVERY_PHASE_2C.md"
+    ],
+    "production_source_files_changed": 0,
+    "insertions": 716,
+    "deletions": 0,
+    "nature": "documentation only",
+    "verdict": "PASS (not BLOCKED)"
+  },
+
+  "working_tree": {
+    "tracked_tree_clean": true,
+    "untracked": [
+      ".workbuddy-ai/memory/2026-09-20.md",
+      ".workbuddy-ai/memory/MEMORY.md"
+    ],
+    "untracked_note": "Assistant working-memory files, outside the tracked production tree, containing no Candidate A content. Not a promotion artifact; not proposed for commit.",
+    "verdict": "CLEAN (tracked tree)"
+  },
+
+  "recovery_ancestry_statement": {
+    "original_master_d668e6a": "UNRECOVERABLE",
+    "recovered_master_518cd896": "reconstructed baseline, 0 parent, no fabricated ancestry",
+    "forbidden_phrase": "original master restored",
+    "required_phrase": "recovered/reconstructed baseline commit"
+  },
+
+  "section12_final_decision": {
+    "conditions": {
+      "019b18a_parent_eq_recovered_master": "PASS",
+      "production_diff_candidate_a_only": "PASS",
+      "forbidden_production_contamination_zero": "PASS",
+      "399_tests_passed": "PASS",
+      "safety_pass": "PASS",
+      "runtime_smoke_pass": "PASS",
+      "frozen_hashes_match": "PASS",
+      "master_unchanged": "PASS",
+      "working_tree_clean": "PASS",
+      "6814153_documentation_only": "PASS"
+    },
+    "decision": "READY_FOR_MASTER_MERGE",
+    "merged_by_this_review": false
+  },
+
+  "status": "STOPPED"
+}

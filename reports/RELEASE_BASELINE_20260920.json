@@ -1,0 +1,401 @@
+{
+  "$schema_note": "Phase 2F — Release Baseline Freeze, machine-readable record",
+  "report_id": "RELEASE_BASELINE_20260920",
+  "report_type": "release_baseline",
+  "phase": "2F",
+  "date": "2026-09-20",
+  "generated_at": "2026-09-20T14:20:00+08:00",
+  "human_readable": "reports/RELEASE_BASELINE_20260920.md",
+  "hash_manifest": [
+    "reports/RELEASE_BASELINE_MANIFEST.json",
+    "reports/RELEASE_BASELINE_MANIFEST.md"
+  ],
+  "status": "RELEASE_BASELINE_FROZEN",
+
+  "1_baseline_identity": {
+    "current_development_baseline": "35a9ad6",
+    "commit_full": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+    "commit_subject": "docs: finalize Phase 2E report tip",
+    "branch": "master",
+    "head_full": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+    "head_equals_master": true,
+    "release_tag": "release_baseline_20260920",
+    "release_tag_target": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+    "release_tag_type": "lightweight",
+    "release_tag_ref_file": ".git/refs/tags/release_baseline_20260920",
+    "release_tag_ref_bytes": 41,
+    "release_tag_verified_via_rev_parse": true,
+    "ref_names_with_slash": [],
+    "commit_content_modified": false
+  },
+
+  "2_git_state": {
+    "git_version": "2.55.0.windows.3",
+    "core_autocrlf": "true",
+    "branches": {
+      "master": {
+        "commit": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+        "short": "35a9ad6",
+        "role": "current development baseline"
+      },
+      "candidateA_promotion_20260920": {
+        "commit": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+        "short": "35a9ad6",
+        "role": "same commit as master"
+      },
+      "recovery_master_20260920": {
+        "commit": "518cd8964fc438aa82151f60b415cb4d9ce17a37",
+        "short": "518cd896",
+        "role": "recovery anchor (retained, not deleted)"
+      }
+    },
+    "tags": {
+      "release_baseline_20260920": "35a9ad61a9616619c1324fda68de69b6ae19996c"
+    },
+    "commit_tip_log_5": [
+      "35a9ad6 (HEAD -> master, tag: release_baseline_20260920, candidateA_promotion_20260920) docs: finalize Phase 2E report tip",
+      "df83d0a docs: correct Phase 2E report final state",
+      "7286d11 docs: Phase 2E final promotion report",
+      "6814153 docs: Phase 2C recovery report + Candidate A promotion manifest",
+      "019b18a perf: promote Candidate A runtime reuse"
+    ],
+    "linked_worktrees": [
+      {
+        "path": "F:/基于 Text2SQL 的电商智能数据分析 Agent",
+        "head": "35a9ad6",
+        "branch": "master"
+      },
+      {
+        "path": "C:/Users/29593/WorkBuddy/Worktrees/基于 Text2SQL 的电商智能数据分析 Agent/master-b947f329",
+        "head": "80a09b5",
+        "branch": "workbuddy/master-b947f329"
+      },
+      {
+        "path": "C:/Users/29593/WorkBuddy/Worktrees/基于 Text2SQL 的电商智能数据分析 Agent/master-de8ad9a1",
+        "head": "80a09b5",
+        "branch": "workbuddy/master-de8ad9a1"
+      },
+      {
+        "path": "C:/Users/29593/WorkBuddy/Worktrees/基于 Text2SQL 的电商智能数据分析 Agent/master-e516219f",
+        "head": "80a09b5",
+        "branch": "workbuddy/master-e516219f"
+      }
+    ],
+    "worktrees_modified": false
+  },
+
+  "3_candidate_a_production_state": {
+    "status": "IN_MASTER",
+    "merged_in_commit": "019b18a",
+    "merged_in_subject": "perf: promote Candidate A runtime reuse",
+    "promotion_branch": "candidateA_promotion_20260920",
+    "observable_semantics_changed": false,
+    "five_source_sha256": {
+      "backend/app/agent/graph.py": "9d09cbae3de49521cef242e106e967b8065aa368c9a6dcc0183b16503d14a25b",
+      "backend/app/schema/metadata.py": "6aa9b571229d17ad6d9f066c911886f35b046b48a39911280d3a1989293e2de8",
+      "backend/app/llm/mimo.py": "2eddd623bf8db37a91cf9462783eba6f462944c08363c977540999750e2be403",
+      "backend/app/sqlgen/safety.py": "c9cd072471381036b9e32c675225dafa30a7992e096ee2fbbb0f42fa03bb85b1",
+      "backend/app/sqlgen/validator.py": "1c0e9a2c395adabcf1528ced1f90f844e1e2b9d6f5f76a2138570ff05f384e59"
+    },
+    "candidate_a_test_sha256": {
+      "backend/tests/test_task29_runtime_reuse.py": "5d6282299832c69e7b75a5a5a768ba1307661a529940cfc24cd0cb0bf4d52383",
+      "backend/tests/conftest.py": "3aec65b806a228b5d611f93080f23d776398c4c7c7adf8d28cdfde483c376599"
+    },
+    "optimizations": [
+      "graph.py: process-level graph cache in get_default_graph()",
+      "metadata.py: SchemaCatalog.get_cached()/clear_cache() — 12 SQLite connections per request -> 0",
+      "mimo.py: MimoProvider._get_client() instance reuse, max_retries=0",
+      "safety.py: check_sql_safety_with_tables() single sqlglot parse; validator.py switched to it"
+    ]
+  },
+
+  "4_experimental_component_isolation": {
+    "production": [
+      {
+        "name": "SchemaLinker",
+        "entrypoint": "create_schema_linker()",
+        "mode": "llm",
+        "file": "backend/app/schema/linker_factory.py"
+      },
+      {
+        "name": "Candidate A",
+        "kind": "runtime reuse optimizations"
+      }
+    ],
+    "not_production": [
+      {
+        "name": "Rule Linker",
+        "file": "backend/app/schema/rule_linker.py",
+        "verdict": "BLOCKED",
+        "reason": "Task 30/31: Sufficiency 88.9% < 98% threshold"
+      },
+      {
+        "name": "Coverage Guard",
+        "file": "backend/app/schema/coverage_guard.py",
+        "verdict": "BLOCKED",
+        "reason": "Task 32: recall 1/4 (true 0/4); sufficiency ceiling locked at 87.5%"
+      },
+      {
+        "name": "Hybrid Linker",
+        "file": "backend/app/schema/hybrid_linker.py",
+        "verdict": "BLOCKED",
+        "reason": "Task 32: upper bound determined by recall, not precision"
+      },
+      {
+        "name": "Schema Retrieval",
+        "file": "backend/app/agent/schema_retrieval.py",
+        "verdict": "INCONCLUSIVE",
+        "reason": "Task 34: no config satisfies high recall + materially smaller candidate set"
+      }
+    ],
+    "experimental_wired_to_production": false
+  },
+
+  "5_test_baseline": {
+    "command": "python -m pytest backend/tests",
+    "interpreter": ".venv/Scripts/python.exe",
+    "python_version": "3.12.10",
+    "pytest_version": "9.1.1",
+    "passed": 399,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "warnings": 1,
+    "warning_detail": "starlette/testclient.py:53 DeprecationWarning: anyio.abc.BlockingPortal alias deprecated (third-party, not project code)",
+    "duration_reported_s": 27.62,
+    "duration_wall_clock_s": 32,
+    "result": "PASS"
+  },
+
+  "6_safety_baseline": {
+    "status": "PASS",
+    "included_in_399_passed": true,
+    "covered_by": [
+      "backend/tests/test_sql_executor.py",
+      "backend/app/sqlgen/safety.py unit tests"
+    ],
+    "candidate_a_safety_regression": "0 diffs across 29 samples"
+  },
+
+  "7_frozen_asset_hashes": {
+    "prompt_v1_3": {
+      "path": "data/prompts/sql_generator_v1.3.txt",
+      "sha256": "2af938be9866a62a97fdc3f1b0c7dc43b0785a7ff75ad420109b1d18ed39dc4c",
+      "frozen_record_prefix": "10583478",
+      "result": "MATCH"
+    },
+    "fewshot_v3": {
+      "path": "data/fewshot/ecommerce_examples.json",
+      "sha256": "ee12fcc994c6afec42a94f4e327109961ac2022466673bc4a37485638f7d4cee",
+      "frozen_record_prefix": "ee12fcc9",
+      "result": "MATCH"
+    },
+    "dataset": {
+      "path": "data/eval/ecommerce_eval_v1.json",
+      "sha256": "dba277cc0be7cc282df67c86dd7eabfea1337458612a86885f6daef0c6829f1a",
+      "frozen_record_prefix": "dba277cc",
+      "result": "MATCH"
+    },
+    "db": {
+      "path": "db/ecommerce.db",
+      "sha256": "65e5d8b2727cfa064174f9a08aa7d4b08209e0edd1eba81f3155698f1a4491d9",
+      "size_bytes": 2912256
+    },
+    "clean_baseline": {
+      "path": "reports/eval/clean_baseline_v1_1/eval_clean_baseline_v1_1.json",
+      "sha256": "39404fedef84b338cc7b48ed2972db98c7c574cd8cfca196ca02f7843e42f66e",
+      "bytes": 418828,
+      "run_id": "20260916_09876",
+      "frozen_record_prefix": "39404fed",
+      "result": "MATCH"
+    },
+    "dependency_pins": {
+      "sqlglot": "30.18.0",
+      "result": "MATCH"
+    },
+    "overall": "MATCH"
+  },
+
+  "8_performance_measurement_scope": {
+    "local_deterministic": {
+      "before_ms": 29.074,
+      "after_ms": 1.955,
+      "delta_percent": -93.3,
+      "evidence_class": "LOCAL_DETERMINISTIC",
+      "status": "MEASURED"
+    },
+    "historical_provider_backed": {
+      "value_ms_per_call": 836,
+      "note": "client reuse evidence",
+      "evidence_class": "HISTORICAL_PROVIDER_BACKED",
+      "status": "SUPPORTING_EVIDENCE_ONLY"
+    },
+    "current_real_e2e": {
+      "value": "NOT_MEASURED",
+      "reason": "Mimo HTTP 402 Insufficient account balance",
+      "evidence_class": "CURRENT_E2E",
+      "status": "UNAVAILABLE"
+    },
+    "prohibited_claims": [
+      "E2E latency improved 93.3%"
+    ],
+    "claim_discipline": "Three evidence layers must never be mixed: local deterministic / historical provider-backed / current E2E"
+  },
+
+  "9_recovery_anchor": {
+    "ref": "recovery_master_20260920",
+    "commit": "518cd8964fc438aa82151f60b415cb4d9ce17a37",
+    "short": "518cd896",
+    "subject": "recovery: reconstruct master baseline 2026-09-20",
+    "present": true,
+    "deleted": false,
+    "construction": "git write-tree + git commit-tree (0 parent, ancestors not guessed)"
+  },
+
+  "10_backup_location": {
+    "path": "C:/Users/29593/Desktop/Text2SQL_Agent_ReleaseBackup_20260920",
+    "method": "physical cp -r (.git + full worktree); NOT a git export",
+    "status": "COMPLETE",
+    "attempts": 2,
+    "first_attempt": {
+      "result": "FAILED",
+      "root_cause": "second cp -r \"$SRC/.\" wrote into a destination already containing .git, causing self-overwrite and ~57 Permission denied errors",
+      "remediation": "wiped destination; .git copied exclusively first, then find -mindepth 1 -maxdepth 1 ! -name .git"
+    },
+    "second_attempt": {
+      "result": "COMPLETE",
+      "rc_git": 0,
+      "rc_worktree": 0,
+      "stderr_error_count": 0
+    },
+    "verification": {
+      "backup_head": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+      "backup_master": "35a9ad61a9616619c1324fda68de69b6ae19996c",
+      "backup_tag": "release_baseline_20260920 -> 35a9ad61a9616619c1324fda68de69b6ae19996c",
+      "backup_branches_match_source": true,
+      "tag_ref_file_present_in_backup": true,
+      "fsck_connectivity_only": "only pre-existing dangling objects; no corruption",
+      "src_git_bytes": 53223332,
+      "backup_git_bytes": 53223332,
+      "git_bytes_equal": true,
+      "src_worktree_file_count": 12337,
+      "backup_worktree_file_count": 12337,
+      "worktree_file_count_equal": true
+    },
+    "sizes": {
+      "git_bytes": 53223332,
+      "git_human": "51M",
+      "total_bytes": 404054901,
+      "total_human": "416M"
+    }
+  },
+
+  "9b_working_tree": {
+    "tracked_clean": true,
+    "tracked_modified_count": 0,
+    "untracked_count": 4,
+    "untracked": [
+      ".workbuddy-ai/memory/2026-09-20.md",
+      ".workbuddy-ai/memory/MEMORY.md",
+      "reports/CANDIDATE_A_PROMOTION_REVIEW.json",
+      "reports/CANDIDATE_A_PROMOTION_REVIEW.md"
+    ],
+    "untracked_deleted": false
+  },
+
+  "11_known_limitations": [
+    {
+      "id": "L1",
+      "severity": "HIGH",
+      "title": "Real E2E latency not measured",
+      "detail": "Mimo provider returns HTTP 402 (insufficient balance). No end-to-end latency claim may be made against this baseline."
+    },
+    {
+      "id": "L2",
+      "severity": "MEDIUM",
+      "title": "HTTP 402 mis-mapped to LLMServiceUnavailableError",
+      "detail": "backend/app/llm/mimo.py classifies 402 alongside 5xx. Unfixed by explicit instruction."
+    },
+    {
+      "id": "L3",
+      "severity": "MEDIUM",
+      "title": "Original master object d668e6a6 permanently unrecoverable",
+      "detail": "ORIGINAL_MASTER_COMMIT_UNRECOVERABLE. Baseline is reconstructed commit 518cd896 advanced to 35a9ad6. No ancestry above 518cd896 is forged or recoverable."
+    },
+    {
+      "id": "L4",
+      "severity": "MEDIUM",
+      "title": "Schema Linking experimental line all BLOCKED / INCONCLUSIVE",
+      "detail": "Rule Linker (88.9%), Coverage Guard / Hybrid (87.5% ceiling), Structural Coverage (DISCARD_AS_PRIMARY_GUARD), Schema Retrieval (INCONCLUSIVE). None wired to production. Task 31's 11.1pp generalization gap remains the headline finding."
+    },
+    {
+      "id": "L5",
+      "severity": "LOW",
+      "title": "core.autocrlf=true produces phantom modified entries",
+      "detail": "Zero content difference. Currently no such entries (tracked clean)."
+    },
+    {
+      "id": "L6",
+      "severity": "LOW",
+      "title": "Git 2.55.0.windows.3 cannot create refs containing '/' on F: drive",
+      "detail": "Silent failure (update-ref rc=0, no file written). Permanent project constraint; all release refs are slash-free."
+    },
+    {
+      "id": "L7",
+      "severity": "LOW",
+      "title": "4 untracked files intentionally left untracked",
+      "detail": ".workbuddy-ai/memory/{MEMORY.md,2026-09-20.md} and reports/CANDIDATE_A_PROMOTION_REVIEW.{md,json}. Not deleted, not added."
+    }
+  ],
+
+  "12_task_36_entry_gate": {
+    "task_36": "NOT_STARTED",
+    "entry_baseline": "35a9ad6",
+    "recovery_anchor": "518cd896",
+    "release_tag": "release_baseline_20260920",
+    "tests": "399 passed",
+    "production": "Candidate A active",
+    "provider": "E2E measurement unavailable due to HTTP 402",
+    "gate_status": "OPEN_FOR_TASK_36",
+    "action_taken": "status only; Task 36 not executed"
+  },
+
+  "phase_2f_constraint_compliance": {
+    "business_source_modified": false,
+    "tests_modified": false,
+    "prompt_modified": false,
+    "fewshot_modified": false,
+    "benchmark_modified": false,
+    "db_modified": false,
+    "linker_modified": false,
+    "schema_retrieval_modified": false,
+    "rule_coverage_hybrid_modified": false,
+    "http_402_fixed": false,
+    "task_36_entered": false,
+    "merge_performed": false,
+    "rebase_performed": false,
+    "push_performed": false,
+    "recovery_ref_deleted": false,
+    "git_gc_run": false,
+    "git_prune_run": false,
+    "git_clean_run": false,
+    "ref_with_slash_created": false,
+    "commit_content_modified": false
+  },
+
+  "final_output": {
+    "phase": "2F COMPLETE",
+    "release_baseline": "35a9ad6",
+    "tag": "release_baseline_20260920",
+    "candidate_a": "IN_MASTER",
+    "tests": "399 passed",
+    "frozen_assets": "MATCH",
+    "backup": "COMPLETE",
+    "recovery_anchor": "518cd896",
+    "working_tree": "tracked clean YES / 4 untracked preserved",
+    "real_e2e": "NOT_MEASURED",
+    "provider": "HTTP 402",
+    "task_36": "NOT_STARTED",
+    "status": "RELEASE_BASELINE_FROZEN"
+  }
+}

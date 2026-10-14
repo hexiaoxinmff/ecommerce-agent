@@ -1,0 +1,80 @@
+{
+  "steps": [
+    {
+      "step": "health",
+      "ok": true,
+      "detail": {
+        "status": "ok",
+        "database": "ok",
+        "llm_provider": "mimo",
+        "llm_model": "deepseek-chat"
+      }
+    },
+    {
+      "step": "register",
+      "ok": true,
+      "detail": {
+        "status": 201,
+        "user_id": 35
+      }
+    },
+    {
+      "step": "login",
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "token_type": "bearer"
+      }
+    },
+    {
+      "step": "agent_analyze",
+      "ok": true,
+      "detail": {
+        "question": "本月销售额是多少？",
+        "wall_ms": 3994,
+        "total_time_ms": 3920.02,
+        "agent_value": 826080.07,
+        "data_as_of": "2026-09-12",
+        "sql_head": "SELECT ROUND(SUM(oi.subtotal), 2) AS total_sales FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.status "
+      }
+    },
+    {
+      "step": "dashboard_consistency",
+      "ok": true,
+      "detail": {
+        "agent": 826080.07,
+        "dashboard": 826080.07,
+        "tolerance": 0.01
+      }
+    },
+    {
+      "step": "history_persisted",
+      "ok": true,
+      "detail": {
+        "found": true,
+        "has_sql": true,
+        "total_time_ms": 3920.02,
+        "history_total": 1
+      }
+    },
+    {
+      "step": "cleanup",
+      "ok": true,
+      "detail": {
+        "deleted_history_rows": 1,
+        "account_removed": "pilot_smoke_20261014_033633_066ded"
+      }
+    }
+  ],
+  "ok": true,
+  "started_at": "2026-10-14T03:36:33+00:00",
+  "base_url": "http://127.0.0.1:8765",
+  "mode": "full",
+  "health": {
+    "status": "ok",
+    "database": "ok",
+    "llm_provider": "mimo",
+    "llm_model": "deepseek-chat"
+  },
+  "finished_at": "2026-10-14T03:36:38+00:00"
+}

@@ -1,0 +1,1 @@
+﻿log_id,date,time,user_role,question,agent_response,sql,result,row_count,latency_ms,data_as_of,success,user_feedback,final_classification

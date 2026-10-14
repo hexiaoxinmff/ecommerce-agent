@@ -7,16 +7,30 @@
 
 ## 1. 启动检查清单
 
+> **推荐直接用正式启动入口**（第十阶段 P0-3）：它在启动前把下表的检查全部做完，
+> 失败时给出明确文案与退出码，不需要人工逐项核对：
+>
+> ```bash
+> python scripts/start_dev.py            # 启动；--check-only 只做预检
+> python scripts/stop_dev.py             # 停止 --detach 拉起的服务
+> ```
+>
+> Windows 也可双击 `scripts\start_dev.bat`（失败时窗口不闪退）。
+
 | # | 检查项 | 命令 / 位置 | 期望 |
 |---|---|---|---|
 | 1 | Python / 依赖 | `.venv\Scripts\python.exe -m pytest --version` | pytest 可用 |
-| 2 | `.env` 存在 | 项目根 `.env`（复制自 `.env.example`） | `MIMO_API_KEY` 已填写 |
-| 3 | 数据库存在 | `db/ecommerce.db` | 文件存在（缺失则 `python scripts/init_db.py`） |
+| 2 | `.env` 存在 | 项目根 `.env`（复制自 `.env.example`） | `DASHSCOPE_API_KEY` 已填写 |
+| 3 | 数据库存在 | `db/ecommerce.db` + `db/app.db` | 均存在（缺失见 §7.6） |
 | 4 | 后端启动 | `cd backend && uvicorn app.main:app --reload` | 监听 http://127.0.0.1:8000 |
 | 5 | 健康检查 | `curl http://127.0.0.1:8000/api/health` | `status=ok` |
 | 6 | 数据库信息 | `curl http://127.0.0.1:8000/api/system/database` | 返回 5 表行数 |
 | 7 | 前端启动 | `cd frontend && npm run dev` | http://localhost:5173 可访问 |
 | 8 | LLM 链路（可选） | `POST /api/llm/test` | `success=true` |
+
+> ⚠️ **第 5 步的 `status=ok` 不代表 LLM 可用**：`/api/health` 只表达
+> Backend / Database / Runtime 配置三件事，它不发起任何 LLM 请求。
+> LLM 可用性看第 8 步的实际结果。详见 [API.md](API.md) §1 职责边界。
 
 ## 2. 健康检查
 
@@ -119,6 +133,20 @@ LLM 相关接口（`/api/llm/test`、`/api/schema/link`、`/api/sql/generate`、
 
 **处理**：配置一致后重启前端（`npm run dev`）。修改后的 `.env` 需重新启动 vite 才能生效。
 
+> **第十阶段 P0-1 起的行为变化**：后端**整个挂掉**（连接被拒绝 / 端口不通）时，
+> 前端**不再把用户丢到登录页**，而是显示「后端服务不可用 / 请检查后端是否启动」+ **重试**按钮。
+> 判定规则：
+>
+> | 后端返回 | 前端状态 | 行为 |
+> |---|---|---|
+> | `200` | `authenticated` | 正常进入系统 |
+> | `401 / 403` | `anonymous` | 清理本地会话 → 登录页（服务在，凭证无效） |
+> | 连不上 | `backend_unavailable` | **保留会话** + 显示不可用页 + 重试 |
+> | `5xx` | `backend_error` | **保留会话** + 显示异常页 + 重试 |
+>
+> 所以：**看到登录页 = 后端是活的、只是凭证无效**；**看到"后端服务不可用" = 后端没起来**。
+> 后者把后端拉起来后点「重试」即可，不需要重新登录（会话没有被清掉）。
+
 ### 7.4 SQLite database locked / 数据库不可读
 
 **现象**：`/api/health` 返回 `degraded`；接口返回“数据库不可用”或 SQLite `database is locked`。
@@ -148,6 +176,43 @@ LLM 相关接口（`/api/llm/test`、`/api/schema/link`、`/api/sql/generate`、
 2. 手动在 `scripts/init_db.py` 对应 SQLite 上验证表 / 列名；用 `/docs` 单独调用执行接口复现。
 
 **处理**：属受控拒绝（安全边界按设计工作），换种问法 / 修正 SQL；若为 LLM 持续生成非法 SQL，检查 Prompt（`data/prompts/sql_generator_v1.3.txt`）与 Few-shot 示例是否覆盖该场景。
+
+### 7.6 数据文件缺失（`db/ecommerce.db` / `db/app.db`）
+
+**现象**：`python scripts/start_dev.py` 以退出码 `8` 中止；或登录 / 业务查询返回 500。
+
+**原因**：新克隆的仓库不携带二进制库（`.gitignore` 排除了 `db/*.db`），必须先初始化。
+
+**排查 / 处理**：
+
+```bash
+python scripts/init_db.py         # 业务库（固定 seed 20260914，可完全复现）
+python scripts/init_auth_db.py    # 应用库（认证 / 会话 / 查询历史，幂等）
+```
+
+> 缺 `db/app.db` 时，`appdb` 会抛 `AppDbNotFoundError`，鉴权依赖若未接住它会
+> 让伪造 token 返回 **500** 而不是 401（既有已知问题）。启动脚本因此在启动前
+> 就把这个文件的存在性拦下来，而不是等用户点登录才发现。
+
+### 7.7 端口被占用（8000 / 5173）
+
+**现象**：`start_dev.py` 以退出码 `7` 中止并点名端口；或访问 5173 看到的不是本项目。
+
+**原因**：上一次的服务没退干净；或 Vite 已**静默**换到了 5174。
+
+**排查 / 处理**：
+
+```bash
+netstat -ano | findstr :8000      # Windows：查占用 PID
+netstat -ano | findstr :5173
+python scripts/stop_dev.py        # 若上次是 --detach 启动的
+```
+
+或换端口：`python scripts/start_dev.py --backend-port 8001 --frontend-port 5174`
+（同时把 `frontend/.env` 的 `VITE_API_BASE_URL` 与后端 `CORS_ORIGINS` 改到一致）。
+
+> `start_dev.py` 用 `--strictPort` 启动 Vite，**不会**静默换端口；
+> 端口探测同时覆盖 IPv4 `127.0.0.1` 与 IPv6 `::1`（Vite 默认绑 `::1`）。
 
 ---
 

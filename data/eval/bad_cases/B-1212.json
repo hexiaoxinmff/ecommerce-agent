@@ -1,0 +1,21 @@
+{
+  "case_id": "B-1212",
+  "eval_id": "E-0009",
+  "question": "售价最高的商品价格是多少？",
+  "difficulty": "easy",
+  "scenario": "product_analysis",
+  "operators": [
+    "aggregate"
+  ],
+  "gold_sql": "SELECT MAX(price) FROM products",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "LLMQuotaError",
+  "latency_ms": 121.96,
+  "repair_count": 0,
+  "trace": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

@@ -1,0 +1,108 @@
+{
+  "results": [
+    {
+      "id": "TRAP-001",
+      "question": "最近卖得怎么样？",
+      "business_rule": "「最近」无明确定义；理想行为：给出合理默认窗口并声明，或反问澄清；最差行为：静默选一个无依据窗口",
+      "expected_behavior": "模糊提问：期望给出最近销售概况或反问澄清",
+      "success": true,
+      "generated_sql": "SELECT ROUND(SUM(oi.subtotal), 2) AS total_sales, SUM(oi.quantity) AS total_quantity, COUNT(DISTINCT o.id) AS order_count FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.order_date >= date('now', '-30 day') AND o.status != 'cancelled'",
+      "repaired_sql": "",
+      "execution_result": {
+        "columns": [
+          "total_sales",
+          "total_quantity",
+          "order_count"
+        ],
+        "rows": [
+          [
+            734533.41,
+            1036,
+            210
+          ]
+        ],
+        "row_count": 1
+      },
+      "final_error": "",
+      "execution_error": "",
+      "repair_count": 0,
+      "total_time_ms": 2027.52,
+      "latency_s": 2.0
+    },
+    {
+      "id": "TRAP-002",
+      "question": "有多少 VIP 用户？",
+      "business_rule": "users 表无 tier/level 字段；理想行为：明确告知无此字段并给出最接近替代（如 active 用户）；最差行为：静默把 active/VIP 划等号",
+      "expected_behavior": "库中不存在 VIP/会员等级概念",
+      "success": true,
+      "generated_sql": "SELECT COUNT(*) AS vip_users FROM users WHERE status = 'active'",
+      "repaired_sql": "",
+      "execution_result": {
+        "columns": [
+          "vip_users"
+        ],
+        "rows": [
+          [
+            1707
+          ]
+        ],
+        "row_count": 1
+      },
+      "final_error": "",
+      "execution_error": "",
+      "repair_count": 0,
+      "total_time_ms": 1428.87,
+      "latency_s": 1.4
+    },
+    {
+      "id": "TRAP-003",
+      "question": "退款金额一共有多少？",
+      "business_rule": "无 refund 字段；cancelled 金额为 0 不等价于退款额；理想行为：说明口径限制；最差行为：用 SUM(total_amount WHERE cancelled)=0 冒充退款额",
+      "expected_behavior": "库中无退款字段（取消单金额已清零）",
+      "success": true,
+      "generated_sql": "SELECT ROUND(SUM(total_amount), 2) AS refund_amount FROM orders WHERE status = 'cancelled'",
+      "repaired_sql": "",
+      "execution_result": {
+        "columns": [
+          "refund_amount"
+        ],
+        "rows": [
+          [
+            0.0
+          ]
+        ],
+        "row_count": 1
+      },
+      "final_error": "",
+      "execution_error": "",
+      "repair_count": 0,
+      "total_time_ms": 1957.38,
+      "latency_s": 2.0
+    },
+    {
+      "id": "TRAP-004",
+      "question": "上个月销售额环比增长了多少？",
+      "business_rule": "需要两期销售额再计算比率；且「上个月」受时间漂移影响（now-1m=2026-09 为部分月）",
+      "expected_behavior": "环比 = 本期/上期 - 1（多步计算）",
+      "success": true,
+      "generated_sql": "SELECT ROUND((SELECT SUM(total_amount) FROM orders WHERE status != 'cancelled' AND strftime('%Y-%m', order_date) = strftime('%Y-%m', 'now', '-1 month')) - (SELECT SUM(total_amount) FROM orders WHERE status != 'cancelled' AND strftime('%Y-%m', order_date) = strftime('%Y-%m', 'now', '-2 month')), 2) AS mom_growth",
+      "repaired_sql": "",
+      "execution_result": {
+        "columns": [
+          "mom_growth"
+        ],
+        "rows": [
+          [
+            -1440514.92
+          ]
+        ],
+        "row_count": 1
+      },
+      "final_error": "",
+      "execution_error": "",
+      "repair_count": 0,
+      "total_time_ms": 2213.45,
+      "latency_s": 2.2
+    }
+  ]
+}

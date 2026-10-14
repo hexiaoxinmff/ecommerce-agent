@@ -1,0 +1,27 @@
+{
+  "case_id": "B-1190",
+  "eval_id": "E-0082",
+  "question": "休闲零食类别在全部非取消订单明细中的销售金额占全平台商品销售总额的比例是多少？（百分比，保留两位小数）",
+  "difficulty": "hard",
+  "scenario": "ratio",
+  "operators": [
+    "multiple_join",
+    "join",
+    "where",
+    "group_by",
+    "aggregate",
+    "ratio",
+    "subquery"
+  ],
+  "gold_sql": "SELECT c.name, ROUND(SUM(oi.subtotal) * 100.0 / (SELECT SUM(oi2.subtotal) FROM order_items oi2 JOIN orders o2 ON o2.id = oi2.order_id WHERE o2.status != 'cancelled'), 2) AS pct FROM categories c JOIN products p ON p.category_id = c.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status != 'cancelled' AND c.name = '休闲零食' GROUP BY c.id, c.name",
+  "pred_sql": "SELECT ROUND(CAST(SUM(CASE WHEN c.name = '休闲零食' THEN oi.subtotal ELSE 0 END) AS REAL) / SUM(oi.subtotal) * 100, 2) AS percentage FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled'",
+  "initial_sql": "SELECT ROUND(CAST(SUM(CASE WHEN c.name = '休闲零食' THEN oi.subtotal ELSE 0 END) AS REAL) / SUM(oi.subtotal) * 100, 2) AS percentage FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled'",
+  "final_sql": "SELECT ROUND(CAST(SUM(CASE WHEN c.name = '休闲零食' THEN oi.subtotal ELSE 0 END) AS REAL) / SUM(oi.subtotal) * 100, 2) AS percentage FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id JOIN categories c ON c.id = p.category_id WHERE o.status != 'cancelled'",
+  "exec_success": true,
+  "failure_stage": "result",
+  "error_type": "result_mismatch",
+  "latency_ms": 15753.79,
+  "repair_count": 0,
+  "trace": "schema_link:success;fewshot_retrieve:success;sql_generate:success;sql_safety:success;sql_execute:success;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

@@ -1,0 +1,22 @@
+{
+  "case_id": "B-1213",
+  "eval_id": "E-0010",
+  "question": "在售商品中售价最低的是多少？",
+  "difficulty": "easy",
+  "scenario": "product_analysis",
+  "operators": [
+    "aggregate",
+    "where"
+  ],
+  "gold_sql": "SELECT MIN(price) FROM products WHERE status = 'on_sale'",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "LLMQuotaError",
+  "latency_ms": 116.39,
+  "repair_count": 0,
+  "trace": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

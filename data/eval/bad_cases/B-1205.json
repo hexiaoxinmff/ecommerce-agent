@@ -1,0 +1,22 @@
+{
+  "case_id": "B-1205",
+  "eval_id": "E-0002",
+  "question": "广东省有多少用户？",
+  "difficulty": "easy",
+  "scenario": "user_analysis",
+  "operators": [
+    "aggregate",
+    "where"
+  ],
+  "gold_sql": "SELECT COUNT(*) FROM users WHERE region = '广东'",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "LLMQuotaError",
+  "latency_ms": 119.19,
+  "repair_count": 0,
+  "trace": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

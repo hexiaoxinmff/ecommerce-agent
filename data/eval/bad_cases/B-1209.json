@@ -1,0 +1,22 @@
+{
+  "case_id": "B-1209",
+  "eval_id": "E-0006",
+  "question": "北京和上海两个地区的用户一共有多少？",
+  "difficulty": "easy",
+  "scenario": "user_analysis",
+  "operators": [
+    "aggregate",
+    "where"
+  ],
+  "gold_sql": "SELECT COUNT(*) FROM users WHERE region IN ('北京', '上海')",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "LLMQuotaError",
+  "latency_ms": 133.12,
+  "repair_count": 0,
+  "trace": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

@@ -1,0 +1,23 @@
+{
+  "case_id": "B-1207",
+  "eval_id": "E-0004",
+  "question": "2023年注册的用户有多少？",
+  "difficulty": "easy",
+  "scenario": "user_analysis",
+  "operators": [
+    "aggregate",
+    "where",
+    "date_filter"
+  ],
+  "gold_sql": "SELECT COUNT(*) FROM users WHERE register_date >= '2023-01-01' AND register_date <= '2023-12-31'",
+  "pred_sql": "",
+  "initial_sql": "",
+  "final_sql": "",
+  "exec_success": false,
+  "failure_stage": "provider",
+  "error_type": "LLMQuotaError",
+  "latency_ms": 132.07,
+  "repair_count": 0,
+  "trace": "schema_link:error;fewshot_retrieve:skipped;sql_generate:skipped;sql_safety:skipped;sql_execute:skipped;sql_repair:skipped;sql_execute_repaired:skipped;result:success",
+  "notes": "Task 13 评测失败自动沉淀；供 Task 14 分析"
+}

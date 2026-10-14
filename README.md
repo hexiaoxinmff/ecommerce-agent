@@ -28,6 +28,7 @@
 | SQL 自修复 | 有界 `≤1` 次 Repair（Repair 后二次校验 + 二次执行） |
 | 全链路 Trace | 每节点成功 / 失败 / 跳过事件 + 耗时，可归因、可回放 |
 | 评测闭环 | 100 条 Benchmark + Gold Hash Gate + Leakage Gate + 自动落盘报告 |
+| 用户认证与查询历史 | 注册 / 登录 / 当前用户 / 登出（Bearer session）；查询历史按登录用户隔离记录与删除 |
 
 ## 3. 系统架构
 
@@ -37,6 +38,12 @@ Frontend (React 19 + Vite + ECharts, 自定义 CSS)
     ▼
 Backend (FastAPI)
     ├── /api/health         健康检查（含 SQLite 只读探活）
+    ├── /api/auth/register  注册（201；冲突 409）
+    ├── /api/auth/login     登录（签发 Bearer access_token）
+    ├── /api/auth/me        当前用户（Bearer）
+    ├── /api/auth/logout    登出（删除当前会话）
+    ├── /api/history        查询历史（按登录用户隔离，分页）
+    ├── /api/history/{id}   删除一条历史（仅本人）
     ├── /api/system/database 数据库信息（只读）
     ├── /api/llm/test       LLM Provider 连接测试
     ├── /api/schema/link    Schema Linking
@@ -45,7 +52,7 @@ Backend (FastAPI)
     ├── /api/sql/execute    SQL 只读执行
     ├── /api/sql/repair     SQL 修复（单独测试）
     ├── /api/sql/execute-with-repair  有限 Repair 闭环（≤1 修复 / 2 执行）
-    └── /api/agent/analyze  LangGraph Agent 编排（核心入口）
+    └── /api/agent/analyze  LangGraph Agent 编排（核心入口，需 Bearer 登录）
              │
              ├── SchemaLinker → FewShotRetriever → SQLGenerator(LLM) → SQL Safety → SQLExecutor
              │   └─（数据库执行错误时）→ SQLRepairer(≤1) → 二次 Safety/执行
@@ -89,8 +96,8 @@ Agent 图（LangGraph）：`START → schema_link → fewshot_retrieve → sql_g
 .
 ├── backend/                 # FastAPI 后端 + LangGraph Agent
 │   ├── app/
-│   │   ├── main.py          # 应用入口（注册 10 个 route）
-│   │   ├── api/routes/      # Health / System / LLM / Schema / Few-shot / SQL / Agent 路由
+│   │   ├── main.py          # 应用入口（路由清单见 docs/API_ENDPOINTS.md，由脚本生成）
+│   │   ├── api/routes/      # Health / System / LLM / Schema / Few-shot / SQL / Agent / Auth / History 路由
 │   │   ├── agent/           # LangGraph 图、节点、状态、模型
 │   │   ├── schema/          # Schema 元数据 + Linking
 │   │   ├── fewshot/         # 示例数据集 + 规则型检索
@@ -101,17 +108,18 @@ Agent 图（LangGraph）：`START → schema_link → fewshot_retrieve → sql_g
 │   │   ├── experiments/     # E3 Hint 模块（冻结）
 │   │   ├── llm/             # Mimo Provider（OpenAI-compatible）
 │   │   ├── trace/           # Trace 事件
-│   │   ├── db/              # SQLite 只读访问层
+│   │   ├── db/              # sqlite.py 业务库只读访问层 + appdb.py 应用库（认证 / 会话 / 历史）
 │   │   └── core/config.py   # 全局配置（.env）
-│   └── tests/               # pytest（367 passed）
+│   └── tests/               # pytest（967 passed / 1 skipped，2026-09-25 实测）
 ├── frontend/                # React 19 + Vite + ECharts 前端
 ├── data/
 │   ├── eval/                # ECO-SQL-Bench v1.1（100 题）+ bad_cases/
 │   ├── fewshot/             # FEWSHOT_V3（23 例）
 │   └── prompts/             # sql_generator_v1 / v1.1 / v1.3.txt
-├── db/ecommerce.db          # SQLite 业务库（dev-2026-09-14，脚本重建）
+├── db/ecommerce.db          # SQLite 业务库（dev-2026-09-14，脚本重建，只读访问）
+├── db/app.db                # 应用库（auth_user / auth_session / query_history，scripts/init_auth_db.py 创建）
 ├── evaluation/              # 评测框架（runner / metrics / normalization / report）
-├── scripts/                 # init_db / validate / run_eval / E3 脚本（冻结）
+├── scripts/                 # init_db / init_auth_db / validate / run_eval 等脚本
 ├── reports/                 # 评测报告与最终验收报告（冻结历史证据）
 ├── docs/                    # 项目文档（见 §18）
 ├── requirements.txt         # 后端依赖（最小必要集合）
@@ -126,7 +134,8 @@ Agent 图（LangGraph）：`START → schema_link → fewshot_retrieve → sql_g
 | Python | 3.12+（开发环境实测 3.12.10） |
 | Node.js | 18+（Vite 8 实测可构建） |
 | npm | 与 Node 配套 |
-| Mimo API Key | 可用的 `MIMO_API_KEY`（调用 SQL 生成 / Schema Linking / Repair / Agent 时必须） |
+| 阿里云百炼 API Key | 可用的 `DASHSCOPE_API_KEY`（**推荐运行环境**，调用 SQL 生成 / Schema Linking / Repair / Agent 时必须；配置见第 8 节） |
+| Mimo API Key | 可用的 `MIMO_API_KEY`（可选：正式评测基线 Provider `mimo-v2.5-pro`） |
 
 ## 7. 安装
 
@@ -160,7 +169,7 @@ npm install
 cd ..
 ```
 
-### 7.4 生成数据库（可选）
+### 7.4 生成业务数据库（可选）
 
 ```bash
 python scripts/init_db.py
@@ -168,7 +177,15 @@ python scripts/init_db.py
 
 `db/ecommerce.db`（dev-2026-09-14 / seed 20260914）可由脚本重建，完全可复现。
 
-## 8. Mimo API 配置
+### 7.5 初始化应用库（认证 / 查询历史必需）
+
+```bash
+python scripts/init_auth_db.py
+```
+
+创建 `db/app.db` 并初始化三张应用表：`auth_user`（账号，仅存 PBKDF2 口令哈希）、`auth_session`（会话，仅存 token 哈希）、`query_history`（查询历史）。幂等，可重复执行。
+
+## 8. LLM Provider 配置
 
 复制环境变量示例并填写真实值（**真实 API Key 只允许存在于本机 `.env` / 环境变量，严禁提交到 Git**）：
 
@@ -176,7 +193,20 @@ python scripts/init_db.py
 cp .env.example .env
 ```
 
-`.env` 关键项（均在 [backend/app/core/config.py](backend/app/core/config.py) 中读取）：
+**推荐运行环境（Demo / 日常运行）：阿里云百炼**。`.env` 关键项（均在 [backend/app/core/config.py](backend/app/core/config.py) 中读取）：
+
+```text
+LLM_PROVIDER=bailian
+DASHSCOPE_API_KEY=<你的百炼 Key>
+BAILIAN_MODEL=qwen3.7-flash
+BAILIAN_PRIMARY_MODEL=qwen3.7-flash
+LLM_MODEL_LOCK=true
+```
+
+> **口径声明**：正式历史评测基线（Clean Baseline v1.1，Mimo V2.5 Pro，90.0% EX）与当前
+> Demo Runtime Provider 是两个不同口径。正式评测基线保持冻结，不因运行配置切换而改变。
+
+可选：改用正式评测基线 Provider（Mimo）：
 
 ```text
 LLM_PROVIDER=mimo
@@ -189,7 +219,9 @@ MIMO_TIMEOUT=30
 可选环境变量：
 
 ```text
-ECOMMERCE_DB_PATH=db/ecommerce.db      # 覆盖数据库路径
+ECOMMERCE_DB_PATH=db/ecommerce.db      # 覆盖业务库路径
+APP_DB_PATH=db/app.db                  # 覆盖应用库路径（认证 / 会话 / 历史）
+AUTH_SESSION_TTL_SECONDS=604800        # 会话有效期（默认 7 天）
 CORS_ORIGINS=http://localhost:5173      # 逗号分隔，默认允许 Vite 前端
 FEWSHOT_DATASET_PATH=...                # 覆盖 Few-shot 数据集路径
 ```
@@ -218,9 +250,32 @@ curl -X POST http://127.0.0.1:8000/api/llm/test \
 curl http://127.0.0.1:8000/api/system/database
 ```
 
-## 10. 启动 Backend
+## 10. 启动（推荐：一条命令）
 
-在项目根目录下（backend 模块根为 `backend/`）：
+```bash
+python scripts/start_dev.py
+```
+
+脚本会依次完成：**检查 Python / Node / 后端依赖 / 前端依赖 / `.env` / 数据文件 / 端口**
+→ 启动 Backend `8000` + Frontend `5173` → 健康检查，最后输出：
+
+```text
+Backend : http://127.0.0.1:8000
+Frontend: http://localhost:5173
+Health  : OK
+```
+
+- Windows 也可双击 `scripts\start_dev.bat`（失败时窗口**不会闪退**，错误信息留在屏幕上）。
+- 停止：前台按 `Ctrl+C`；若用 `--detach` 后台启动，执行 `python scripts/stop_dev.py`。
+- 只做预检不启动：`python scripts/start_dev.py --check-only`。
+- 换端口：`--backend-port 8001 --frontend-port 5174`。
+
+失败场景都有**明确文案 + 退出码**（端口占用 7、`.env` 缺失 6、依赖缺失 3/5、
+数据文件缺失 8、后端启动失败 9、前端启动失败 10），详见 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) §2.5。
+
+## 11. 启动（手动，两条等价命令）
+
+上面的脚本调用的就是下面这两条命令，没有第二套启动体系：
 
 ```bash
 cd backend
@@ -229,8 +284,7 @@ uvicorn app.main:app --reload   # 默认 http://127.0.0.1:8000
 
 - 交互式 API 文档：http://127.0.0.1:8000/docs
 - 健康检查：http://127.0.0.1:8000/api/health
-
-## 11. 启动 Frontend
+- ⚠️ 手动启动时若 5173 被占用，Vite 会**静默**改用 5174；脚本用 `--strictPort` 把它变成明确报错。
 
 ```bash
 cd frontend
@@ -253,11 +307,12 @@ npm run dev        # 默认 http://localhost:5173
 近30天销量最高的商品 Top 5 是哪些？
 ```
 
-直接调用 Agent API：
+Agent API 需登录后调用（未登录返回 401）。先注册 / 登录获取 `access_token`（注册 / 登录 / 历史接口详见 [docs/API.md](docs/API.md)）：
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/agent/analyze \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <access_token>" \
   -d '{"question": "2025年每月销售额是多少？"}'
 ```
 
@@ -265,24 +320,17 @@ curl -X POST http://127.0.0.1:8000/api/agent/analyze \
 
 ## 13. API Overview
 
-后端共 10 条真实可达路由（详见 [docs/API.md](docs/API.md)）：
+<!-- API-ENDPOINTS:BEGIN (generated by scripts/export_api_endpoints.py — do not edit) -->
+**API 端点：18 个**（12 个 router；需鉴权 6 ／ 公开 12）。权威清单见 [`docs/API_ENDPOINTS.md`](docs/API_ENDPOINTS.md)。
+<!-- API-ENDPOINTS:END -->
 
-| 方法 | 路径 | 用途 |
-|---|---|---|
-| GET | `/api/health` | 健康检查（含 SQLite 只读探活） |
-| GET | `/api/system/database` | 数据库信息（只读） |
-| POST | `/api/llm/test` | LLM Provider 连接测试 |
-| POST | `/api/schema/link` | Schema Linking |
-| POST | `/api/fewshot/retrieve` | Few-shot 检索 |
-| POST | `/api/sql/generate` | SQL 生成（只生成不执行） |
-| POST | `/api/sql/execute` | SQL 只读执行 |
-| POST | `/api/sql/repair` | SQL 修复（单独测试） |
-| POST | `/api/sql/execute-with-repair` | 有限 Repair 闭环 |
-| POST | `/api/agent/analyze` | Text2SQL Agent 编排（LangGraph，含 Trace） |
+本节的端点总数与清单由 `scripts/export_api_endpoints.py` 从运行中的 FastAPI app 生成，
+**不手工维护**；改代码即改清单，`backend/tests/test_api_endpoints_manifest.py` 负责在漂移时变红。
+
+**认证与查询历史（已实现，Task37 起）**：本地注册 / 登录（PBKDF2 口令哈希 + Bearer session，库中只存 token 哈希）/ 当前用户 / 登出；Agent 查询成功与失败都会按登录用户写入查询历史，历史支持分页查询与本人删除、跨用户隔离。已知限制见 §17。
 
 **当前版本未实现**（不虚构）：
 
-- login / 用户管理 API；
 - 多轮 conversation API（Multi-turn 属 PRD 阶段 2）。
 
 ## 14. Evaluation
@@ -325,7 +373,7 @@ Clean Baseline EX = 90.0%
 python -m pytest backend/tests
 ```
 
-结果：**367 passed**（Task 23 最终技术验收实测）。
+结果：**967 passed / 1 skipped**（2026-09-25 Task41 文档阶段复测；含 Task37 认证 / 历史测试与 Task39 G7 回归）。历史阶段数字（Task 23：367 passed）保留于 [docs/TEST_REPORT.md](docs/TEST_REPORT.md)，标注 Historical。
 
 测试分类与覆盖详见 [docs/TEST_REPORT.md](docs/TEST_REPORT.md)。
 
@@ -354,9 +402,20 @@ python -m pytest backend/tests
 **当前未实现（范围边界，如实声明）**：
 
 - **Multi-turn**（多轮上下文 / 追问）：PRD 阶段 2 / Out-of-Scope；当前为单轮 Agent；
-- **User Management**（用户管理 / 登录）：PRD 明确 Out of Scope；
 - 结论生成、完整图表规格生成（前端 ECharts 映射为规则 Map）：未实现，仅占位；
-- 前端 `datasets / history / settings` 为占位页。
+- 前端 `datasets / settings` 为占位页（`history` 已实现：登录后可查看与删除本人查询历史）。
+
+**认证与查询历史：已知限制（Task37 验收时明确接受，如实声明）**：
+
+> **后端不可用 ≠ 未登录**（第十阶段 P0-1）：`/api/auth/me` 的失败按类型分派 ——
+> `401/403` → 未登录（清理会话）；**网络失败 → 后端不可用**（保留会话 + 显示重试）；
+> `5xx` → 后端异常。后端挂掉时不再把用户丢到登录页，也不回退任何本地假数据。
+
+- 登录无限流 / 验证码；
+- 登录失败响应统一文案，但未做恒时模糊（存在理论上的时序侧信道）；
+- 过期会话无后台清理，仅登录态校验时惰性失效；
+- 无 refresh token（会话 TTL 默认 7 天，过期需重新登录）；
+- access_token 存于浏览器 localStorage，存在 XSS 暴露面（已配套统一 401 清理会话）。
 
 **E3 当前限制（冻结）**：
 
@@ -391,8 +450,8 @@ docs/                                # 项目文档（30 份）
 │   └── llm-integration.md           # LLM 集成（Mimo Provider）
 │
 ├── 【接口与运维】
-│   ├── API.md                       # API 参考（10 条真实路由）
-│   ├── DEPLOYMENT.md                # 部署指南（安装 / 配置 / 启动）
+│   ├── API.md                       # API 参考（逐端点说明；端点总数见 API_ENDPOINTS.md）
+│   ├── DEPLOYMENT.md                # 部署指南（安装 / 配置 / 应用库初始化 / 启动）
 │   └── OPERATIONS.md                # 运行维护手册（巡检 / 日志 / 常见问题）
 │
 ├── 【评测】
@@ -408,7 +467,7 @@ docs/                                # 项目文档（30 份）
     ├── project-understanding.md     # 项目理解（交接期梳理）
     ├── development-baseline.md      # 开发基线
     ├── project-parameters.md        # 项目说明（参数文档：运行参数 / 环境变量 / 未实现清单）
-    ├── TEST_REPORT.md               # 测试报告（pytest 367 passed + E2E）
+    ├── TEST_REPORT.md               # 测试报告（Latest Verification：967 passed / 1 skipped；历史阶段数字保留）
     ├── AI_COLLABORATION.md          # AI 协作过程记录
     └── phase4-task10-acceptance.md  # 阶段 4 任务 10 验收记录
 

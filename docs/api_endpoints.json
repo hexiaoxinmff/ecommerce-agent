@@ -1,0 +1,208 @@
+{
+  "generated_by": "scripts/export_api_endpoints.py",
+  "source_of_truth": "backend/app/main.py + backend/app/api/routes/*（由 app.openapi() 与 app.routes 推导）",
+  "endpoint_count": 18,
+  "router_count": 12,
+  "auth_required_count": 6,
+  "public_count": 12,
+  "endpoints": [
+    {
+      "index": 1,
+      "router": "health",
+      "method": "GET",
+      "path": "/api/health",
+      "summary": "服务健康检查",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "HealthResponse",
+      "source_module": "app.api.routes.health"
+    },
+    {
+      "index": 2,
+      "router": "system",
+      "method": "GET",
+      "path": "/api/system/database",
+      "summary": "数据库信息（只读验证）",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "DatabaseInfo",
+      "source_module": "app.api.routes.system"
+    },
+    {
+      "index": 3,
+      "router": "system",
+      "method": "GET",
+      "path": "/api/system/schema",
+      "summary": "数据库 Schema 元数据（只读）",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "SchemaResponse",
+      "source_module": "app.api.routes.system"
+    },
+    {
+      "index": 4,
+      "router": "insights",
+      "method": "GET",
+      "path": "/api/insights/overview",
+      "summary": "首页业务概览（只读聚合 + Bearer 鉴权，不调用 LLM）",
+      "auth": true,
+      "auth_scheme": "HTTPBearer",
+      "response_model": "OverviewResponse",
+      "source_module": "app.api.routes.insights"
+    },
+    {
+      "index": 5,
+      "router": "llm",
+      "method": "POST",
+      "path": "/api/llm/test",
+      "summary": "LLM 连接测试（真实调用当前 Provider）",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "LlmTestResponse",
+      "source_module": "app.api.routes.llm"
+    },
+    {
+      "index": 6,
+      "router": "schema_link",
+      "method": "POST",
+      "path": "/api/schema/link",
+      "summary": "Schema Linking（识别问题相关表与字段）",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "SchemaLinkResponse",
+      "source_module": "app.api.routes.schema_link"
+    },
+    {
+      "index": 7,
+      "router": "fewshot",
+      "method": "POST",
+      "path": "/api/fewshot/retrieve",
+      "summary": "Few-shot 示例检索（规则型，Top-K）",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "FewShotRetrieveResponse",
+      "source_module": "app.api.routes.fewshot"
+    },
+    {
+      "index": 8,
+      "router": "sql_generate",
+      "method": "POST",
+      "path": "/api/sql/generate",
+      "summary": "SQL 生成（Text2SQL，只生成不执行）",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "SQLGenerationResponse",
+      "source_module": "app.api.routes.sql_generate"
+    },
+    {
+      "index": 9,
+      "router": "sql_execute",
+      "method": "POST",
+      "path": "/api/sql/execute",
+      "summary": "SQL 执行（只读 SELECT/WITH，结构化结果）",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "SQLExecutionResponse",
+      "source_module": "app.api.routes.sql_execute"
+    },
+    {
+      "index": 10,
+      "router": "sql_repair",
+      "method": "POST",
+      "path": "/api/sql/repair",
+      "summary": "SQL 修复（单独测试 Repair 能力，不执行 Repair SQL）",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "SQLRepairResponse",
+      "source_module": "app.api.routes.sql_repair"
+    },
+    {
+      "index": 11,
+      "router": "sql_repair",
+      "method": "POST",
+      "path": "/api/sql/execute-with-repair",
+      "summary": "SQL 执行（有限 Repair 闭环：最多 1 次修复 / 2 次执行）",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "SQLExecuteWithRepairResponse",
+      "source_module": "app.api.routes.sql_repair"
+    },
+    {
+      "index": 12,
+      "router": "auth",
+      "method": "POST",
+      "path": "/api/auth/register",
+      "summary": "注册新用户（username/email 冲突返回 409）",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "UserOut",
+      "source_module": "app.api.routes.auth"
+    },
+    {
+      "index": 13,
+      "router": "auth",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "summary": "登录并签发 Bearer access_token（会话只存 token_hash）",
+      "auth": false,
+      "auth_scheme": "—",
+      "response_model": "LoginResponse",
+      "source_module": "app.api.routes.auth"
+    },
+    {
+      "index": 14,
+      "router": "auth",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "summary": "当前登录用户（Bearer 认证）",
+      "auth": true,
+      "auth_scheme": "HTTPBearer",
+      "response_model": "UserOut",
+      "source_module": "app.api.routes.auth"
+    },
+    {
+      "index": 15,
+      "router": "auth",
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "summary": "登出（删除当前 token 对应的服务端会话）",
+      "auth": true,
+      "auth_scheme": "HTTPBearer",
+      "response_model": "—",
+      "source_module": "app.api.routes.auth"
+    },
+    {
+      "index": 16,
+      "router": "history",
+      "method": "GET",
+      "path": "/api/history",
+      "summary": "当前用户的查询历史（created_at 倒序 + 分页）",
+      "auth": true,
+      "auth_scheme": "HTTPBearer",
+      "response_model": "HistoryListResponse",
+      "source_module": "app.api.routes.history"
+    },
+    {
+      "index": 17,
+      "router": "history",
+      "method": "DELETE",
+      "path": "/api/history/{history_id}",
+      "summary": "删除本人一条查询历史（不属于本人或不存在 → 404）",
+      "auth": true,
+      "auth_scheme": "HTTPBearer",
+      "response_model": "—",
+      "source_module": "app.api.routes.history"
+    },
+    {
+      "index": 18,
+      "router": "agent",
+      "method": "POST",
+      "path": "/api/agent/analyze",
+      "summary": "Text2SQL Agent 编排分析（LangGraph，≤1 次修复，含 Trace，需登录）",
+      "auth": true,
+      "auth_scheme": "HTTPBearer",
+      "response_model": "AgentResponse",
+      "source_module": "app.api.routes.agent"
+    }
+  ]
+}

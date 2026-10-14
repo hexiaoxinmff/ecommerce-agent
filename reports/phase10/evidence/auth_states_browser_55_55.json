@@ -1,0 +1,407 @@
+{
+  "run_id": "p10_mulaeed4",
+  "started_at": "2026-09-28T13:32:24.384Z",
+  "backend_port": 8000,
+  "frontend_port": 5173,
+  "api_ground_truth": {
+    "as_of": "2026-09-12",
+    "month_sales": 766292.18,
+    "month_orders": 234,
+    "users_total": 2000,
+    "avg_order_value": 3274.75,
+    "trend_len": 12,
+    "trend_first": "2025-10",
+    "trend_last": "2026-09",
+    "category_len": 5
+  },
+  "dom_kpi": [
+    "¥766,292.18",
+    "234",
+    "2,000",
+    "¥3,274.75"
+  ],
+  "dashboard_charts": [
+    {
+      "label": "销售趋势",
+      "w": 618,
+      "h": 280,
+      "painted": 21189,
+      "colors": 405
+    },
+    {
+      "label": "分类销售",
+      "w": 446,
+      "h": 280,
+      "painted": 16825,
+      "colors": 56
+    }
+  ],
+  "dashboard_subtitles": [
+    "近 12 个月 · 单位万元 · 数据截至 2026-09-12",
+    "叶子类目 Top 5 · 按销售额 · 单位万元",
+    "按销售额排序 · 真实业务数据（截至 2026-09-12）",
+    "暂无记录",
+    "暂无查询历史",
+    "在「智能分析」提问后，记录会自动出现在这里",
+    "实时业务数据 · 数据截至 2026-09-12 · 来源 GET /api/insights/overview",
+    "当前开发数据库 · 合成数据"
+  ],
+  "backend_pid": 19940,
+  "frontend_pid_before": 22008,
+  "kill_tree_killed_pids": [
+    19400,
+    19940,
+    24788
+  ],
+  "kill_tree_raw": "�ɹ�: ����ֹ PID 24788 (���� PID 19940 �ӽ���)�Ľ��̡�\r\n�ɹ�: ����ֹ PID 19940 (���� PID 19400 �ӽ���)�Ľ��̡�",
+  "frontend_pid_after": 22008,
+  "network_failures_while_down": [
+    {
+      "url": "22164.130",
+      "failed": "net::ERR_ABORTED"
+    },
+    {
+      "url": "47888738BEB26BF4F94E88DF31C10645",
+      "failed": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "url": "A7D11B5494A56DD0658B2FA2B3BDAB34",
+      "failed": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "url": "22164.131",
+      "failed": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "url": "22164.133",
+      "failed": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "url": "22164.132",
+      "failed": "net::ERR_CONNECTION_REFUSED"
+    }
+  ],
+  "restart_output_tail": "Health  : OK\r | API 文档: http://127.0.0.1:8000/docs\r | ==============================================================\r | 已后台启动；PID 写入 logs\\start_dev_pids.json\r | 停止：python scripts/stop_dev.py\r | ",
+  "business": {
+    "question": "注册用户总数是多少？",
+    "generated_sql": "SELECT COUNT(*) AS total_registered_users FROM users",
+    "success": true,
+    "row_count": 1,
+    "rows": [
+      [
+        2000
+      ]
+    ],
+    "total_time_ms": 7437.73,
+    "execute_count": 1,
+    "trace_nodes": [
+      "schema_link",
+      "fewshot_retrieve",
+      "sql_generate",
+      "sql_safety",
+      "sql_execute",
+      "sql_repair",
+      "sql_execute_repaired",
+      "result"
+    ],
+    "final_error": "",
+    "history_total": 1,
+    "history_item": {
+      "id": 67,
+      "question": "注册用户总数是多少？",
+      "sql": "SELECT COUNT(*) AS total_registered_users FROM users",
+      "success": true,
+      "row_count": 1,
+      "total_time_ms": 7437.73,
+      "created_at": "2026-09-28T13:32:42+00:00"
+    }
+  },
+  "bootstrap": {
+    "stop_before": "没有找到 F:\\基于 Text2SQL 的电商智能数据分析 Agent\\logs\\start_dev_pids.json：没有本脚本拉起的服务需要停止。\r\n",
+    "startup_output": "==============================================================\r\nText2SQL 电商智能数据分析 Agent — 正式启动\r\n==============================================================\r\n  [OK]   Python  3.12.10\r\n  [OK]   后端依赖  7 个模块可导入\r\n  [OK]   Node  v22.22.2\r\n  [OK]   前端依赖  frontend/node_modules 已就绪\r\n  [OK]   .env  .env\r\n  [OK]   数据文件  db/ecommerce.db + db/app.db\r\n  [OK]   端口  8000 / 5173 均空闲\r\n\r\n启动：\r\n  [OK]   Backend  PID 19400 → 127.0.0.1:8000\r\n  [OK]   Frontend  PID 22680 → localhost:5173\r\n\r\n健康检查：http://127.0.0.1:8000/api/health（最多等待 60s）\r\n等待前端监听 5173…\r\n\r\n==============================================================\r\nBackend : http://127.0.0.1:8000\r\nFrontend: http://localhost:5173\r\nHealth  : OK\r\nAPI 文档: http://127.0.0.1:8000/docs\r\n==============================================================\r\n已后台启动；PID 写入 logs\\start_dev_pids.json\r\n停止：python scripts/stop_dev.py\r\n",
+    "stop_after": "  [STOP] backend (PID 3472)\r\n  [STOP] frontend (PID 22008)\r\n  [SKIP] backend (PID 22472) 已不在运行\r\n  [SKIP] frontend (PID 22680) 已不在运行\r\n已停止。\r\n"
+  },
+  "finished_at": "2026-09-28T13:32:45.038Z",
+  "total": 55,
+  "passed": 55,
+  "failed": 0,
+  "verdict": "ALL_PASS",
+  "checks": [
+    {
+      "name": "启动：正式脚本 start_dev.py 冷启动成功并自报 Health OK",
+      "passed": true,
+      "detail": "Health  : OK"
+    },
+    {
+      "name": "启动：输出包含 Backend 访问地址",
+      "passed": true,
+      "detail": "Backend : http://127.0.0.1:8000"
+    },
+    {
+      "name": "启动：输出包含 Frontend 访问地址",
+      "passed": true,
+      "detail": "Frontend: http://localhost:5173"
+    },
+    {
+      "name": "启动：/api/health 返回 200",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "准备：注册本次运行专属用户（真实 POST /api/auth/register）",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "name": "准备：真实登录拿到 access_token",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "准备：真实 overview 聚合可用",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "未登录：渲染登录页（真实密码输入框）",
+      "passed": true,
+      "detail": "pwd inputs=1"
+    },
+    {
+      "name": "未登录：不渲染受保护内容（无 Hero / 无 KPI）",
+      "passed": true,
+      "detail": "hero=0 kpi=0"
+    },
+    {
+      "name": "未登录：无本地假数据指纹",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "未登录：localStorage 无会话",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "正常：在真实 UI 上填表并提交登录",
+      "passed": true,
+      "detail": "submitted:2"
+    },
+    {
+      "name": "正常：登录后进入真实系统（密码框消失 且 Hero 出现）",
+      "passed": true,
+      "detail": "pwd=0 hero=1"
+    },
+    {
+      "name": "正常：会话已写入 localStorage",
+      "passed": true,
+      "detail": "session present"
+    },
+    {
+      "name": "正常：DOM KPI 含真实本月销售额",
+      "passed": true,
+      "detail": "¥766,292.18 | 234 | 2,000 | ¥3,274.75 vs API 766292.18"
+    },
+    {
+      "name": "正常：DOM KPI 含真实订单量",
+      "passed": true,
+      "detail": "API 234"
+    },
+    {
+      "name": "正常：DOM KPI 含真实注册用户数",
+      "passed": true,
+      "detail": "API 2000"
+    },
+    {
+      "name": "正常：DOM KPI 含真实客单价",
+      "passed": true,
+      "detail": "API 3274.75"
+    },
+    {
+      "name": "正常：页面无本地假数据指纹",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "图表：Dashboard 渲染出 ≥2 张图表卡片",
+      "passed": true,
+      "detail": "cards=2"
+    },
+    {
+      "name": "图表：卡片标识为「销售趋势」「分类销售」",
+      "passed": true,
+      "detail": "销售趋势 | 分类销售"
+    },
+    {
+      "name": "图表：每张图都实际绘制（有尺寸 / 有像素 / 多色，不是空容器）",
+      "passed": true,
+      "detail": "销售趋势:618x280 px=21189 colors=405 | 分类销售:446x280 px=16825 colors=56"
+    },
+    {
+      "name": "图表：副标题带出接口真实趋势长度（近 N 个月）",
+      "passed": true,
+      "detail": "近 12 个月 · 单位万元 · 数据截至 2026-09-12 | 叶子类目 Top 5 · 按销售额 · 单位万元 | 按销售额排序 · 真实业务数据（截至 2026-09-12） | 暂无记录 | 暂无查询历史 | 在「智能分析」提问后，记录会自动出现在这里 | 实时业务数据 · 数据截至 2026-09-12 · 来源 GET /api/insights/overview | 当前开发数据库 · 合成数据 vs API trend_len=12"
+    },
+    {
+      "name": "图表：副标题带出接口真实数据截止日（as_of）",
+      "passed": true,
+      "detail": "vs API as_of=2026-09-12"
+    },
+    {
+      "name": "图表：副标题带出接口真实类目数（叶子类目 Top N）",
+      "passed": true,
+      "detail": "vs API category_len=5"
+    },
+    {
+      "name": "断开：定位到后端监听进程 PID",
+      "passed": true,
+      "detail": "PID 19940"
+    },
+    {
+      "name": "断开：定位到前端监听进程 PID（负对照基准）",
+      "passed": true,
+      "detail": "PID 22008"
+    },
+    {
+      "name": "断开：杀后端时未误伤前端监听进程（自证式负对照）",
+      "passed": true,
+      "detail": "killed=[19400,19940,24788] frontend=22008"
+    },
+    {
+      "name": "断开：后端端口已释放",
+      "passed": true,
+      "detail": "port 8000"
+    },
+    {
+      "name": "断开：前端仍在监听（负对照与目标路径同构）",
+      "passed": true,
+      "detail": "port 5173 before=22008 after=22008"
+    },
+    {
+      "name": "断开：前端进程未被替换（同一 PID，不是重启了一个新的）",
+      "passed": true,
+      "detail": "before=22008 after=22008"
+    },
+    {
+      "name": "断开：显示「后端服务不可用」",
+      "passed": true,
+      "detail": "电商智能数据\n分析 Agent\n首页\n智能分析\n数据集管理\n历史记录\n系统设置\nUI/UX v1.0 · 汇报演示优化版\n电商智能数据分析 Agent\nSQLi"
+    },
+    {
+      "name": "断开：给出「请检查后端是否启动」",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "断开：提供重试按钮",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "断开：**不进入登录页**（无密码输入框）",
+      "passed": true,
+      "detail": "pwd inputs=0"
+    },
+    {
+      "name": "断开：不渲染受保护内容（无 KPI）",
+      "passed": true,
+      "detail": "kpi=0"
+    },
+    {
+      "name": "断开：不出现本地假数据指纹",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "断开：会话被保留（未把「服务挂了」记成「用户登出」）",
+      "passed": true,
+      "detail": "{\"accessToken\":\"WEaE6NtDuSo47w6bQ3TCCP4Z"
+    },
+    {
+      "name": "断开：网络层确实观察到失败请求（不是渲染问题）",
+      "passed": true,
+      "detail": "failed=6"
+    },
+    {
+      "name": "恢复：后端通过正式脚本重启成功",
+      "passed": true,
+      "detail": "Health OK"
+    },
+    {
+      "name": "恢复：/api/health 返回 200",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "恢复：点击「重试」后回到真实系统（未重新登录）",
+      "passed": true,
+      "detail": "pwd=0 hero=1"
+    },
+    {
+      "name": "恢复：KPI 重新显示真实值（未回退假数据）",
+      "passed": true,
+      "detail": "¥766,292.18 | 234 | 2,000 | ¥3,274.75"
+    },
+    {
+      "name": "恢复：页面无本地假数据指纹",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "业务：POST /api/agent/analyze 返回 200",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "业务：Agent 判定成功（success=true 且无 final_error）",
+      "passed": true,
+      "detail": "error= final_error="
+    },
+    {
+      "name": "业务：生成了真实 SQL（命中 users 且是聚合查询）",
+      "passed": true,
+      "detail": "SELECT COUNT(*) AS total_registered_users FROM users"
+    },
+    {
+      "name": "业务：SQL 真的在 SQLite 上执行并返回结果行",
+      "passed": true,
+      "detail": "row_count=1 execute_count=1"
+    },
+    {
+      "name": "业务：查询结果与 /api/insights/overview 的用户总数一致（三方对账）",
+      "passed": true,
+      "detail": "rows=[[2000]] vs API users_total=2000"
+    },
+    {
+      "name": "业务：Agent 走完了编排节点（trace 非空）",
+      "passed": true,
+      "detail": "nodes=schema_link → fewshot_retrieve → sql_generate → sql_safety → sql_execute → sql_repair → sql_execute_repaired → result"
+    },
+    {
+      "name": "业务：GET /api/history 返回 200",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "业务：History 中出现刚才那次真实查询",
+      "passed": true,
+      "detail": "total=1 最近=注册用户总数是多少？"
+    },
+    {
+      "name": "业务：History 记录的 SQL 与本次生成的 SQL 逐字一致",
+      "passed": true,
+      "detail": "id=67 sql=SELECT COUNT(*) AS total_registered_users FROM users"
+    },
+    {
+      "name": "业务：History 记录带真实耗时（> 0ms）",
+      "passed": true,
+      "detail": "total_time_ms=7437.73"
+    },
+    {
+      "name": "业务：History 记录带真实行数",
+      "passed": true,
+      "detail": "row_count=1"
+    }
+  ],
+  "notes": []
+}

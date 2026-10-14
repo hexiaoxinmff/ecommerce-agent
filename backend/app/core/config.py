@@ -19,6 +19,13 @@ LLM Provider 配置（mimo / bailian 两种实现）：
   （默认模型 qwen3.7-flash-2026-07-15）。
   注意：**没有** thinking 开关 —— thinking 在 BailianProvider 里物理锁死为 False。
 
+Task66 免费模型池配置（全部有安全默认值，不配即保持单模型行为）：
+- BAILIAN_PRIMARY_MODEL：主模型，默认回落 BAILIAN_MODEL；
+- BAILIAN_FALLBACK_MODELS：备用模型池（逗号分隔、显式有序），默认空；
+- LLM_MODEL_LOCK：默认 **true** —— 正式评测固定单模型，禁止自动切换；
+- BAILIAN_FREE_TIER_ONLY：默认 **true** —— 只允许调用显式配置的免费优先模型，
+  绝不自动转付费。
+
 CORS 允许来源可通过环境变量 CORS_ORIGINS（逗号分隔）覆盖，
 默认仅允许前端本地开发地址 http://localhost:5173。
 """
@@ -42,6 +49,18 @@ DEFAULT_DB_PATH = PROJECT_ROOT / "db" / "ecommerce.db"
 
 _raw_db_path = os.getenv("ECOMMERCE_DB_PATH")
 DB_PATH = Path(_raw_db_path).resolve() if _raw_db_path else DEFAULT_DB_PATH.resolve()
+
+# ---------- 应用库（认证 / 会话 / 查询历史） ----------
+
+# 与业务库 ecommerce.db（只读，见 app/db/sqlite.py）物理隔离的独立 SQLite 文件。
+# 环境变量 APP_DB_PATH 可覆盖；默认 db/app.db。
+# 本库是唯一的认证持久化位置：业务库连接层保持只读设计，绝不写入。
+_raw_app_db_path = os.getenv("APP_DB_PATH")
+APP_DB_PATH = (
+    Path(_raw_app_db_path).resolve()
+    if _raw_app_db_path
+    else (PROJECT_ROOT / "db" / "app.db").resolve()
+)
 
 SERVICE_NAME = "ecommerce-analysis-agent"
 
@@ -77,6 +96,14 @@ def _env_positive_float(name: str, default: float) -> float:
 # 超时必设：默认 30 秒，不允许 None（由 _env_positive_float 保证）
 MIMO_TIMEOUT = _env_positive_float("MIMO_TIMEOUT", 30.0)
 
+# ---------- 应用库会话有效期 ----------
+
+# 会话 TTL（秒）。默认 7 天（604800）；环境变量 AUTH_SESSION_TTL_SECONDS 可覆盖。
+# 登录时据此计算 auth_session.expires_at；认证依赖据此校验会话是否过期。
+AUTH_SESSION_TTL_SECONDS = int(
+    _env_positive_float("AUTH_SESSION_TTL_SECONDS", 7 * 24 * 3600)
+)
+
 # ---------- Alibaba Cloud Bailian（DashScope OpenAI 兼容模式）----------
 
 # API Key 唯一来源：DASHSCOPE_API_KEY（刻意不提供 BAILIAN_API_KEY 别名，
@@ -98,6 +125,46 @@ BAILIAN_MODEL = (
 # 不留任何可被环境变量覆盖的旋钮 —— 低消费是本项目的硬约束。
 
 BAILIAN_TIMEOUT = _env_positive_float("BAILIAN_TIMEOUT", 30.0)
+
+# ---------- Task66: 百炼免费模型池 / 自动 Fallback ----------
+
+
+def _env_flag(name: str, default: bool) -> bool:
+    """读取布尔环境变量；未设置或无法识别时回退默认值。
+
+    ⚠️ 刻意不命名为 ``_env_bool``：既有护栏测试
+    （``backend/tests/test_bailian_provider.py``）对 ``app/`` 全目录做 AST 扫描，
+    禁止出现 ``_env_bool`` 属性引用 —— 那是「thinking 不得有配置旋钮」
+    这条硬约束的守卫。新增开关不应削弱既有守卫，故另起名字。
+    """
+    raw = os.getenv(name)
+    if raw is None or not raw.strip():
+        return default
+    return raw.strip().lower() in ("1", "true", "yes", "on")
+
+
+# 主模型：未显式配置时回落到既有 BAILIAN_MODEL，
+# 保证「只配了单模型」的既有部署行为逐项不变（Task66 §29 向后兼容）。
+BAILIAN_PRIMARY_MODEL = os.getenv("BAILIAN_PRIMARY_MODEL", "").strip() or BAILIAN_MODEL
+
+# 备用模型池（显式有序，逗号分隔）。默认为空 => 不启用 fallback，
+# 等价于当前单模型模式。
+# ⚠️ 这里只保存「已显式配置的候选」，绝不写死任何「当前免费」的模型名单：
+# 百炼不同模型 / 不同快照的免费额度相互独立且随周期变化，属运行时状态
+# （Task66 §34）。空字符串项被丢弃，顺序即优先级（§20）。
+BAILIAN_FALLBACK_MODELS: tuple[str, ...] = tuple(
+    m.strip() for m in os.getenv("BAILIAN_FALLBACK_MODELS", "").split(",") if m.strip()
+)
+
+# 正式评测默认 true：一次 run 必须固定单模型，禁止中途自动切换，
+# 否则一个 run 内混入多个 model，无法与 Frozen Baseline 做干净比较
+# （Task66 §13 / §15 / §28 / §36）。
+LLM_MODEL_LOCK = _env_flag("LLM_MODEL_LOCK", True)
+
+# 默认 true：只允许调用显式配置的免费优先模型。
+# 绝不自动关闭 free-tier-only、绝不自动转付费 / 充值 / 购买资源包
+# （Task66 §4 / §30）。
+BAILIAN_FREE_TIER_ONLY = _env_flag("BAILIAN_FREE_TIER_ONLY", True)
 
 # ---------- Few-shot Dataset ----------
 

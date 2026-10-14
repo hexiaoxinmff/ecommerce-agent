@@ -3,6 +3,9 @@
 覆盖：正常 200（success=true、计数）、空 question 422、
 修复成功 200（execute_count=2）、最终失败 422 语义（success=false 仍 200 结构）、
 Provider 网络错误 503。
+
+P4 起 Agent 路由强制 Bearer 认证：本文件通过 dependency_overrides 注入
+fake (session, user)（autouse fixture），既有断言与调用方式保持原样。
 """
 
 import pytest
@@ -10,12 +13,37 @@ from fastapi.testclient import TestClient
 
 from app.agent import graph as graph_module
 from app.agent.nodes import AgentComponents
+from app.auth.dependencies import get_current_session
 from app.llm.provider import LLMNetworkError
+from app.main import app
 from app.schemas.schema_link import SchemaLinkResult
 from app.schemas.sql_generate import SQLGenerationResult
 from app.sqlexec.errors import SQLExecutionDatabaseError
 from app.sqlexec.models import SQLExecutionResult
 from app.sqlrepair.models import SQLRepairResult
+
+
+@pytest.fixture(autouse=True)
+def _fake_agent_auth():
+    """P4：Agent 路由强制认证，本文件专注编排语义，注入固定假会话。"""
+    fake_session = {
+        "id": 1,
+        "user_id": 1,
+        "token_hash": "test-token-hash",
+        "created_at": "2026-01-01T00:00:00+00:00",
+        "expires_at": "2099-01-01T00:00:00+00:00",
+    }
+    fake_user = {
+        "id": 1,
+        "username": "agent-test-user",
+        "email": "agent-test@example.com",
+        "password_hash": "not-a-real-hash",
+        "created_at": "2026-01-01T00:00:00+00:00",
+        "is_active": 1,
+    }
+    app.dependency_overrides[get_current_session] = lambda: (fake_session, fake_user)
+    yield
+    app.dependency_overrides.pop(get_current_session, None)
 
 
 class _Linker:

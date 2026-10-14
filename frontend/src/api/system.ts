@@ -21,11 +21,19 @@ export interface DatabaseHealthDto {
   name: string;
 }
 
+/** 当前实际配置的 LLM Provider / Model（后端 LlmRuntimeInfo，只读展示） */
+export interface LlmRuntimeDto {
+  provider: string | null;
+  model: string | null;
+}
+
 /** GET /api/health 响应（后端 HealthResponse） */
 export interface HealthResponseDto {
   status: "ok" | "degraded";
   service: string;
   database: DatabaseHealthDto;
+  /** 可选：后端无法安全判定（配置非法等）时为 null/缺失，前端须显示中性占位 */
+  llm?: LlmRuntimeDto | null;
 }
 
 /** GET /api/system/database 响应（后端 DatabaseInfo）：数据库名 + 6 项规模统计 */

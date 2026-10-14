@@ -1,0 +1,75 @@
+/* =========================================================
+   登录页（P5）：沿用 tokens 深色体系，克制无渐变背景
+   ========================================================= */
+
+.login {
+  min-height: calc(100vh - var(--layout-header) - 2 * var(--space-24));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login__card {
+  width: 100%;
+  max-width: 380px;
+  padding: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.login__title {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.login__subtitle {
+  font-size: var(--font-size-aux);
+  color: var(--color-text-secondary);
+}
+
+.login__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  font-size: var(--font-size-aux);
+  color: var(--color-text-secondary);
+}
+
+.login__input {
+  height: 44px;
+  padding: 0 var(--space-12);
+  background: var(--color-bg-sub);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body);
+  transition: border-color 0.15s ease;
+}
+
+.login__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.login__error {
+  font-size: var(--font-size-aux);
+  color: var(--color-error);
+}
+
+.login__submit {
+  width: 100%;
+  height: 44px;
+  padding: 0;
+}
+
+.login__switch {
+  align-self: center;
+  font-size: var(--font-size-aux);
+  color: var(--color-primary-text);
+}
+
+.login__switch:hover {
+  color: var(--color-primary-hover);
+}

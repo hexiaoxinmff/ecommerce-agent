@@ -1,0 +1,118 @@
+/* =========================================================
+   历史记录页（P5）：复用 card / badge / btn-ghost 既有体系
+   ========================================================= */
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.history__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-12);
+}
+
+.history__state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-32) 0;
+}
+
+.history__empty-icon {
+  color: var(--color-text-disabled);
+}
+
+.history__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.history__row {
+  padding: var(--space-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+.history__row-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.history__question {
+  flex: 1;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history__time {
+  font-size: var(--font-size-aux);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.history__delete {
+  height: 32px;
+  padding: 0 var(--space-12);
+  font-size: var(--font-size-aux);
+}
+
+.history__delete:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.history__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-16);
+  font-size: var(--font-size-aux);
+  color: var(--color-text-secondary);
+}
+
+.history__error {
+  font-size: var(--font-size-aux);
+  color: var(--color-error);
+}
+
+.history__sql summary {
+  cursor: pointer;
+  font-size: var(--font-size-aux);
+  color: var(--color-primary-text);
+  user-select: none;
+}
+
+.history__sql pre {
+  margin-top: var(--space-8);
+  padding: var(--space-12);
+  background: var(--color-bg-navy);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-aux);
+  color: var(--color-text-body);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.history__more {
+  display: flex;
+  justify-content: center;
+}
+
+.history__action-error {
+  font-size: var(--font-size-aux);
+  color: var(--color-error);
+}

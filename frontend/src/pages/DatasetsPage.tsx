@@ -8,6 +8,11 @@ import {
   type SchemaResponseDto,
 } from "../api/system";
 import { IconDatabase } from "../components/Icons";
+import {
+  DB_CONNECTION_BADGE,
+  DB_CONNECTION_WORD,
+  toDbConnectionTone,
+} from "../utils/connection";
 import "../styles/datasets.css";
 
 /**
@@ -109,26 +114,18 @@ export function DatasetsPage() {
     return map;
   }, [activeSchema]);
 
-  const connected = health?.database.status === "ok";
+  // 第九阶段 Phase E：连接态推导统一走 utils/connection.ts。
+  // 本页沿用自己那次 /api/health 请求（与 schema 并发），不额外再取一次；
+  // 关键是**词表与徽标与其他三处同源**，避免同一个事实在不同页面说成不同的话。
+  const tone = toDbConnectionTone(status, health);
   const databaseName = schema?.database ?? health?.database.name ?? "—";
 
-  const connectionBadge =
-    status === "loading" ? (
-      <span className="badge badge-processing">
-        <span className="dot" />
-        加载中
-      </span>
-    ) : status === "success" && connected ? (
-      <span className="badge badge-success">
-        <span className="dot" />
-        已连接
-      </span>
-    ) : (
-      <span className="badge badge-error">
-        <span className="dot" />
-        未连接
-      </span>
-    );
+  const connectionBadge = (
+    <span className={`badge ${DB_CONNECTION_BADGE[tone]}`}>
+      <span className="dot" />
+      {DB_CONNECTION_WORD[tone]}
+    </span>
+  );
 
   return (
     <>

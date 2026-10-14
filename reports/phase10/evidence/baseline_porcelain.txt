@@ -1,0 +1,178 @@
+ M .env.example
+ M README.md
+ M backend/app/api/routes/agent.py
+ M backend/app/api/routes/health.py
+ M backend/app/api/routes/llm.py
+ M backend/app/core/config.py
+ M backend/app/llm/bailian.py
+ M backend/app/llm/provider.py
+ M backend/app/main.py
+ M backend/app/schemas/health.py
+ M backend/app/sqlexec/errors.py
+ M backend/app/sqlexec/executor.py
+ M backend/app/sqlgen/prompt.py
+ M backend/app/sqlrepair/validator.py
+ M backend/tests/test_agent_api.py
+ M backend/tests/test_bailian_provider.py
+ M backend/tests/test_health.py
+ M backend/tests/test_llm_api.py
+ M backend/tests/test_sqlgen_prompt_rules.py
+ M docs/API.md
+ M docs/DEPLOYMENT.md
+ M docs/TEST_REPORT.md
+ M evaluation/runner.py
+ M frontend/package-lock.json
+ M frontend/package.json
+ M frontend/src/App.tsx
+ M frontend/src/api/agent.ts
+ M frontend/src/api/system.ts
+ M frontend/src/components/AnalysisFlow.tsx
+ M frontend/src/components/Header.tsx
+ M frontend/src/components/Hero.tsx
+ M frontend/src/components/KpiCard.tsx
+ M frontend/src/components/Sidebar.tsx
+ M frontend/src/components/TopProducts.tsx
+ M frontend/src/data/charts.ts
+ D frontend/src/data/demo.ts
+ M frontend/src/main.tsx
+ M frontend/src/pages/AnalysisPage.tsx
+ M frontend/src/pages/DatasetsPage.tsx
+ M frontend/src/pages/HomePage.tsx
+ M frontend/src/styles/home.css
+ M scripts/run_eval.py
+?? .workbuddy-ai/memory/2026-09-20.md
+?? .workbuddy-ai/memory/2026-09-21.md
+?? .workbuddy-ai/memory/2026-09-22.md
+?? .workbuddy-ai/memory/2026-09-23.md
+?? .workbuddy-ai/memory/2026-09-27.md
+?? .workbuddy-ai/memory/2026-09-28.md
+?? .workbuddy-ai/memory/MEMORY.md
+?? .workbuddy-ai/memory/MEMORY_ARCHIVE.md
+?? .workbuddy-ai/memory/_MEMORY_full_backup_20260928.md
+?? .zcodeignore
+?? _delivery_build/
+?? _task36/
+?? backend/app/api/routes/auth.py
+?? backend/app/api/routes/history.py
+?? backend/app/api/routes/insights.py
+?? backend/app/auth/
+?? backend/app/db/appdb.py
+?? backend/app/llm/fallback_router.py
+?? backend/app/llm/local_provider.py
+?? backend/app/llm/model_pool.py
+?? backend/app/schemas/auth.py
+?? backend/app/schemas/history.py
+?? backend/app/schemas/insights.py
+?? backend/app/sqlcheck/scope_validator.py
+?? backend/app/sqlgen/date_window.py
+?? backend/app/sqlgen/entity_constraint.py
+?? backend/app/sqlgen/semantic_contracts.py
+?? backend/tests/real_llm_smoke_gate.py
+?? backend/tests/test_agent_history.py
+?? backend/tests/test_appdb.py
+?? backend/tests/test_auth_api.py
+?? backend/tests/test_auth_security.py
+?? backend/tests/test_insights_api.py
+?? backend/tests/test_task37_sql_scope.py
+?? backend/tests/test_task38_entity_constraint.py
+?? backend/tests/test_task39_g7_logout_fix.py
+?? backend/tests/test_task39_local_provider.py
+?? backend/tests/test_task44_semantic_rules.py
+?? backend/tests/test_task46_e11_narrowing.py
+?? backend/tests/test_task46_e9_boundary.py
+?? backend/tests/test_task51_prod_cte_scope.py
+?? backend/tests/test_task66_fallback_router.py
+?? backend/tests/test_task66_phase2_integration.py
+?? backend/tests/test_task70_real_llm_smoke_gate.py
+?? data/eval/bad_cases/B-1188.json
+?? data/eval/bad_cases/B-1189.json
+?? data/eval/bad_cases/B-1190.json
+?? data/eval/bad_cases/B-1191.json
+?? data/eval/bad_cases/B-1192.json
+?? data/eval/bad_cases/B-1193.json
+?? data/eval/bad_cases/B-1194.json
+?? data/eval/bad_cases/B-1195.json
+?? data/eval/bad_cases/B-1196.json
+?? data/eval/bad_cases/B-1197.json
+?? data/eval/bad_cases/B-1198.json
+?? data/eval/bad_cases/B-1199.json
+?? data/eval/bad_cases/B-1200.json
+?? data/eval/bad_cases/B-1201.json
+?? data/eval/bad_cases/B-1202.json
+?? data/eval/bad_cases/B-1203.json
+?? data/eval/bad_cases/B-1204.json
+?? data/eval/bad_cases/B-1205.json
+?? data/eval/bad_cases/B-1206.json
+?? data/eval/bad_cases/B-1207.json
+?? data/eval/bad_cases/B-1208.json
+?? data/eval/bad_cases/B-1209.json
+?? data/eval/bad_cases/B-1210.json
+?? data/eval/bad_cases/B-1211.json
+?? data/eval/bad_cases/B-1212.json
+?? data/eval/bad_cases/B-1213.json
+?? evaluation/benchmark_contract.py
+?? frontend/src/api/agent.test.ts
+?? frontend/src/api/auth.ts
+?? frontend/src/api/history.ts
+?? frontend/src/api/http.test.ts
+?? frontend/src/api/http.ts
+?? frontend/src/api/insights.ts
+?? frontend/src/auth/
+?? frontend/src/components/Header.test.tsx
+?? frontend/src/components/RecentActivity.test.tsx
+?? frontend/src/components/RecentActivity.tsx
+?? frontend/src/data/uiCopy.test.ts
+?? frontend/src/data/uiCopy.ts
+?? frontend/src/hooks/
+?? frontend/src/pages/HistoryPage.test.tsx
+?? frontend/src/pages/HistoryPage.tsx
+?? frontend/src/pages/HomePage.test.tsx
+?? frontend/src/pages/LoginPage.tsx
+?? frontend/src/styles/history.css
+?? frontend/src/styles/login.css
+?? frontend/src/test/
+?? frontend/src/utils/connection.ts
+?? frontend/src/utils/datetime.ts
+?? frontend/vitest.config.ts
+?? reports/CANDIDATE_A_PROMOTION_REVIEW.json
+?? reports/CANDIDATE_A_PROMOTION_REVIEW.md
+?? reports/RELEASE_BASELINE_20260920.json
+?? reports/RELEASE_BASELINE_20260920.md
+?? reports/RELEASE_BASELINE_MANIFEST.json
+?? reports/RELEASE_BASELINE_MANIFEST.md
+?? reports/eval/eval_20260927_24942.json
+?? reports/eval/eval_20260927_24942.md
+?? reports/eval/eval_20260927_28404.json
+?? reports/eval/eval_20260927_28404.md
+?? reports/eval/task38_phase1/
+?? reports/eval/task38_phase2/
+?? reports/eval/task38_phase2_on/
+?? reports/eval/task39/
+?? reports/phase9/
+?? reports/task37_sql_scope_validation.json
+?? reports/task37_sql_scope_validation.md
+?? reports/task38_entity_constraint.json
+?? reports/task38_entity_constraint.md
+?? reports/task39_local_llm_e2e.json
+?? reports/task39_local_llm_e2e.md
+?? reports/task39_local_llm_e2e_smoke.json
+?? reports/task39_local_llm_e2e_smoke_qwen3vl.json
+?? reports/task39_local_screen_ctx8192.json
+?? reports/task39_real_e2e_performance_gate.json
+?? reports/task39_real_e2e_performance_gate.md
+?? reports/task44_sqlgen_semantic_rules.json
+?? reports/task44_sqlgen_semantic_rules.md
+?? reports/task45_semantic_contract_validation.md
+?? reports/task46_e9_e11.md
+?? reports/task47_e11_trigger_validation.md
+?? reports/task48_e11_scope_fix.md
+?? reports/task49_e11_full_trigger_revalidation.md
+?? scripts/init_auth_db.py
+?? scripts/task37_repair_routing_check.py
+?? scripts/task37_scope_impact_check.py
+?? scripts/task38_phase1_off_on.py
+?? scripts/task38_phase2_compare.py
+?? scripts/task38_trigger_check.py
+?? scripts/task38b_structural_audit.py
+?? scripts/task39_local_benchmark.py
+?? scripts/task39_local_model_screen.py
